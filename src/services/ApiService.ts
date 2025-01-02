@@ -4,9 +4,9 @@ import { ActionRequest, MutateRequest, SearchRequest } from "@/interfaces";
 import { injectable } from "inversify";
 import { AxiosRequestConfig } from "axios";
 import "reflect-metadata";
-import { SearchResponse } from "@/interfaces/Search";
-import { MutateResponse } from "@/interfaces/Mutate";
-import { ActionResponse } from "@/interfaces/Action";
+import { SearchResponse } from "@/interfaces/search";
+import { MutateResponse } from "@/interfaces/mutate";
+import { ActionResponse } from "@/interfaces/action";
 
 export interface IApiService<T> {
   search(searchRequest: SearchRequest): Promise<SearchResponse<T>>;
@@ -36,11 +36,11 @@ class ApiService<T> extends HttpService implements IApiService<T> {
     }
   }
 
-  public async search(params: SearchRequest): Promise<SearchResponse<T>> {
+  public async search(search: SearchRequest): Promise<SearchResponse<T>> {
     return this.request<SearchResponse<T>>({
       method: "POST",
       url: "/search",
-      data: { search: params },
+      data: { search },
     });
   }
 

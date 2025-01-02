@@ -51,19 +51,17 @@ export interface Aggregate {
     filters?: Filter[];
 }
 export interface SearchRequest {
-    search: {
-        text?: SearchText;
-        scopes?: Scope[];
-        filters?: Filter[];
-        sorts?: Sort[];
-        selects?: Select[];
-        includes?: Include[];
-        aggregates?: Aggregate[];
-        instructions?: Instruction[];
-        gates?: Gate[];
-        page?: number;
-        limit?: number;
-    };
+    text?: SearchText;
+    scopes?: Scope[];
+    filters?: Filter[];
+    sorts?: Sort[];
+    selects?: Select[];
+    includes?: Include[];
+    aggregates?: Aggregate[];
+    instructions?: Instruction[];
+    gates?: Gate[];
+    page?: number;
+    limit?: number;
 }
 export interface SearchResponse<T> {
     data: T[];
