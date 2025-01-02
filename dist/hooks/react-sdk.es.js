@@ -1,23 +1,25 @@
-import { useInfiniteQuery as u } from "@tanstack/react-query";
+import { useInfiniteQuery as o } from "@tanstack/react-query";
 export * from "@tanstack/react-query";
-function m({
+function p({
   queryKey: n,
   requestFn: i,
-  initialRequest: r
+  initialRequest: r,
+  options: u = {}
 }) {
-  return u({
+  return o({
     queryKey: n,
     queryFn: ({ pageParam: e = r }) => i(e),
     initialPageParam: r,
-    getNextPageParam: (e, o, t) => {
+    getNextPageParam: (e, f, t) => {
       if (!(!e.meta || e.data.length < (e.meta.perPage || 10)))
         return {
           ...t,
           page: (t.page || 1) + 1
         };
-    }
+    },
+    ...u
   });
 }
 export {
-  m as useInfiniteRequest
+  p as useInfiniteRequest
 };

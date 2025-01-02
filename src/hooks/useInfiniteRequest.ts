@@ -1,25 +1,38 @@
 import { SearchResponse } from "@/interfaces";
 import { PaginationParams } from "@/interfaces/common";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  QueryKey,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+} from "@tanstack/react-query";
 
-export function useInfiniteRequest<
-  TRequest extends PaginationParams,
-  TResponse,
->({
+export function useInfiniteRequest<TReq extends PaginationParams, TRes>({
   queryKey,
   requestFn,
   initialRequest,
+  options = {},
 }: {
-  queryKey: string[];
-  requestFn: (request: TRequest) => Promise<SearchResponse<TResponse>>;
-  initialRequest: TRequest;
+  queryKey: QueryKey[];
+  requestFn: (request: TReq) => Promise<SearchResponse<TRes>>;
+  initialRequest: TReq;
+
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      SearchResponse<TRes>,
+      Error,
+      SearchResponse<TRes>,
+      SearchResponse<TRes>,
+      typeof queryKey,
+      TReq
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >;
 }) {
   return useInfiniteQuery({
     queryKey,
-    queryFn: ({ pageParam = initialRequest }) =>
-      requestFn(pageParam as TRequest),
+    queryFn: ({ pageParam = initialRequest }) => requestFn(pageParam as TReq),
     initialPageParam: initialRequest,
-    getNextPageParam: (lastPage, _, lastPageParam: TRequest) => {
+    getNextPageParam: (lastPage, _, lastPageParam: TReq) => {
       if (
         !lastPage.meta ||
         lastPage.data.length < (lastPage.meta.perPage || 10)
@@ -29,7 +42,8 @@ export function useInfiniteRequest<
       return {
         ...lastPageParam,
         page: (lastPageParam.page || 1) + 1,
-      } as TRequest;
+      } as TReq;
     },
+    ...options,
   });
 }
