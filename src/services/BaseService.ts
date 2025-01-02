@@ -35,7 +35,7 @@ interface ServiceConfiguration {
   baseProdUrl?: string;
 }
 
-export abstract class BaseService<R, T> {
+export abstract class BaseService<T> {
   protected axiosInstance: AxiosInstance;
   protected baseDevUrl: string;
   protected baseProdUrl: string;
@@ -235,44 +235,6 @@ export abstract class BaseService<R, T> {
       method: "POST",
       url: `/actions/${action}`,
       data: params,
-    });
-  }
-
-  // Basic CRUD
-  public async fetchAll(params?: Record<string, any>): Promise<T[]> {
-    return this.request<T[]>({
-      method: "GET",
-      params,
-    });
-  }
-
-  public async fetchById(id: string, params?: Record<string, any>): Promise<T> {
-    return this.request<T>({
-      method: "GET",
-      url: `/${id}`,
-      params,
-    });
-  }
-
-  public async create(data: Partial<R>): Promise<T> {
-    return this.request<T>({
-      method: "POST",
-      data,
-    });
-  }
-
-  public async update(id: string, data: Partial<R>): Promise<T> {
-    return this.request<T>({
-      method: "PUT",
-      url: `/${id}`,
-      data,
-    });
-  }
-
-  public async delete(id: string): Promise<void> {
-    return this.request<void>({
-      method: "DELETE",
-      url: `/${id}`,
     });
   }
 }

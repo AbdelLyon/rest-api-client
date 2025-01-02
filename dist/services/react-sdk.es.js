@@ -1,10 +1,10 @@
 var c = Object.defineProperty;
-var u = (n, e, t) => e in n ? c(n, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[e] = t;
-var r = (n, e, t) => u(n, typeof e != "symbol" ? e + "" : e, t);
-import a from "axios";
-import { getCookie as l, setCookie as o, deleteCookie as h } from "cookies-next";
-import i from "axios-retry";
-class y {
+var u = (i, e, t) => e in i ? c(i, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : i[e] = t;
+var r = (i, e, t) => u(i, typeof e != "symbol" ? e + "" : e, t);
+import n from "axios";
+import { getCookie as p, setCookie as o, deleteCookie as h } from "cookies-next";
+import a from "axios-retry";
+class k {
   constructor({
     pathname: e,
     baseDevUrl: t = "http://localhost:8000",
@@ -20,7 +20,7 @@ class y {
     this.pathname = e, this.baseDevUrl = t, this.baseProdUrl = s, this.axiosInstance = this.createAxiosInstance(), this.initializeRetry(), this.setupInterceptors();
   }
   createAxiosInstance() {
-    return a.create({
+    return n.create({
       baseURL: this.getBaseApiUrl(),
       timeout: 1e4,
       headers: {
@@ -43,7 +43,7 @@ class y {
     );
   }
   addAuthorizationHeader(e) {
-    const t = l("jwt");
+    const t = p("jwt");
     return t && e.headers && (e.headers.Authorization = `Bearer ${t}`), e;
   }
   async handleResponseError(e) {
@@ -68,7 +68,7 @@ class y {
   async refreshToken() {
     var e, t;
     try {
-      const s = await a.post(
+      const s = await n.post(
         `${this.getBaseApiUrl()}/refresh-token`,
         {},
         { withCredentials: !0 }
@@ -101,12 +101,12 @@ class y {
     this.clearTokens(), typeof window < "u" && (window.location.href = "/");
   }
   initializeRetry() {
-    i(this.axiosInstance, {
+    a(this.axiosInstance, {
       retries: this.MAX_RETRIES,
-      retryDelay: i.exponentialDelay,
+      retryDelay: a.exponentialDelay,
       retryCondition: (e) => {
         var t;
-        return i.isNetworkOrIdempotentRequestError(e) || ((t = e.response) == null ? void 0 : t.status) === 429;
+        return a.isNetworkOrIdempotentRequestError(e) || ((t = e.response) == null ? void 0 : t.status) === 429;
       }
     });
   }
@@ -144,40 +144,7 @@ class y {
       data: t
     });
   }
-  // Basic CRUD
-  async fetchAll(e) {
-    return this.request({
-      method: "GET",
-      params: e
-    });
-  }
-  async fetchById(e, t) {
-    return this.request({
-      method: "GET",
-      url: `/${e}`,
-      params: t
-    });
-  }
-  async create(e) {
-    return this.request({
-      method: "POST",
-      data: e
-    });
-  }
-  async update(e, t) {
-    return this.request({
-      method: "PUT",
-      url: `/${e}`,
-      data: t
-    });
-  }
-  async delete(e) {
-    return this.request({
-      method: "DELETE",
-      url: `/${e}`
-    });
-  }
 }
 export {
-  y as BaseService
+  k as BaseService
 };

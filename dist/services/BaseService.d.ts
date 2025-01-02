@@ -22,7 +22,7 @@ interface ServiceConfiguration {
     baseDevUrl?: string;
     baseProdUrl?: string;
 }
-export declare abstract class BaseService<R, T> {
+export declare abstract class BaseService<T> {
     protected axiosInstance: AxiosInstance;
     protected baseDevUrl: string;
     protected baseProdUrl: string;
@@ -46,10 +46,5 @@ export declare abstract class BaseService<R, T> {
     search(params: SearchRequest): Promise<SearchResponse<T>>;
     mutate(mutations: MutateRequest[]): Promise<MutateResponse<T>>;
     executeAction(action: string, params: ActionRequest): Promise<ActionResponse>;
-    fetchAll(params?: Record<string, any>): Promise<T[]>;
-    fetchById(id: string, params?: Record<string, any>): Promise<T>;
-    create(data: Partial<R>): Promise<T>;
-    update(id: string, data: Partial<R>): Promise<T>;
-    delete(id: string): Promise<void>;
 }
 export {};
