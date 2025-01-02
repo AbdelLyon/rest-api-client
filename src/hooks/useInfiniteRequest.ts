@@ -12,7 +12,7 @@ export function useInfiniteRequest<TReq extends PaginationParams, TRes>({
   initialRequest,
   options = {},
 }: {
-  queryKey: QueryKey[];
+  queryKey: QueryKey;
   requestFn: (request: TReq) => Promise<SearchResponse<TRes>>;
   initialRequest: TReq;
 
