@@ -3,6 +3,7 @@ export type {
   ActionFilter,
   ActionRequest,
   DeleteRequest,
+  ActionResponse,
 } from "@/interfaces/Action";
 export type {
   Aggregate,
@@ -23,6 +24,7 @@ export type {
   Select,
   Sort,
   SortDirection,
+  SearchResponse,
 } from "@/interfaces/Search";
 
 export type {
@@ -35,4 +37,5 @@ export type {
   Relation,
   RelationsMap,
   SyncRelation,
+  MutateResponse,
 } from "@/interfaces/Mutate";
