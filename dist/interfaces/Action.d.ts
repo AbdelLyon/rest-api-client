@@ -6,11 +6,15 @@ export interface ActionFilter {
     field: string;
     value: boolean | string | number;
 }
-export interface ActionRequest {
+export interface paramsAction {
     fields: ActionField[];
     search?: {
         filters?: ActionFilter[];
     };
+}
+export interface ActionRequest {
+    action: string;
+    params: paramsAction;
 }
 export interface DeleteRequest {
     resources: string[] | number[];
