@@ -1,67 +1,22 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  AxiosRequestConfig,
-  InternalAxiosRequestConfig,
-} from "axios";
-import { getCookie, setCookie, deleteCookie } from "cookies-next";
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import axiosRetry from "axios-retry";
-import { SearchRequest } from "@/interfaces/SearchRequest";
-import { ActionRequest } from "@/interfaces/ActionRequest";
-import { MutateRequest } from "@/interfaces";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
 
-interface SearchResponse<T> {
-  data: T[];
-  meta?: {
-    page: number;
-    perPage: number;
-    total: number;
-  };
-}
-
-interface MutateResponse<T> {
-  data: T[];
-}
-
-interface ActionResponse {
-  success: boolean;
-  data?: any;
-}
-
-// Service configuration
-interface ServiceConfiguration {
-  pathname: string;
-  baseDevUrl?: string;
-  baseProdUrl?: string;
-}
-
-export abstract class BaseService<T> {
+export abstract class HttpService {
   protected axiosInstance: AxiosInstance;
-  protected baseDevUrl: string;
-  protected baseProdUrl: string;
-  protected pathname: string;
-
   private isRefreshing = false;
   private refreshTokenPromise: Promise<void> | null = null;
   private readonly MAX_RETRIES = 3;
 
-  constructor({
-    pathname,
-    baseDevUrl = "http://localhost:8000",
-    baseProdUrl = "https://api.example.com",
-  }: ServiceConfiguration) {
-    this.pathname = pathname;
-    this.baseDevUrl = baseDevUrl;
-    this.baseProdUrl = baseProdUrl;
-
-    this.axiosInstance = this.createAxiosInstance();
+  constructor(baseUrl: string) {
+    this.axiosInstance = this.createInstance(baseUrl);
     this.initializeRetry();
     this.setupInterceptors();
   }
 
-  private createAxiosInstance(): AxiosInstance {
+  private createInstance(baseUrl: string): AxiosInstance {
     return axios.create({
-      baseURL: this.getBaseApiUrl(),
+      baseURL: baseUrl,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
@@ -71,28 +26,21 @@ export abstract class BaseService<T> {
     });
   }
 
-  private getBaseApiUrl(): string {
-    return process.env.NODE_ENV === "production"
-      ? `${this.baseProdUrl}/${this.pathname}`
-      : `${this.baseDevUrl}/api/${this.pathname}`;
-  }
-
   private setupInterceptors(): void {
     this.axiosInstance.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) =>
-        this.addAuthorizationHeader(config) as InternalAxiosRequestConfig,
+      this.addAuthorizationHeader,
       (error) => Promise.reject(error),
     );
 
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      async (error) => this.handleResponseError(error),
+      this.handleResponseError.bind(this),
     );
   }
 
   private addAuthorizationHeader(
-    config: AxiosRequestConfig,
-  ): AxiosRequestConfig {
+    config: InternalAxiosRequestConfig,
+  ): InternalAxiosRequestConfig {
     const token = getCookie("jwt");
     if (token && config.headers) {
       config.headers["Authorization"] = `Bearer ${token}`;
@@ -133,7 +81,7 @@ export abstract class BaseService<T> {
   private async refreshToken(): Promise<void> {
     try {
       const response = await axios.post(
-        `${this.getBaseApiUrl()}/refresh-token`,
+        `${this.axiosInstance.defaults.baseURL}/refresh-token`,
         {},
         { withCredentials: true },
       );
@@ -149,7 +97,7 @@ export abstract class BaseService<T> {
     }
   }
 
-  private updateTokens(tokens: {
+  protected updateTokens(tokens: {
     access_token: string;
     refresh_token?: string;
   }): void {
@@ -171,7 +119,7 @@ export abstract class BaseService<T> {
     }
   }
 
-  public clearTokens(): void {
+  protected clearTokens(): void {
     deleteCookie("jwt");
     deleteCookie("refresh_token");
   }
@@ -187,54 +135,9 @@ export abstract class BaseService<T> {
     axiosRetry(this.axiosInstance, {
       retries: this.MAX_RETRIES,
       retryDelay: axiosRetry.exponentialDelay,
-      retryCondition: (error: any) =>
+      retryCondition: (error) =>
         axiosRetry.isNetworkOrIdempotentRequestError(error) ||
         error.response?.status === 429,
-    });
-  }
-
-  protected async request<ResponseType>(
-    config: AxiosRequestConfig,
-  ): Promise<ResponseType> {
-    try {
-      const response: AxiosResponse<ResponseType> = await this.axiosInstance(
-        config,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(
-        `API Request failed: ${config.method} ${config.url}`,
-        error,
-      );
-      throw error;
-    }
-  }
-
-  // rest-api Methods
-  public async search(params: SearchRequest): Promise<SearchResponse<T>> {
-    return this.request<SearchResponse<T>>({
-      method: "POST",
-      url: "/search",
-      data: { search: params },
-    });
-  }
-
-  public async mutate(mutations: MutateRequest[]): Promise<MutateResponse<T>> {
-    return this.request<MutateResponse<T>>({
-      method: "POST",
-      url: "/mutate",
-      data: { mutate: mutations },
-    });
-  }
-
-  public async executeAction(
-    action: string,
-    params: ActionRequest,
-  ): Promise<ActionResponse> {
-    return this.request<ActionResponse>({
-      method: "POST",
-      url: `/actions/${action}`,
-      data: params,
     });
   }
 }

@@ -1,1 +1,2 @@
-export { BaseService } from './BaseService';
+export { HttpService } from './HttpService';
+export { ApiService, type IApiService } from './ApiService';

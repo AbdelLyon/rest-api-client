@@ -29,3 +29,6 @@ export interface MutateRequest {
 export interface MutatePayload {
     mutate: MutateRequest[];
 }
+export interface MutateResponse<T> {
+    data: T[];
+}

@@ -15,3 +15,7 @@ export interface ActionRequest {
 export interface DeleteRequest {
     resources: string[] | number[];
 }
+export interface ActionResponse {
+    success: boolean;
+    data?: any;
+}

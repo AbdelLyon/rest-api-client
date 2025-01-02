@@ -49,4 +49,8 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    target: "es2020",
+    include: /\.(tsx?|jsx?)$/,
+  },
 });

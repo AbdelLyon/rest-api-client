@@ -65,3 +65,11 @@ export interface SearchRequest {
         limit?: number;
     };
 }
+export interface SearchResponse<T> {
+    data: T[];
+    meta?: {
+        page: number;
+        perPage: number;
+        total: number;
+    };
+}
