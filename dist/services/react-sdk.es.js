@@ -1,13 +1,13 @@
-import a from "axios";
+import o from "axios";
 import n from "axios-retry";
-import { getCookie as p, setCookie as o, deleteCookie as h } from "cookies-next";
-var d = Object.defineProperty, l = (r, e, t) => e in r ? d(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, i = (r, e, t) => l(r, typeof e != "symbol" ? e + "" : e, t);
-class f {
+import { getCookie as c, setCookie as a, deleteCookie as h } from "cookies-next";
+var u = Object.defineProperty, l = (r, e, t) => e in r ? u(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, i = (r, e, t) => l(r, typeof e != "symbol" ? e + "" : e, t);
+class p {
   constructor(e) {
     i(this, "axiosInstance"), i(this, "isRefreshing", !1), i(this, "refreshTokenPromise", null), i(this, "MAX_RETRIES", 3), this.axiosInstance = this.createInstance(e), this.initializeRetry(), this.setupInterceptors();
   }
   createInstance(e) {
-    return a.create({
+    return o.create({
       baseURL: e,
       timeout: 1e4,
       headers: {
@@ -27,7 +27,7 @@ class f {
     );
   }
   addAuthorizationHeader(e) {
-    const t = p("jwt");
+    const t = c("jwt");
     return t && e.headers && (e.headers.Authorization = `Bearer ${t}`), e;
   }
   async handleResponseError(e) {
@@ -52,7 +52,7 @@ class f {
   async refreshToken() {
     var e, t;
     try {
-      const s = await a.post(
+      const s = await o.post(
         `${this.axiosInstance.defaults.baseURL}/refresh-token`,
         {},
         { withCredentials: !0 }
@@ -65,12 +65,12 @@ class f {
     }
   }
   updateTokens(e) {
-    o("jwt", e.access_token, {
+    a("jwt", e.access_token, {
       maxAge: 30 * 24 * 60 * 60,
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict"
-    }), e.refresh_token && o("refresh_token", e.refresh_token, {
+    }), e.refresh_token && a("refresh_token", e.refresh_token, {
       maxAge: 60 * 24 * 60 * 60,
       path: "/",
       secure: process.env.NODE_ENV === "production",
@@ -95,13 +95,9 @@ class f {
     });
   }
 }
-var m = Object.defineProperty, _ = (r, e, t) => e in r ? m(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, k = (r, e, t) => _(r, e + "", t);
-const c = class u extends f {
+class k extends p {
   constructor(e) {
     super(e);
-  }
-  static getInstance(e) {
-    return this.instances.has(e) || this.instances.set(e, new u(e)), this.instances.get(e);
   }
   async request(e) {
     try {
@@ -134,10 +130,8 @@ const c = class u extends f {
       data: e.params
     });
   }
-};
-k(c, "instances", /* @__PURE__ */ new Map());
-let P = c;
+}
 export {
-  P as ApiService,
-  f as HttpService
+  k as ApiService,
+  p as HttpService
 };

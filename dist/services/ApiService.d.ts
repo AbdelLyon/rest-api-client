@@ -9,10 +9,8 @@ export interface IApiService<T> {
     mutate(mutateRequest: MutateRequest[]): Promise<MutateResponse<T>>;
     executeAction(actionRequest: ActionRequest): Promise<ActionResponse>;
 }
-export declare class ApiService<T> extends HttpService implements IApiService<T> {
-    private static instances;
-    private constructor();
-    static getInstance<T>(baseUrl: string): ApiService<T>;
+export declare abstract class ApiService<T> extends HttpService implements IApiService<T> {
+    constructor(baseUrl: string);
     protected request<ResponseType>(config: AxiosRequestConfig): Promise<ResponseType>;
     search(search: SearchRequest): Promise<SearchResponse<T>>;
     mutate(mutations: MutateRequest[]): Promise<MutateResponse<T>>;
