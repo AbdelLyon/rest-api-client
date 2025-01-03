@@ -8,7 +8,7 @@ export abstract class HttpService {
   private refreshTokenPromise: Promise<void> | null = null;
   private readonly MAX_RETRIES = 3;
 
-  constructor(baseUrl: string) {
+  constructor(protected baseUrl: string) {
     this.axiosInstance = this.createInstance(baseUrl);
     this.initializeRetry();
     this.setupInterceptors();

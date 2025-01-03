@@ -4,7 +4,7 @@ import { getCookie as c, setCookie as a, deleteCookie as h } from "cookies-next"
 var u = Object.defineProperty, l = (r, e, t) => e in r ? u(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, i = (r, e, t) => l(r, typeof e != "symbol" ? e + "" : e, t);
 class p {
   constructor(e) {
-    i(this, "axiosInstance"), i(this, "isRefreshing", !1), i(this, "refreshTokenPromise", null), i(this, "MAX_RETRIES", 3), this.axiosInstance = this.createInstance(e), this.initializeRetry(), this.setupInterceptors();
+    this.baseUrl = e, i(this, "axiosInstance"), i(this, "isRefreshing", !1), i(this, "refreshTokenPromise", null), i(this, "MAX_RETRIES", 3), this.axiosInstance = this.createInstance(e), this.initializeRetry(), this.setupInterceptors();
   }
   createInstance(e) {
     return o.create({

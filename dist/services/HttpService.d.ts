@@ -1,5 +1,6 @@
 import { AxiosInstance } from 'axios';
 export declare abstract class HttpService {
+    protected baseUrl: string;
     protected axiosInstance: AxiosInstance;
     private isRefreshing;
     private refreshTokenPromise;
