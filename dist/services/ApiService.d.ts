@@ -10,6 +10,7 @@ export interface IApiService<T> {
     executeAction(actionRequest: ActionRequest): Promise<ActionResponse>;
 }
 export declare abstract class ApiService<T> extends HttpService implements IApiService<T> {
+    protected baseUrl: string;
     constructor(baseUrl: string);
     protected request<ResponseType>(config: AxiosRequestConfig): Promise<ResponseType>;
     search(search: SearchRequest): Promise<SearchResponse<T>>;

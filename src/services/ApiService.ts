@@ -16,7 +16,7 @@ export abstract class ApiService<T>
   extends HttpService
   implements IApiService<T>
 {
-  constructor(baseUrl: string) {
+  constructor(protected baseUrl: string) {
     super(baseUrl);
   }
 

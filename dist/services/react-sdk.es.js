@@ -97,7 +97,7 @@ class p {
 }
 class k extends p {
   constructor(e) {
-    super(e);
+    super(e), this.baseUrl = e;
   }
   async request(e) {
     try {
