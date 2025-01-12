@@ -14,33 +14,40 @@
   "author": "DailyApps",
   "license": "MIT",
   "exports": {
-    "./interfaces": {
-      "import": "./dist/interfaces/react-sdk.es.js",
-      "types": "./dist/interfaces/index.d.ts"
+    "./rest-api/interfaces": {
+      "import": "./dist/rest-api/interfaces/index.es.js",
+      "types": "./dist/rest-api/interfaces/index.d.ts"
     },
-    "./providers": {
-      "import": "./dist/providers/react-sdk.es.js",
-      "types": "./dist/providers/index.d.ts"
+    "./rest-api/services": {
+      "import": "./dist/rest-api/services/index.es.js",
+      "types": "./dist/rest-api/services/index.d.ts"
     },
-    "./services": {
-      "import": "./dist/services/react-sdk.es.js",
-      "types": "./dist/services/index.d.ts"
+    "./rest-api/models": {
+      "import": "./dist/rest-api/models/index.es.js",
+      "types": "./dist/rest-api/models/index.d.ts"
     },
-    "./hooks": {
-      "import": "./dist/hooks/react-sdk.es.js",
-      "types": "./dist/hooks/index.d.ts"
+    "./rest-api/hooks": {
+      "import": "./dist/rest-api/hooks/index.es.js",
+      "types": "./dist/rest-api/hooks/index.d.ts"
+    },
+    "./react-query": {
+      "import": "./dist/react-query/index.es.js",
+      "types": "./dist/react-query/index.d.ts"
     }
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*/index.d.ts"
+      "rest-api/*": [
+        "./dist/rest-api/*/index.d.ts"
+      ],
+      "react-query": [
+        "./dist/react-query/index.d.ts"
       ]
     }
   },
   "scripts": {
     "clean": "rimraf node_modules dist *.log && pnpm install",
-    "build": "pnpm lint --fix && tsc -b && vite build && pnpm test ",
+    "build": "pnpm lint --fix && tsc -b && vitest --watch=false && vite build",
     "test": "vitest",
     "test:cov": "vitest --coverage",
     "lint": "eslint .",

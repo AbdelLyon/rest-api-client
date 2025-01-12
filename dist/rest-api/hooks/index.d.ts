@@ -1,0 +1,1 @@
+export { useInfiniteRequest } from './useInfinitSearch';
