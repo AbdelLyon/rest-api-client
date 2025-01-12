@@ -1,0 +1,41 @@
+export type {
+  ActionField,
+  ActionFilter,
+  ActionRequest,
+  DeleteRequest,
+  ActionResponse,
+} from "@/rest-api/interfaces/action";
+export type {
+  Aggregate,
+  AggregateType,
+  BaseFilter,
+  Filter,
+  FilterOperator,
+  FilterType,
+  Gate,
+  Include,
+  Instruction,
+  InstructionField,
+  NestedFilter,
+  Scope,
+  ScopeParameter,
+  SearchRequest,
+  SearchText,
+  Select,
+  Sort,
+  SortDirection,
+  SearchResponse,
+} from "@/rest-api/interfaces/search";
+
+export type {
+  Attributes,
+  BaseRelation,
+  MutatePayload,
+  MutateRequest,
+  Operation,
+  Pivot,
+  Relation,
+  RelationsMap,
+  SyncRelation,
+  MutateResponse,
+} from "@/rest-api/interfaces/mutate";

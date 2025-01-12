@@ -14,10 +14,14 @@ export default tseslint.config(
       ...tseslint.configs.recommended,
       ...tseslint.configs.strict,
     ],
-    files: ["**/*.{ts}"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2020,
+      globals: globals.browser,
       parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
         project: "./tsconfig.json",
       },
     },
@@ -67,7 +71,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/strict-boolean-expressions": "error",
 
-      // Générales
+      // Règles générales
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "no-debugger": "error",
       "prefer-const": "error",

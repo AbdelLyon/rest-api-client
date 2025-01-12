@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
 var modules = ["interfaces", "providers", "services", "hooks"];
+var foldres = ["rest-api", "react-query"];
 export default defineConfig({
   plugins: [
     react(),

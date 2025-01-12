@@ -39,11 +39,13 @@
     }
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "clean": "rimraf node_modules dist *.log && pnpm install",
+    "build": "pnpm lint --fix && tsc -b && vite build && pnpm test ",
+    "test": "vitest",
+    "test:cov": "vitest --coverage",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "reset": "pnpm clean && pnpm build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.10",
@@ -70,6 +72,8 @@
     "vite": "^6.0.6",
     "vite-plugin-dts": "^4.4.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8",
+    "rimraf": "^6.0.1"
   }
 }
