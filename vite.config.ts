@@ -34,7 +34,6 @@ export default defineConfig({
   build: {
     lib: {
       entry: entries,
-      name: "react-query",
       formats: ["es"],
       fileName: (format, entryName) => `${entryName}/index.${format}.js`,
     },

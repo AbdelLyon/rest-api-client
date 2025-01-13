@@ -37,16 +37,15 @@ export function useInfiniteRequest<TReq extends PaginationParams, TRes>({
 > {
   return useInfiniteQuery({
     queryKey,
-    queryFn: ({ pageParam = initialRequest }) => {
-      const typedPageParam = pageParam as TReq;
-      return requestFn(typedPageParam);
+    queryFn: ({ pageParam }) => {
+      return requestFn(pageParam as TReq);
     },
     initialPageParam: initialRequest,
     getNextPageParam: (lastPage, _, lastPageParam: TReq) => {
       const perPage = lastPage.meta?.perPage ?? 10;
       const currentPage = lastPageParam.page ?? 1;
 
-      if (!lastPage.meta || lastPage.data.length < perPage) {
+      if (lastPage.data.length < perPage) {
         return undefined;
       }
 

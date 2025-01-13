@@ -1,46 +1,46 @@
-import { useInfiniteQuery as m } from "@tanstack/react-query";
+import { useInfiniteQuery as p } from "@tanstack/react-query";
 import "axios";
 import "axios-retry";
-import { U as p } from "../../RoleService-Cy-fER5k.js";
-function g({
-  queryKey: t,
-  requestFn: n,
-  initialRequest: r,
-  options: a
+import { U as g } from "../../RoleService-Cy-fER5k.js";
+function m({
+  queryKey: r,
+  requestFn: t,
+  initialRequest: n,
+  options: i
 }) {
-  return m({
-    queryKey: t,
-    queryFn: ({ pageParam: e = r }) => n(e),
-    initialPageParam: r,
-    getNextPageParam: (e, u, i) => {
-      var o;
-      const c = ((o = e.meta) == null ? void 0 : o.perPage) ?? 10, s = i.page ?? 1;
-      if (!(!e.meta || e.data.length < c))
+  return p({
+    queryKey: r,
+    queryFn: ({ pageParam: e }) => t(e),
+    initialPageParam: n,
+    getNextPageParam: (e, o, u) => {
+      var s;
+      const a = ((s = e.meta) == null ? void 0 : s.perPage) ?? 10, c = u.page ?? 1;
+      if (!(e.data.length < a))
         return {
-          ...i,
-          page: s + 1
+          ...u,
+          page: c + 1
         };
     },
-    ...a
+    ...i
   });
 }
-const q = ({
-  domaine: t,
-  pathname: n,
-  search: r,
-  queryKey: a,
+const P = ({
+  domaine: r,
+  pathname: t,
+  search: n,
+  queryKey: i,
   initialRequest: e
 }) => {
-  const u = p.getInstance(t, n);
+  const o = g.getInstance(r, t);
   return {
-    ...g({
-      queryKey: a,
-      requestFn: () => u.search(r),
+    ...m({
+      queryKey: i,
+      requestFn: () => o.search(n),
       initialRequest: e
     })
   };
 };
 export {
-  q as useInfinitSearchUser,
-  g as useInfiniteRequest
+  P as useInfinitSearchUser,
+  m as useInfiniteRequest
 };
