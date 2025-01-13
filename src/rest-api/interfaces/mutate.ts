@@ -6,42 +6,62 @@ export type Operation =
   | "sync"
   | "toggle";
 
-export interface Attributes {
-  [key: string]: string | number | boolean;
-}
+export type Attributes<TAttributes extends string> = Record<
+  TAttributes,
+  string | number | boolean
+>;
 
 export interface Pivot {
   [key: string]: string;
 }
 
-export interface BaseRelation {
+export interface BaseRelation<
+  TAttributes extends string,
+  TRelations extends string,
+> {
   operation: Operation;
-  attributes?: Attributes;
-  relations?: RelationsMap;
+  attributes?: Attributes<TAttributes>;
+  relations?: RelationsMap<TAttributes, TRelations>;
   key?: number;
   pivot?: Pivot;
 }
 
-export interface SyncRelation extends BaseRelation {
+export interface SyncRelation<
+  TAttributes extends string,
+  TRelations extends string,
+> extends BaseRelation<TAttributes, TRelations> {
   operation: "sync";
   without_detaching?: boolean;
 }
 
-export type Relation = BaseRelation | SyncRelation;
+export type Relation<TAttributes extends string, TRelations extends string> =
+  | BaseRelation<TAttributes, TRelations>
+  | SyncRelation<TAttributes, TRelations>;
 
-export interface RelationsMap {
-  [key: string]: Relation | Array<Relation>;
-}
+export type RelationsMap<
+  TAttributes extends string,
+  TRelations extends string,
+> = {
+  [key in TRelations]?:
+    | Relation<TAttributes, TRelations>
+    | Array<Relation<TAttributes, TRelations>>;
+};
 
-export interface MutateRequest {
+export interface MutateRequest<
+  TAttributes extends string,
+  TRelations extends string,
+> {
   operation: Operation;
   key?: number;
-  attributes: Attributes;
-  relations?: RelationsMap;
+  attributes: Attributes<TAttributes>;
+  relations?: RelationsMap<TAttributes, TRelations>;
 }
 
-export interface MutatePayload {
-  mutate: Array<MutateRequest>;
+export interface MutatePayload<
+  TAttributes extends string,
+  TRelations extends string,
+> {
+  mutate: Array<MutateRequest<TAttributes, TRelations>>;
 }
 
 export interface MutateResponse<T> {

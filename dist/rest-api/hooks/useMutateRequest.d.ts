@@ -1,12 +1,12 @@
-import { MutatePayload, MutateResponse, Operation, RelationsMap } from '../interfaces';
+import { Attributes, MutatePayload, MutateResponse, Operation, RelationsMap } from '../interfaces';
 import { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-interface UseMutateRequestParams<TReq extends MutatePayload, TRes> {
-    requestFn: (request: TReq) => Promise<MutateResponse<TRes>>;
-    options?: MutateOptions<TReq, TRes>;
+interface UseMutateRequestParams<TAttributes extends string, TRelations extends string, TRes> {
+    requestFn: (request: MutatePayload<TAttributes, TRelations>) => Promise<MutateResponse<TRes>>;
+    options?: MutateOptions<TAttributes, TRelations, TRes>;
 }
-export type MutateOptions<TReq, TRes> = Omit<UseMutationOptions<MutateResponse<TRes>, Error, TReq>, "mutationFn">;
-type Return<TReq extends MutatePayload, TRes> = UseMutationResult<MutateResponse<TRes>, Error, TReq> & {
-    createMutatePayload: (operation: Operation, attributes: Record<string, string | number | boolean>, key?: number, relations?: RelationsMap) => MutatePayload;
+export type MutateOptions<TAttributes extends string, TRelations extends string, TRes> = Omit<UseMutationOptions<MutateResponse<TRes>, Error, MutatePayload<TAttributes, TRelations>>, "mutationFn">;
+type Return<TAttributes extends string, TRelations extends string, TRes> = UseMutationResult<MutateResponse<TRes>, Error, MutatePayload<TAttributes, TRelations>> & {
+    createMutatePayload: (operation: Operation, attributes: Attributes<TAttributes>, key?: number, relations?: RelationsMap<TAttributes, TRelations>) => MutatePayload<TAttributes, TRelations>;
 };
-export declare function useMutateRequest<TReq extends MutatePayload, TRes>({ requestFn, options, }: UseMutateRequestParams<TReq, TRes>): Return<TReq, TRes>;
+export declare function useMutateRequest<TAttributes extends string, TRelations extends string, TRes>({ requestFn, options, }: UseMutateRequestParams<TAttributes, TRelations, TRes>): Return<TAttributes, TRelations, TRes>;
 export {};

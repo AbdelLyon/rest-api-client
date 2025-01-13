@@ -335,7 +335,7 @@ describe("UserService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: Array<MutateRequest> = [
+      const mutateRequest: Array<MutateRequest<string, string>> = [
         {
           operation: "create",
           attributes: {

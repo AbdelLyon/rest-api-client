@@ -22,7 +22,9 @@ export class ApiServiceError extends Error {
 
 export interface IApiService<T> {
   search: (searchRequest: SearchRequest) => Promise<SearchResponse<T>>;
-  mutate: (mutateRequest: Array<MutateRequest>) => Promise<MutateResponse<T>>;
+  mutate: (
+    mutateRequest: Array<MutateRequest<string, string>>,
+  ) => Promise<MutateResponse<T>>;
   executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
 }
 
@@ -108,7 +110,7 @@ export abstract class ApiService<T>
   }
 
   public mutate(
-    mutations: Array<MutateRequest>,
+    mutations: Array<MutateRequest<string, string>>,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
     return this.request<MutateResponse<T>>(
