@@ -1,21 +1,21 @@
 // ApplicationService.test.ts
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AxiosInstance } from "axios";
+import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { MutateRequest } from "@/rest-api/interfaces/mutate";
 import type {
-  SearchRequest,
   Filter,
   Include,
+  SearchRequest,
 } from "@/rest-api/interfaces/search";
 import type { Application } from "@/rest-api/models/Application";
+import { ApplicationService } from "@/rest-api/services/Application";
 import { createAxiosMock } from "@/utils/utils";
 import {
   createApplicationMock,
   createSearchResponseMock,
 } from "@/tests/mocks/modelMocks";
-import { ApplicationService } from "@/rest-api/services/Application";
-import type { MutateRequest } from "@/rest-api/interfaces/mutate";
-import type { ActionRequest } from "@/rest-api/interfaces/action";
 
 describe("ApplicationService", () => {
   let applicationService: ApplicationService;
@@ -82,7 +82,7 @@ describe("ApplicationService", () => {
 
     describe("Advanced Search Capabilities", () => {
       it("devrait supporter des filtres sur maintenance", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           { field: "is_under_maintenance", operator: "=", value: false },
           { field: "has_mobile_application", operator: "=", value: true },
         ];
@@ -111,7 +111,7 @@ describe("ApplicationService", () => {
       });
 
       it("devrait supporter des filtres sur pack et slug", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           { field: "pack.name", operator: "=", value: "Mobile Apps" },
           { field: "slug", operator: "=", value: "mobile-app" },
         ];
@@ -140,7 +140,7 @@ describe("ApplicationService", () => {
       });
 
       it("devrait supporter les inclusions de profiles", async () => {
-        const includes: Include[] = [
+        const includes: Array<Include> = [
           {
             relation: "profiles",
             filters: [{ field: "is_visible", operator: "=", value: true }],
@@ -193,7 +193,7 @@ describe("ApplicationService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: MutateRequest[] = [
+      const mutateRequest: Array<MutateRequest> = [
         {
           operation: "create",
           attributes: {

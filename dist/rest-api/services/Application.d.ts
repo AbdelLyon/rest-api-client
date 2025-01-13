@@ -1,5 +1,5 @@
-import { Application } from '../models/Application';
 import { ApiService } from './ApiService';
+import { Application } from '../models/Application';
 export declare class ApplicationService extends ApiService<Application> {
     private static instances;
     private constructor();

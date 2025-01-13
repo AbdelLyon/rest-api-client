@@ -1,5 +1,5 @@
-import { Site } from '../models/Site';
 import { ApiService } from './ApiService';
+import { Site } from '../models/Site';
 export declare class SiteService extends ApiService<Site> {
     private static instances;
     private constructor();

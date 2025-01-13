@@ -1,17 +1,17 @@
 // RoleService.test.ts
-import type { Mock } from "vitest";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { AxiosInstance } from "axios";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createRoleMock } from "./mocks/modelMocks";
+import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { MutateRequest } from "@/rest-api/interfaces/mutate";
+import type { Role } from "@/rest-api/models/User";
 import type {
   SearchRequest,
   SearchResponse,
 } from "@/rest-api/interfaces/search";
-import type { Role } from "@/rest-api/models/User";
-import type { MutateRequest } from "@/rest-api/interfaces/mutate";
-import type { ActionRequest } from "@/rest-api/interfaces/action";
-import { createAxiosMock } from "@/utils/utils";
+import type { AxiosInstance } from "axios";
+import type { Mock } from "vitest";
 import { RoleService } from "@/rest-api/services/RoleService";
-import { createRoleMock } from "./mocks/modelMocks";
+import { createAxiosMock } from "@/utils/utils";
 
 describe("RoleService", () => {
   let roleService: RoleService;
@@ -105,7 +105,7 @@ describe("RoleService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: MutateRequest[] = [
+      const mutateRequest: Array<MutateRequest> = [
         {
           operation: "create",
           attributes: {

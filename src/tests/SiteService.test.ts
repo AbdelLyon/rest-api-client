@@ -1,21 +1,21 @@
 // SiteService.test.ts
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AxiosInstance } from "axios";
-import { SiteService } from "@/rest-api/services/SiteService";
+import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { MutateRequest } from "@/rest-api/interfaces/mutate";
+import type { Site } from "@/rest-api/models/Site";
 import type {
-  SearchRequest,
   Filter,
   Include,
+  SearchRequest,
 } from "@/rest-api/interfaces/search";
-import { createAxiosMock } from "@/utils/utils";
+import { SiteService } from "@/rest-api/services/SiteService";
 import {
-  createSiteMock,
   createSearchResponseMock,
+  createSiteMock,
 } from "@/tests/mocks/modelMocks";
-import type { Site } from "@/rest-api/models/Site";
-import type { MutateRequest } from "@/rest-api/interfaces/mutate";
-import type { ActionRequest } from "@/rest-api/interfaces/action";
+import { createAxiosMock } from "@/utils/utils";
 
 describe("SiteService", () => {
   let siteService: SiteService;
@@ -80,7 +80,7 @@ describe("SiteService", () => {
 
     describe("Advanced Search Capabilities", () => {
       it("devrait supporter des filtres géographiques", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           { field: "country_alpha", operator: "=", value: "FR" },
           { field: "city", operator: "=", value: "Paris" },
         ];
@@ -109,7 +109,7 @@ describe("SiteService", () => {
       });
 
       it("devrait supporter des filtres sur le client", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           { field: "client.name", operator: "=", value: "Xefi" },
           { field: "timezone", operator: "=", value: "Europe/Paris" },
         ];
@@ -138,7 +138,7 @@ describe("SiteService", () => {
       });
 
       it("devrait supporter les inclusions de client", async () => {
-        const includes: Include[] = [
+        const includes: Array<Include> = [
           {
             relation: "client",
             filters: [
@@ -191,7 +191,7 @@ describe("SiteService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: MutateRequest[] = [
+      const mutateRequest: Array<MutateRequest> = [
         {
           operation: "create",
           attributes: {

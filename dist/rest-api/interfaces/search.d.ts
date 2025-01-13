@@ -9,7 +9,7 @@ export interface SearchText {
 }
 export interface Scope {
     name: string;
-    parameters: ScopeParameter[];
+    parameters: Array<ScopeParameter>;
 }
 export interface BaseFilter {
     field: string;
@@ -18,7 +18,7 @@ export interface BaseFilter {
     type?: FilterType;
 }
 export interface NestedFilter {
-    nested: BaseFilter[];
+    nested: Array<BaseFilter>;
 }
 export type Filter = BaseFilter | NestedFilter;
 export interface Sort {
@@ -34,37 +34,37 @@ export interface InstructionField {
 }
 export interface Instruction {
     name: string;
-    fields: InstructionField[];
+    fields: Array<InstructionField>;
 }
 export interface Include {
     relation: string;
-    filters?: Filter[];
-    sorts?: Sort[];
-    selects?: Select[];
-    scopes?: Scope[];
+    filters?: Array<Filter>;
+    sorts?: Array<Sort>;
+    selects?: Array<Select>;
+    scopes?: Array<Scope>;
     limit?: number;
 }
 export interface Aggregate {
     relation: string;
     type: AggregateType;
     field?: string;
-    filters?: Filter[];
+    filters?: Array<Filter>;
 }
 export interface SearchRequest {
     text?: SearchText;
-    scopes?: Scope[];
-    filters?: Filter[];
-    sorts?: Sort[];
-    selects?: Select[];
-    includes?: Include[];
-    aggregates?: Aggregate[];
-    instructions?: Instruction[];
-    gates?: Gate[];
+    scopes?: Array<Scope>;
+    filters?: Array<Filter>;
+    sorts?: Array<Sort>;
+    selects?: Array<Select>;
+    includes?: Array<Include>;
+    aggregates?: Array<Aggregate>;
+    instructions?: Array<Instruction>;
+    gates?: Array<Gate>;
     page?: number;
     limit?: number;
 }
 export interface SearchResponse<T> {
-    data: T[];
+    data: Array<T>;
     meta?: {
         page: number;
         perPage: number;

@@ -7,6 +7,6 @@ interface UseInfiniteRequestParams<TReq extends PaginationParams, TRes> {
     initialRequest: TReq;
     options?: InfiniteQueryOptions<TReq, TRes>;
 }
-type InfiniteQueryOptions<TReq, TRes> = Omit<UseInfiniteQueryOptions<SearchResponse<TRes>, Error, SearchResponse<TRes>, SearchResponse<TRes>, QueryKey, TReq>, "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam">;
+export type InfiniteQueryOptions<TReq, TRes> = Omit<UseInfiniteQueryOptions<SearchResponse<TRes>, Error, SearchResponse<TRes>, SearchResponse<TRes>, QueryKey, TReq>, "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam">;
 export declare function useInfiniteRequest<TReq extends PaginationParams, TRes>({ queryKey, requestFn, initialRequest, options, }: UseInfiniteRequestParams<TReq, TRes>): UseInfiniteQueryResult<SearchResponse<TRes>, Error>;
 export {};

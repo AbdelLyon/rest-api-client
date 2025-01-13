@@ -1,5 +1,5 @@
-import { Client } from '../models/Client';
 import { ApiService } from './ApiService';
+import { Client } from '../models/Client';
 export declare class ClientService extends ApiService<Client> {
     private static instances;
     private constructor();

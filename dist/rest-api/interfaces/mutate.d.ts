@@ -18,7 +18,7 @@ export interface SyncRelation extends BaseRelation {
 }
 export type Relation = BaseRelation | SyncRelation;
 export interface RelationsMap {
-    [key: string]: Relation | Relation[];
+    [key: string]: Relation | Array<Relation>;
 }
 export interface MutateRequest {
     operation: Operation;
@@ -27,8 +27,8 @@ export interface MutateRequest {
     relations?: RelationsMap;
 }
 export interface MutatePayload {
-    mutate: MutateRequest[];
+    mutate: Array<MutateRequest>;
 }
 export interface MutateResponse<T> {
-    data: T[];
+    data: Array<T>;
 }

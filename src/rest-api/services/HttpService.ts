@@ -1,7 +1,7 @@
 // HttpService.ts
-import type { AxiosInstance, AxiosError } from "axios";
 import axios from "axios";
 import axiosRetry from "axios-retry";
+import type { AxiosError, AxiosInstance } from "axios";
 
 export abstract class HttpService {
   protected axiosInstance: AxiosInstance;

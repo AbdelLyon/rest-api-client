@@ -1,5 +1,5 @@
-import { Role } from '../models/User';
 import { ApiService } from './ApiService';
+import { Role } from '../models/User';
 export declare class RoleService extends ApiService<Role> {
     private static instances;
     private constructor();

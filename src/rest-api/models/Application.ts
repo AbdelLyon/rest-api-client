@@ -31,7 +31,7 @@ export interface Application extends BaseModel {
   is_under_maintenance: boolean;
   default_order: number;
   translate_description: string;
-  media: MediaApplication[];
-  profiles: Profile[];
+  media: Array<MediaApplication>;
+  profiles: Array<Profile>;
   pack: PackApplication;
 }

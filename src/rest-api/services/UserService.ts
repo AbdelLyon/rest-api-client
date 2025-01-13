@@ -1,31 +1,31 @@
-import type { User } from "../models/User";
 import { ApiService } from "./ApiService";
+import type { User } from "../models/User";
 
 export class UserService extends ApiService<User> {
   private static instances: Map<string, UserService> = new Map();
 
-  private constructor(domain: string, baseUrl: string) {
-    super(domain, baseUrl);
+  private constructor(domain: string, pathname: string) {
+    super(domain, pathname);
   }
 
-  static getInstance(domain: string, baseUrl: string): UserService {
-    const key = `${domain}:${baseUrl}`;
+  static getInstance(domain: string, pathname: string): UserService {
+    const key = `${domain}:${pathname}`;
 
     if (!this.instances.has(key)) {
-      this.instances.set(key, new UserService(domain, baseUrl));
+      this.instances.set(key, new UserService(domain, pathname));
     }
 
-    return this.instances.get(key) ?? new UserService(domain, baseUrl);
+    return this.instances.get(key) ?? new UserService(domain, pathname);
   }
 
-  static resetInstance(domain?: string, baseUrl?: string): void {
+  static resetInstance(domain?: string, pathname?: string): void {
     if (
       domain !== undefined &&
       domain !== "" &&
-      baseUrl !== undefined &&
-      baseUrl !== ""
+      pathname !== undefined &&
+      pathname !== ""
     ) {
-      const key = `${domain}:${baseUrl}`;
+      const key = `${domain}:${pathname}`;
       this.instances.delete(key);
     } else {
       this.instances.clear();

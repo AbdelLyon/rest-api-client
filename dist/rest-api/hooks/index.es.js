@@ -1,26 +1,46 @@
 import { useInfiniteQuery as m } from "@tanstack/react-query";
-function c({
-  queryKey: a,
-  requestFn: u,
+import "axios";
+import "axios-retry";
+import { U as p } from "../../RoleService-Cy-fER5k.js";
+function g({
+  queryKey: t,
+  requestFn: n,
   initialRequest: r,
-  options: g
+  options: a
 }) {
   return m({
-    queryKey: a,
-    queryFn: ({ pageParam: e = r }) => u(e),
+    queryKey: t,
+    queryFn: ({ pageParam: e = r }) => n(e),
     initialPageParam: r,
-    getNextPageParam: (e, i, t) => {
-      var n;
-      const o = ((n = e.meta) == null ? void 0 : n.perPage) ?? 10, p = t.page ?? 1;
-      if (!(!e.meta || e.data.length < o))
+    getNextPageParam: (e, u, i) => {
+      var o;
+      const c = ((o = e.meta) == null ? void 0 : o.perPage) ?? 10, s = i.page ?? 1;
+      if (!(!e.meta || e.data.length < c))
         return {
-          ...t,
-          page: p + 1
+          ...i,
+          page: s + 1
         };
     },
-    ...g
+    ...a
   });
 }
+const q = ({
+  domaine: t,
+  pathname: n,
+  search: r,
+  queryKey: a,
+  initialRequest: e
+}) => {
+  const u = p.getInstance(t, n);
+  return {
+    ...g({
+      queryKey: a,
+      requestFn: () => u.search(r),
+      initialRequest: e
+    })
+  };
+};
 export {
-  c as useInfiniteRequest
+  q as useInfinitSearchUser,
+  g as useInfiniteRequest
 };

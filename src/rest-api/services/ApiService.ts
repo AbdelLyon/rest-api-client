@@ -1,12 +1,12 @@
+import { HttpService } from "./HttpService";
 import type { ActionRequest, ActionResponse } from "../interfaces/action";
 import type { MutateRequest, MutateResponse } from "../interfaces/mutate";
 import type { SearchRequest, SearchResponse } from "../interfaces/search";
-import { HttpService } from "./HttpService";
 import type {
-  AxiosRequestConfig,
-  AxiosResponse,
   AxiosError,
   AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
 } from "axios";
 
 // Définition d'une erreur API personnalisée
@@ -21,9 +21,9 @@ export class ApiServiceError extends Error {
 }
 
 export interface IApiService<T> {
-  search(searchRequest: SearchRequest): Promise<SearchResponse<T>>;
-  mutate(mutateRequest: MutateRequest[]): Promise<MutateResponse<T>>;
-  executeAction(actionRequest: ActionRequest): Promise<ActionResponse>;
+  search: (searchRequest: SearchRequest) => Promise<SearchResponse<T>>;
+  mutate: (mutateRequest: Array<MutateRequest>) => Promise<MutateResponse<T>>;
+  executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
 }
 
 export abstract class ApiService<T>
@@ -70,10 +70,10 @@ export abstract class ApiService<T>
     });
   }
 
-  protected async request<ResponseType>(
+  protected async request<TResponse>(
     config: AxiosRequestConfig,
     options: Partial<AxiosRequestConfig> = {},
-  ): Promise<ResponseType> {
+  ): Promise<TResponse> {
     try {
       const mergedConfig = {
         ...this.DEFAULT_REQUEST_OPTIONS,
@@ -81,7 +81,7 @@ export abstract class ApiService<T>
         ...options,
       };
 
-      const response = await this.axiosInstance.request<ResponseType>(
+      const response = await this.axiosInstance.request<TResponse>(
         mergedConfig,
       );
       return response.data;
@@ -108,7 +108,7 @@ export abstract class ApiService<T>
   }
 
   public mutate(
-    mutations: MutateRequest[],
+    mutations: Array<MutateRequest>,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
     return this.request<MutateResponse<T>>(
@@ -135,13 +135,13 @@ export abstract class ApiService<T>
     );
   }
 
-  public customRequest<ResponseType>(
+  public customRequest<TResponse>(
     method: string,
     url: string,
     data?: T,
     options: Partial<AxiosRequestConfig> = {},
-  ): Promise<ResponseType> {
-    return this.request<ResponseType>({ method, url, data }, options);
+  ): Promise<TResponse> {
+    return this.request<TResponse>({ method, url, data }, options);
   }
 
   _setAxiosInstanceForTesting(instance: AxiosInstance): void {

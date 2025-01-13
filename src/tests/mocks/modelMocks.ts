@@ -1,5 +1,5 @@
 // src/tests/mocks/modelMocks.ts
-import type { User, RoleName, Role } from "@/rest-api/models/User";
+import type { Role, RoleName, User } from "@/rest-api/models/User";
 import type { SearchResponse } from "@/rest-api/interfaces/search";
 import type {
   Application,
@@ -47,7 +47,7 @@ export const createClientMock = (overrides: Partial<Client> = {}): Client => ({
   number_managers_can_validate: 2,
   referred_by: null,
   siret: "12345678901234",
-  client_id: "client_" + Math.random().toString(36).substr(2, 9),
+  client_id: "client_" + Math.random().toString(36).slice(2, 11),
   country_alpha: "FR",
   ...overrides,
 });
@@ -68,11 +68,11 @@ export const createSiteMock = (overrides: Partial<Site> = {}): Site => ({
 export const createApplicationMock = (
   overrides: Partial<Application> = {},
 ): Application => {
-  const applicationId = "app_" + Math.random().toString(36).substr(2, 9);
+  const applicationId = "app_" + Math.random().toString(36).slice(2, 11);
 
   return {
     ...generateBaseModelFields(applicationId),
-    pack_id: "pack_" + Math.random().toString(36).substr(2, 9),
+    pack_id: "pack_" + Math.random().toString(36).slice(2, 11),
     name: "Test Application",
     slug: "test-app",
     url: "https://test.com",
@@ -107,7 +107,7 @@ export const createProfileMock = (
 };
 
 export const createRoleMock = (overrides: Partial<Role> = {}): Role => {
-  const roleNames: RoleName[] = [
+  const roleNames: Array<RoleName> = [
     "Director",
     "Users",
     "Auto Admin",
@@ -127,12 +127,12 @@ export const createRoleMock = (overrides: Partial<Role> = {}): Role => {
 
 export const createUserMock = (overrides: Partial<User> = {}): User => ({
   ...generateBaseModelFields(),
-  site_id: "site_" + Math.random().toString(36).substr(2, 9),
+  site_id: "site_" + Math.random().toString(36).slice(2, 11),
   manager_id: undefined,
   customer_id: undefined,
   firstname: "Test",
   lastname: "User",
-  email: `test.user.${Math.random().toString(36).substr(2, 9)}@example.com`,
+  email: `test.user.${Math.random().toString(36).slice(2, 11)}@example.com`,
   phone_number: undefined,
   timezone: "Europe/Paris",
   language: "fr",
@@ -144,7 +144,7 @@ export const createUserMock = (overrides: Partial<User> = {}): User => ({
 });
 
 export const createSearchResponseMock = <T>(
-  data?: T[],
+  data?: Array<T>,
   meta?: { page?: number; perPage?: number; total?: number },
 ): SearchResponse<T> => ({
   data: data || [createUserMock() as unknown as T],

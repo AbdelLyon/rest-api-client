@@ -1,5 +1,5 @@
-import type { Role } from "../models/User";
 import { ApiService } from "./ApiService";
+import type { Role } from "../models/User";
 
 export class RoleService extends ApiService<Role> {
   private static instances: Map<string, RoleService> = new Map();

@@ -1,17 +1,17 @@
 // ClientService.test.ts
-import type { Mock } from "vitest";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { AxiosInstance } from "axios";
-import { ClientService } from "@/rest-api/services/ClientService";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createClientMock } from "./mocks/modelMocks";
+import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { MutateRequest } from "@/rest-api/interfaces/mutate";
+import type { Client } from "@/rest-api/models/Client";
 import type {
   SearchRequest,
   SearchResponse,
 } from "@/rest-api/interfaces/search";
-import type { Client } from "@/rest-api/models/Client";
-import type { MutateRequest } from "@/rest-api/interfaces/mutate";
-import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { AxiosInstance } from "axios";
+import type { Mock } from "vitest";
 import { createAxiosMock } from "@/utils/utils";
-import { createClientMock } from "./mocks/modelMocks";
+import { ClientService } from "@/rest-api/services/ClientService";
 
 describe("ClientService", () => {
   let clientService: ClientService;
@@ -103,7 +103,7 @@ describe("ClientService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: MutateRequest[] = [
+      const mutateRequest: Array<MutateRequest> = [
         {
           operation: "create",
           attributes: {

@@ -7,9 +7,9 @@ export interface ActionFilter {
     value: boolean | string | number;
 }
 export interface paramsAction {
-    fields: ActionField[];
+    fields: Array<ActionField>;
     search?: {
-        filters?: ActionFilter[];
+        filters?: Array<ActionFilter>;
     };
 }
 export interface ActionRequest {
@@ -17,7 +17,7 @@ export interface ActionRequest {
     params: paramsAction;
 }
 export interface DeleteRequest {
-    resources: string[] | number[];
+    resources: Array<string> | Array<number>;
 }
 export interface ActionResponse {
     data: {

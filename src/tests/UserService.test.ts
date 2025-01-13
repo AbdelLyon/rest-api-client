@@ -1,26 +1,26 @@
 // UserService.test.ts
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Mock } from "vitest";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import type { ActionRequest } from "@/rest-api/interfaces/action";
+import type { MutateRequest } from "@/rest-api/interfaces/mutate";
+import type {
+  Aggregate,
+  Filter,
+  Gate,
+  Include,
+  Instruction,
+  SearchRequest,
+  Select,
+  Sort,
+} from "@/rest-api/interfaces/search";
 import type { AxiosInstance } from "axios";
 import { UserService } from "@/rest-api/services/UserService";
-import type {
-  SearchRequest,
-  Filter,
-  Sort,
-  Select,
-  Instruction,
-  Include,
-  Aggregate,
-  Gate,
-} from "@/rest-api/interfaces/search";
-import { createAxiosMock } from "@/utils/utils";
 import {
-  createUserWithMultipleApplications,
   createSearchResponseMock,
   createUserMock,
+  createUserWithMultipleApplications,
 } from "@/tests/mocks/modelMocks";
-import type { MutateRequest } from "@/rest-api/interfaces/mutate";
-import type { ActionRequest } from "@/rest-api/interfaces/action";
+import { createAxiosMock } from "@/utils/utils";
 
 describe("UserService", () => {
   let userService: UserService;
@@ -85,7 +85,7 @@ describe("UserService", () => {
 
     describe("Advanced Search Capabilities", () => {
       it("devrait supporter des filtres simples", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           { field: "email", operator: "=", value: "test@example.com" },
         ];
 
@@ -113,7 +113,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter des filtres imbriqués", async () => {
-        const filters: Filter[] = [
+        const filters: Array<Filter> = [
           {
             nested: [
               { field: "email", operator: "=", value: "test@example.com" },
@@ -146,7 +146,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter le tri", async () => {
-        const sorts: Sort[] = [
+        const sorts: Array<Sort> = [
           { field: "lastname", direction: "asc" },
           { field: "created_at", direction: "desc" },
         ];
@@ -175,7 +175,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter la sélection de champs", async () => {
-        const selects: Select[] = [
+        const selects: Array<Select> = [
           { field: "id" },
           { field: "email" },
           { field: "firstname" },
@@ -205,7 +205,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter les inclusions", async () => {
-        const includes: Include[] = [
+        const includes: Array<Include> = [
           {
             relation: "applications",
             filters: [
@@ -243,7 +243,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter les agrégations", async () => {
-        const aggregates: Aggregate[] = [
+        const aggregates: Array<Aggregate> = [
           { relation: "applications", type: "count" },
           { relation: "profiles", type: "sum", field: "is_visible" },
         ];
@@ -272,7 +272,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter les instructions", async () => {
-        const instructions: Instruction[] = [
+        const instructions: Array<Instruction> = [
           {
             name: "custom_filter",
             fields: [
@@ -306,7 +306,7 @@ describe("UserService", () => {
       });
 
       it("devrait supporter les gates", async () => {
-        const gates: Gate[] = ["view", "update"];
+        const gates: Array<Gate> = ["view", "update"];
 
         const searchRequest: SearchRequest = {
           gates,
@@ -335,7 +335,7 @@ describe("UserService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer des mutations", async () => {
-      const mutateRequest: MutateRequest[] = [
+      const mutateRequest: Array<MutateRequest> = [
         {
           operation: "create",
           attributes: {

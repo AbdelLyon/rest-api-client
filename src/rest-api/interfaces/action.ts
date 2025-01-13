@@ -9,9 +9,9 @@ export interface ActionFilter {
 }
 
 export interface paramsAction {
-  fields: ActionField[];
+  fields: Array<ActionField>;
   search?: {
-    filters?: ActionFilter[];
+    filters?: Array<ActionFilter>;
   };
 }
 
@@ -21,7 +21,7 @@ export interface ActionRequest {
 }
 
 export interface DeleteRequest {
-  resources: string[] | number[];
+  resources: Array<string> | Array<number>;
 }
 
 export interface ActionResponse {

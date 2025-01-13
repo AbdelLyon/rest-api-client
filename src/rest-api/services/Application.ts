@@ -1,5 +1,5 @@
-import type { Application } from "../models/Application";
 import { ApiService } from "./ApiService";
+import type { Application } from "../models/Application";
 
 export class ApplicationService extends ApiService<Application> {
   private static instances: Map<string, ApplicationService> = new Map();

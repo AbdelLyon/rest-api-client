@@ -7,7 +7,7 @@ export interface Role extends BaseModel {
     guard_name: string;
     translate_name: string;
 }
-export type Roles = Role[];
+export type Roles = Array<Role>;
 export interface User extends BaseModel {
     site_id: string;
     manager_id?: string;
@@ -18,8 +18,8 @@ export interface User extends BaseModel {
     phone_number?: string;
     timezone: string;
     language: string;
-    applications: Application[];
-    profiles?: Profile[];
+    applications: Array<Application>;
+    profiles?: Array<Profile>;
     site?: Site;
     gates?: Gates;
 }
