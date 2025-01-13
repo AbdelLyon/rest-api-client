@@ -1,5 +1,5 @@
-import { ApiService } from "./ApiService";
-import type { User } from "../models/User";
+import type { User } from "@/rest-api/models";
+import { ApiService } from "@/rest-api/services";
 
 export class UserService extends ApiService<User> {
   private static instances: Map<string, UserService> = new Map();

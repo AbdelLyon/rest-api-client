@@ -14,7 +14,7 @@ import type {
   Sort,
 } from "@/rest-api/interfaces/search";
 import type { AxiosInstance } from "axios";
-import { UserService } from "@/rest-api/services/UserService";
+import { UserService } from "@/tests/services/UserService";
 import {
   createSearchResponseMock,
   createUserMock,
