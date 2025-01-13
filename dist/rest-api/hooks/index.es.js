@@ -1,26 +1,48 @@
-import { useInfiniteQuery as p } from "@tanstack/react-query";
-function m({
+import { useInfiniteQuery as s, useMutation as g } from "@tanstack/react-query";
+function p({
   queryKey: n,
-  requestFn: i,
-  initialRequest: u,
-  options: a
+  requestFn: r,
+  initialRequest: a,
+  options: i
 }) {
-  return p({
+  return s({
     queryKey: n,
-    queryFn: ({ pageParam: e }) => i(e),
-    initialPageParam: u,
-    getNextPageParam: (e, f, r) => {
-      var t;
-      const g = ((t = e.meta) == null ? void 0 : t.perPage) ?? 10, o = r.page ?? 1;
-      if (!(e.data.length < g))
+    queryFn: ({ pageParam: t }) => r(t),
+    initialPageParam: a,
+    getNextPageParam: (t, o, e) => {
+      var c;
+      const u = ((c = t.meta) == null ? void 0 : c.perPage) ?? 10, m = e.page ?? 1;
+      if (!(t.data.length < u))
         return {
-          ...r,
-          page: o + 1
+          ...e,
+          page: m + 1
         };
     },
-    ...a
+    ...i
   });
 }
+function P({
+  requestFn: n,
+  options: r
+}) {
+  return {
+    ...g({
+      mutationFn: (t) => n(t),
+      ...r
+    }),
+    createMutatePayload: (t, o, e, u) => ({
+      mutate: [
+        {
+          operation: t,
+          key: e,
+          attributes: o,
+          relations: u
+        }
+      ]
+    })
+  };
+}
 export {
-  m as useInfiniteRequest
+  p as useInfiniteRequest,
+  P as useMutateRequest
 };
