@@ -1,4 +1,4 @@
 export { HttpService } from './HttpService';
 export { ApiService } from './ApiService';
-export { QueryService } from './QueryService';
-export { MutationService } from './MutationService';
+export { QueryService, type IQueryService, } from './QueryService';
+export { MutationService, type IMutationService, } from './MutationService';
