@@ -1,62 +1,56 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
-  Attributes,
-  MutatePayload,
-  MutateResponse,
-  Operation,
-  RelationsMap,
-} from "../interfaces";
-import type {
   UseMutationOptions,
   UseMutationResult,
 } from "@tanstack/react-query";
+import type {
+  MutateRequest,
+  MutateResponse,
+  MutationOperation,
+  OperationType,
+  RelationOperation,
+} from "../interfaces/mutate";
 
-interface UseMutateRequestParams<
-  TAttributes extends string,
-  TRelations extends string,
-  TRes,
-> {
+type RelationsMap<TAttributes, TRelations> = Partial<
+  Record<
+    keyof TRelations,
+    | RelationOperation<TAttributes, TRelations>
+    | Array<RelationOperation<TAttributes, TRelations>>
+  >
+>;
+
+// Types pour le hook
+interface UseMutateRequestParams<TAttributes, TRelations, TRes> {
   requestFn: (
-    request: MutatePayload<TAttributes, TRelations>,
+    request: MutateRequest<TAttributes, TRelations>,
   ) => Promise<MutateResponse<TRes>>;
   options?: MutateOptions<TAttributes, TRelations, TRes>;
 }
 
-export type MutateOptions<
-  TAttributes extends string,
-  TRelations extends string,
-  TRes,
-> = Omit<
+type MutateOptions<TAttributes, TRelations, TRes> = Omit<
   UseMutationOptions<
     MutateResponse<TRes>,
     Error,
-    MutatePayload<TAttributes, TRelations>
+    MutateRequest<TAttributes, TRelations>
   >,
   "mutationFn"
 >;
 
-type Return<
-  TAttributes extends string,
-  TRelations extends string,
-  TRes,
-> = UseMutationResult<
+type Return<TAttributes, TRelations, TRes> = UseMutationResult<
   MutateResponse<TRes>,
   Error,
-  MutatePayload<TAttributes, TRelations>
+  MutateRequest<TAttributes, TRelations>
 > & {
-  createMutatePayload: (
-    operation: Operation,
-    attributes: Attributes<TAttributes>,
+  createMutateRequest: (
+    operation: OperationType,
+    attributes: Partial<TAttributes>,
     key?: number,
     relations?: RelationsMap<TAttributes, TRelations>,
-  ) => MutatePayload<TAttributes, TRelations>;
+  ) => MutateRequest<TAttributes, TRelations>;
 };
 
-export function useMutateRequest<
-  TAttributes extends string,
-  TRelations extends string,
-  TRes,
->({
+// Le hook
+export function useMutateRequest<TAttributes, TRelations, TRes>({
   requestFn,
   options,
 }: UseMutateRequestParams<TAttributes, TRelations, TRes>): Return<
@@ -65,32 +59,32 @@ export function useMutateRequest<
   TRes
 > {
   const mutation = useMutation({
-    mutationFn: (request: MutatePayload<TAttributes, TRelations>) => {
+    mutationFn: (request: MutateRequest<TAttributes, TRelations>) => {
       return requestFn(request);
     },
     ...options,
   });
 
-  const createMutatePayload = (
-    operation: Operation,
-    attributes: Attributes<TAttributes>,
+  const createMutateRequest = (
+    operation: OperationType,
+    attributes: Partial<TAttributes>,
     key?: number,
     relations?: RelationsMap<TAttributes, TRelations>,
-  ): MutatePayload<TAttributes, TRelations> => {
+  ): MutateRequest<TAttributes, TRelations> => {
+    const mutationOperation: MutationOperation<TAttributes, TRelations> = {
+      operation,
+      attributes,
+      ...(key !== undefined && { key }),
+      ...(relations && { relations }),
+    } as MutationOperation<TAttributes, TRelations>;
+
     return {
-      mutate: [
-        {
-          operation,
-          key,
-          attributes,
-          relations,
-        },
-      ],
+      mutate: [mutationOperation],
     };
   };
 
   return {
     ...mutation,
-    createMutatePayload,
+    createMutateRequest,
   };
 }

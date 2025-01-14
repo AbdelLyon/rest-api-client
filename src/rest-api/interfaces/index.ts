@@ -28,14 +28,6 @@ export type {
 } from "@/rest-api/interfaces/search";
 
 export type {
-  Attributes,
-  BaseRelation,
-  MutatePayload,
   MutateRequest,
-  Operation,
-  Pivot,
-  Relation,
-  RelationsMap,
-  SyncRelation,
-  MutateResponse,
+  OperationType,
 } from "@/rest-api/interfaces/mutate";

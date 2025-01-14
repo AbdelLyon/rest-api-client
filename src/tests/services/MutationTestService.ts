@@ -1,21 +1,21 @@
 import type { User } from "@/rest-api/models";
-import { ApiService } from "@/rest-api/services";
+import { MutationService } from "@/rest-api/services/MutationService";
 
-export class UserService extends ApiService<User> {
-  private static instances: Map<string, UserService> = new Map();
+export class UserTestService extends MutationService<User> {
+  private static instances: Map<string, UserTestService> = new Map();
 
   private constructor(domain: string, pathname: string) {
     super(domain, pathname);
   }
 
-  static getInstance(domain: string, pathname: string): UserService {
+  static getInstance(domain: string, pathname: string): UserTestService {
     const key = `${domain}:${pathname}`;
 
     if (!this.instances.has(key)) {
-      this.instances.set(key, new UserService(domain, pathname));
+      this.instances.set(key, new UserTestService(domain, pathname));
     }
 
-    return this.instances.get(key) ?? new UserService(domain, pathname);
+    return this.instances.get(key) ?? new UserTestService(domain, pathname);
   }
 
   static resetInstance(domain?: string, pathname?: string): void {

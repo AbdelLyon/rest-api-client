@@ -1,2 +1,2 @@
 export { useInfiniteRequest } from './useInfinitSearch';
-export { type MutateOptions, useMutateRequest, } from './useMutateRequest';
+export { useMutateRequest } from './useMutateRequest';

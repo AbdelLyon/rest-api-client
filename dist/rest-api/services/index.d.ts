@@ -1,3 +1,4 @@
 export { HttpService } from './HttpService';
-export { ApiService, type IApiService } from './ApiService';
-export { UserService } from '../../tests/services/UserService';
+export { ApiService } from './ApiService';
+export { QueryService } from './QueryService';
+export { MutationService } from './MutationService';
