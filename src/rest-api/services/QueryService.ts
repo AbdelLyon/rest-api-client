@@ -1,10 +1,12 @@
 import { ApiService } from "./ApiService";
+import type { DetailsResponse } from "../interfaces/details";
 import type { SearchRequest, SearchResponse } from "../interfaces/search";
 import type { AxiosRequestConfig } from "axios";
 
 export interface IQueryService<T> {
   search: (searchRequest: SearchRequest) => Promise<Array<T>>;
   searchPaginate: (searchRequest: SearchRequest) => Promise<SearchResponse<T>>;
+  getdetails: () => Promise<DetailsResponse>;
 }
 
 export class QueryService<T> extends ApiService implements IQueryService<T> {
@@ -39,5 +41,17 @@ export class QueryService<T> extends ApiService implements IQueryService<T> {
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<SearchResponse<T>> {
     return this.searchRequest(search, options);
+  }
+
+  public getdetails(
+    options: Partial<AxiosRequestConfig> = {},
+  ): Promise<DetailsResponse> {
+    return this.request<DetailsResponse>(
+      {
+        method: "GET",
+        url: "",
+      },
+      options,
+    );
   }
 }

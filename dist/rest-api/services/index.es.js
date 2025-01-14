@@ -98,7 +98,7 @@ class p extends m {
     this.axiosInstance = e;
   }
 }
-class R extends p {
+class g extends p {
   constructor(e, t) {
     super(e, t);
   }
@@ -118,8 +118,17 @@ class R extends p {
   searchPaginate(e, t = {}) {
     return this.searchRequest(e, t);
   }
+  getdetails(e = {}) {
+    return this.request(
+      {
+        method: "GET",
+        url: ""
+      },
+      e
+    );
+  }
 }
-class _ extends p {
+class R extends p {
   constructor(e, t) {
     super(e, t);
   }
@@ -147,6 +156,6 @@ class _ extends p {
 export {
   p as ApiService,
   m as HttpService,
-  _ as MutationService,
-  R as QueryService
+  R as MutationService,
+  g as QueryService
 };

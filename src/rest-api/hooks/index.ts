@@ -1,2 +1,3 @@
 export { useInfiniteRequest } from "@/rest-api/hooks/useInfinitSearch";
-export { useMutateRequest } from "@/rest-api/hooks/useMutateRequest";
+export { useMutate } from "@/rest-api/hooks/useMutate";
+export { useDetails } from "@/rest-api/hooks/useDetails";

@@ -42,3 +42,15 @@ export type {
   ToggleRelation,
   UpdateOperation,
 } from "@/rest-api/interfaces/mutate";
+
+export type {
+  DetailsAction,
+  DetailsActionField,
+  DetailsActionMeta,
+  DetailsInstruction,
+  DetailsRelation,
+  DetailsRelationConstraints,
+  DetailsResource,
+  DetailsResponse,
+  DetailsValidationRules,
+} from "@/rest-api/interfaces/details";

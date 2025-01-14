@@ -1,2 +1,3 @@
 export { useInfiniteRequest } from './useInfinitSearch';
-export { useMutateRequest } from './useMutateRequest';
+export { useMutate } from './useMutate';
+export { useDetails } from './useDetails';

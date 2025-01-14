@@ -74,7 +74,7 @@ type Return<
 };
 
 // Le hook
-export function useMutateRequest<
+export function useMutate<
   TAttributes,
   TRelations,
   TRes,
