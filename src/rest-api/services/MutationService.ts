@@ -5,8 +5,16 @@ import type { MutateRequest, MutateResponse } from "../interfaces/mutate";
 import type { AxiosRequestConfig } from "axios";
 
 export interface IMutationService<T> {
-  mutate: <TAttributes, TRelations>(
-    mutateRequest: MutateRequest<TAttributes, TRelations>,
+  mutate: <
+    TAttributes,
+    TRelations,
+    TRelationAttributesMap extends Record<keyof TRelations, unknown>,
+  >(
+    mutateRequest: MutateRequest<
+      TAttributes,
+      TRelations,
+      TRelationAttributesMap
+    >,
   ) => Promise<MutateResponse<T>>;
   executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
 }
@@ -15,12 +23,20 @@ export abstract class MutationService<T>
   extends ApiService
   implements IMutationService<T>
 {
-  protected constructor(domain: string, pathname: string) {
+  public constructor(domain: string, pathname: string) {
     super(domain, pathname);
   }
 
-  public mutate<TAttributes, TRelations>(
-    mutateRequest: MutateRequest<TAttributes, TRelations>,
+  public mutate<
+    TAttributes,
+    TRelations,
+    TRelationAttributesMap extends Record<keyof TRelations, unknown>,
+  >(
+    mutateRequest: MutateRequest<
+      TAttributes,
+      TRelations,
+      TRelationAttributesMap
+    >,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
     return this.request<MutateResponse<T>>(

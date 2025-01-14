@@ -24,6 +24,11 @@ interface UserRelations {
   profiles: unknown;
 }
 
+type UserRelationAttributesMap = {
+  applications: ApplicationAttributes;
+  profiles: unknown;
+};
+
 describe("MutationService", () => {
   let mutationService: UserTestService;
   let mockAxiosInstance: Partial<AxiosInstance>;
@@ -40,7 +45,11 @@ describe("MutationService", () => {
 
   describe("Mutate Method", () => {
     it("devrait effectuer une mutation de création simple", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "create",
@@ -71,7 +80,11 @@ describe("MutationService", () => {
     });
 
     it("devrait effectuer une mutation de mise à jour", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "update",
@@ -103,7 +116,11 @@ describe("MutationService", () => {
     });
 
     it("devrait effectuer une mutation avec création de relation", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "create",
@@ -143,7 +160,11 @@ describe("MutationService", () => {
     });
 
     it("devrait effectuer une mutation avec attachement de relation", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "create",
@@ -245,7 +266,11 @@ describe("MutationService", () => {
 
   describe("Error Handling", () => {
     it("devrait gérer les erreurs de mutation", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "create",
@@ -281,7 +306,11 @@ describe("MutationService", () => {
     });
 
     it("devrait contenir l'erreur originale dans ApiServiceError", async () => {
-      const mutateRequest: MutateRequest<UserAttributes, UserRelations> = {
+      const mutateRequest: MutateRequest<
+        UserAttributes,
+        UserRelations,
+        UserRelationAttributesMap
+      > = {
         mutate: [
           {
             operation: "create",
