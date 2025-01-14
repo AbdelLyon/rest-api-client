@@ -30,4 +30,15 @@ export type {
 export type {
   MutateRequest,
   OperationType,
+  AttachRelation,
+  BaseMutationOperation,
+  CreateOperation,
+  CreateRelation,
+  DetachRelation,
+  MutateResponse,
+  MutationOperation,
+  RelationOperation,
+  SyncRelation,
+  ToggleRelation,
+  UpdateOperation,
 } from "@/rest-api/interfaces/mutate";
