@@ -1,4 +1,4 @@
-// Types de base pour les opérations
+// Types de base
 export type OperationType =
   | "create"
   | "update"
@@ -7,15 +7,31 @@ export type OperationType =
   | "sync"
   | "toggle";
 
-// Types de base pour les relations
+// Relations de base (sans attributs)
 export interface AttachRelation {
   operation: "attach";
-  key: number;
+  key: string | number;
 }
 
 export interface DetachRelation {
   operation: "detach";
-  key: number;
+  key: string | number;
+}
+
+// Relations avec attributs
+export interface SyncRelation<TRelationAttributes> {
+  operation: "sync";
+  without_detaching?: boolean;
+  key: string | number;
+  attributes?: TRelationAttributes;
+  pivot?: Record<string, string | number>;
+}
+
+export interface ToggleRelation<TRelationAttributes> {
+  operation: "toggle";
+  key: string | number;
+  attributes?: TRelationAttributes;
+  pivot?: Record<string, string | number>;
 }
 
 export interface CreateRelation<
@@ -36,21 +52,7 @@ export interface CreateRelation<
   >;
 }
 
-export interface SyncRelation<TRelationAttributes> {
-  operation: "sync";
-  without_detaching?: boolean;
-  key: number;
-  attributes?: TRelationAttributes;
-  pivot?: Record<string, string | number>;
-}
-
-export interface ToggleRelation<TRelationAttributes> {
-  operation: "toggle";
-  key: number;
-  attributes?: TRelationAttributes;
-  pivot?: Record<string, string | number>;
-}
-
+// Type d'opération de relation
 export type RelationOperation<
   TAttributes,
   TRelations,
@@ -62,7 +64,7 @@ export type RelationOperation<
   | SyncRelation<TRelationAttributesMap[keyof TRelations]>
   | ToggleRelation<TRelationAttributesMap[keyof TRelations]>;
 
-// Opérations principales
+// Opérations de mutation
 export interface BaseMutationOperation<
   TAttributes,
   TRelations,
@@ -102,9 +104,10 @@ export interface UpdateOperation<
     TRelationAttributesMap
   > {
   operation: "update";
-  key: number;
+  key: string | number;
 }
 
+// Types d'opération de mutation
 export type MutationOperation<
   TAttributes,
   TRelations,
@@ -113,6 +116,7 @@ export type MutationOperation<
   | CreateOperation<TAttributes, TRelations, TRelationAttributesMap>
   | UpdateOperation<TAttributes, TRelations, TRelationAttributesMap>;
 
+// Types de requête et réponse
 export interface MutateRequest<
   TAttributes,
   TRelations,

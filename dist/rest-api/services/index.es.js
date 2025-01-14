@@ -1,6 +1,6 @@
 import h from "axios";
-import n from "axios-retry";
-var l = Object.defineProperty, d = (r, e, t) => e in r ? l(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, i = (r, e, t) => d(r, typeof e != "symbol" ? e + "" : e, t);
+import o from "axios-retry";
+var l = Object.defineProperty, d = (s, e, t) => e in s ? l(s, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : s[e] = t, i = (s, e, t) => d(s, typeof e != "symbol" ? e + "" : e, t);
 class m {
   constructor(e, t) {
     i(this, "axiosInstance"), i(this, "domain"), i(this, "baseUrl"), i(this, "MAX_RETRIES", 3), this.domain = e, this.baseUrl = t, this.axiosInstance = this.createAxiosInstance(), this.setupInterceptors(), this.configureRetry();
@@ -29,15 +29,15 @@ class m {
     );
   }
   configureRetry() {
-    n(this.axiosInstance, {
+    o(this.axiosInstance, {
       retries: this.MAX_RETRIES,
-      retryDelay: n.exponentialDelay,
+      retryDelay: o.exponentialDelay,
       retryCondition: this.isRetryableError
     });
   }
   isRetryableError(e) {
     var t;
-    return n.isNetworkOrIdempotentRequestError(e) || ((t = e.response) == null ? void 0 : t.status) === 429;
+    return o.isNetworkOrIdempotentRequestError(e) || ((t = e.response) == null ? void 0 : t.status) === 429;
   }
   handleErrorResponse(e) {
     return Promise.reject(e);
@@ -46,13 +46,13 @@ class m {
     this.axiosInstance = e;
   }
 }
-var I = Object.defineProperty, x = (r, e, t) => e in r ? I(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, a = (r, e, t) => x(r, typeof e != "symbol" ? e + "" : e, t);
+var I = Object.defineProperty, x = (s, e, t) => e in s ? I(s, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : s[e] = t, a = (s, e, t) => x(s, typeof e != "symbol" ? e + "" : e, t);
 class c extends Error {
   constructor(e, t) {
     super("API Service Request Failed"), this.originalError = e, this.requestConfig = t, this.name = "ApiServiceError";
   }
 }
-class u extends m {
+class p extends m {
   constructor(e, t) {
     super(e, t), this.domain = e, this.pathname = t, a(this, "DEFAULT_REQUEST_OPTIONS", {
       timeout: 1e4,
@@ -60,8 +60,8 @@ class u extends m {
         "Content-Type": "application/json",
         Accept: "application/json"
       }
-    }), a(this, "successInterceptor", (s) => s), a(this, "errorInterceptor", (s) => {
-      throw this.logError(s), new c(s, s.config || {});
+    }), a(this, "successInterceptor", (r) => r), a(this, "errorInterceptor", (r) => {
+      throw this.logError(r), new c(r, r.config || {});
     }), this.setupApiInterceptors();
   }
   setupApiInterceptors() {
@@ -71,38 +71,38 @@ class u extends m {
     );
   }
   logError(e) {
-    var t, s, o, p;
+    var t, r, n, u;
     console.error("API Request Error", {
       url: (t = e.config) == null ? void 0 : t.url,
-      method: (s = e.config) == null ? void 0 : s.method,
-      status: (o = e.response) == null ? void 0 : o.status,
-      data: (p = e.response) == null ? void 0 : p.data,
+      method: (r = e.config) == null ? void 0 : r.method,
+      status: (n = e.response) == null ? void 0 : n.status,
+      data: (u = e.response) == null ? void 0 : u.data,
       message: e.message
     });
   }
   async request(e, t = {}) {
     try {
-      const s = {
+      const r = {
         ...this.DEFAULT_REQUEST_OPTIONS,
         ...e,
         ...t
       };
       return (await this.axiosInstance.request(
-        s
+        r
       )).data;
-    } catch (s) {
-      throw s instanceof c ? s : new c(s, e);
+    } catch (r) {
+      throw r instanceof c ? r : new c(r, e);
     }
   }
   _setAxiosInstanceForTesting(e) {
     this.axiosInstance = e;
   }
 }
-class _ extends u {
+class R extends p {
   constructor(e, t) {
     super(e, t);
   }
-  search(e, t = {}) {
+  searchRequest(e, t = {}) {
     return this.request(
       {
         method: "POST",
@@ -112,8 +112,14 @@ class _ extends u {
       t
     );
   }
+  async search(e, t = {}) {
+    return (await this.searchRequest(e, t)).data;
+  }
+  searchPaginate(e, t = {}) {
+    return this.searchRequest(e, t);
+  }
 }
-class A extends u {
+class _ extends p {
   constructor(e, t) {
     super(e, t);
   }
@@ -139,8 +145,8 @@ class A extends u {
   }
 }
 export {
-  u as ApiService,
+  p as ApiService,
   m as HttpService,
-  A as MutationService,
-  _ as QueryService
+  _ as MutationService,
+  R as QueryService
 };

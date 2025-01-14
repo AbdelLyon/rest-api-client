@@ -1,29 +1,29 @@
 export type OperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 export interface AttachRelation {
     operation: "attach";
-    key: number;
+    key: string | number;
 }
 export interface DetachRelation {
     operation: "detach";
-    key: number;
-}
-export interface CreateRelation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
-    operation: "create";
-    attributes?: TRelationAttributesMap[keyof TRelations];
-    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations, TRelationAttributesMap> | Array<RelationOperation<TAttributes, TRelations, TRelationAttributesMap>>>>;
+    key: string | number;
 }
 export interface SyncRelation<TRelationAttributes> {
     operation: "sync";
     without_detaching?: boolean;
-    key: number;
+    key: string | number;
     attributes?: TRelationAttributes;
     pivot?: Record<string, string | number>;
 }
 export interface ToggleRelation<TRelationAttributes> {
     operation: "toggle";
-    key: number;
+    key: string | number;
     attributes?: TRelationAttributes;
     pivot?: Record<string, string | number>;
+}
+export interface CreateRelation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
+    operation: "create";
+    attributes?: TRelationAttributesMap[keyof TRelations];
+    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations, TRelationAttributesMap> | Array<RelationOperation<TAttributes, TRelations, TRelationAttributesMap>>>>;
 }
 export type RelationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> = CreateRelation<TAttributes, TRelations, TRelationAttributesMap> | AttachRelation | DetachRelation | SyncRelation<TRelationAttributesMap[keyof TRelations]> | ToggleRelation<TRelationAttributesMap[keyof TRelations]>;
 export interface BaseMutationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
@@ -35,7 +35,7 @@ export interface CreateOperation<TAttributes, TRelations, TRelationAttributesMap
 }
 export interface UpdateOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> extends BaseMutationOperation<TAttributes, TRelations, TRelationAttributesMap> {
     operation: "update";
-    key: number;
+    key: string | number;
 }
 export type MutationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> = CreateOperation<TAttributes, TRelations, TRelationAttributesMap> | UpdateOperation<TAttributes, TRelations, TRelationAttributesMap>;
 export interface MutateRequest<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {

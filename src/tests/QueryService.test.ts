@@ -68,7 +68,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        const result = await queryService.search(searchRequest);
+        const result = await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -99,7 +99,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -132,7 +132,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -161,7 +161,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -191,7 +191,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -228,7 +228,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        const result = await queryService.search(searchRequest);
+        const result = await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -263,7 +263,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -289,7 +289,7 @@ describe("QueryService", () => {
           data: mockSearchResponse,
         });
 
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
 
         expect(mockAxiosInstance.request).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -309,7 +309,9 @@ describe("QueryService", () => {
 
       (mockAxiosInstance.request as Mock).mockRejectedValue(mockError);
 
-      await expect(queryService.search(searchRequest)).rejects.toThrow();
+      await expect(
+        queryService.searchPaginate(searchRequest),
+      ).rejects.toThrow();
     });
 
     it("devrait contenir l'erreur originale dans ApiServiceError", async () => {
@@ -319,7 +321,7 @@ describe("QueryService", () => {
       (mockAxiosInstance.request as Mock).mockRejectedValue(mockError);
 
       try {
-        await queryService.search(searchRequest);
+        await queryService.searchPaginate(searchRequest);
       } catch (error: unknown) {
         expect((error as { name: string }).name).toBe("ApiServiceError");
         expect((error as { originalError: Error }).originalError).toBe(
