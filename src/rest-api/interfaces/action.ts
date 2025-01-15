@@ -20,10 +20,6 @@ export interface ActionRequest {
   params: paramsAction;
 }
 
-export interface DeleteRequest {
-  resources: Array<string> | Array<number>;
-}
-
 export interface ActionResponse {
   data: {
     impacted: number;

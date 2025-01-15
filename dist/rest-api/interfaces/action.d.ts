@@ -16,9 +16,6 @@ export interface ActionRequest {
     action: string;
     params: paramsAction;
 }
-export interface DeleteRequest {
-    resources: Array<string> | Array<number>;
-}
 export interface ActionResponse {
     data: {
         impacted: number;

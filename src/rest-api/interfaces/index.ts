@@ -2,7 +2,6 @@ export type {
   ActionField,
   ActionFilter,
   ActionRequest,
-  DeleteRequest,
   ActionResponse,
 } from "@/rest-api/interfaces/action";
 export type {
@@ -54,3 +53,8 @@ export type {
   DetailsResponse,
   DetailsValidationRules,
 } from "@/rest-api/interfaces/details";
+
+export type {
+  DeleteRequest,
+  DeleteResponse,
+} from "@/rest-api/interfaces/delete";

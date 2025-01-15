@@ -1,58 +1,88 @@
-import { useInfiniteQuery as m, useMutation as p, useQuery as f } from "@tanstack/react-query";
-function q({
+import { useInfiniteQuery as f, useMutation as i, useQuery as p } from "@tanstack/react-query";
+function F({
   queryKey: e,
-  requestFn: n,
-  initialRequest: r,
-  options: i
+  requestFn: t,
+  initialRequest: n,
+  options: a
 }) {
-  return m({
+  return f({
     queryKey: e,
-    queryFn: ({ pageParam: t }) => n(t),
-    initialPageParam: r,
-    getNextPageParam: (t, o, u) => {
-      var c;
-      const a = ((c = t.meta) == null ? void 0 : c.perPage) ?? 10, s = u.page ?? 1;
-      if (!(t.data.length < a))
+    queryFn: ({ pageParam: u }) => t(u),
+    initialPageParam: n,
+    getNextPageParam: (u, s, r) => {
+      var m;
+      const o = ((m = u.meta) == null ? void 0 : m.perPage) ?? 10, c = r.page ?? 1;
+      if (!(u.data.length < o))
         return {
-          ...u,
-          page: s + 1
+          ...r,
+          page: c + 1
         };
     },
-    ...i
+    ...a
   });
 }
-function M({
+function q({
   requestFn: e,
-  options: n
+  options: t
 }) {
   return {
-    ...p({
-      mutationFn: (t) => e(t),
-      ...n
+    ...i({
+      mutationFn: (u) => e(u),
+      ...t
     }),
-    createMutateRequest: (t, o, u, a) => ({
+    createMutateRequest: (u, s, r, o) => ({
       mutate: [{
-        operation: t,
-        attributes: o,
-        ...u !== void 0 && { key: u },
-        ...a && { relations: a }
+        operation: u,
+        attributes: s,
+        ...r !== void 0 && { key: r },
+        ...o && { relations: o }
       }]
     })
   };
 }
-function P({
+function d({
   queryKey: e,
-  requestFn: n,
-  options: r
+  requestFn: t,
+  options: n
 }) {
-  return f({
+  return p({
     queryKey: e,
-    queryFn: n,
-    ...r
+    queryFn: t,
+    ...n
+  });
+}
+function l({
+  service: e,
+  options: t
+}) {
+  return i({
+    mutationFn: (n) => e.delete(n),
+    ...t
+  });
+}
+function D({
+  service: e,
+  options: t
+}) {
+  return i({
+    mutationFn: (n) => e.forceDelete(n),
+    ...t
+  });
+}
+function M({
+  service: e,
+  options: t
+}) {
+  return i({
+    mutationFn: (n) => e.restore(n),
+    ...t
   });
 }
 export {
-  P as useDetails,
-  q as useInfiniteRequest,
-  M as useMutate
+  l as useDelete,
+  d as useDetails,
+  D as useForceDelete,
+  F as useInfiniteRequest,
+  q as useMutate,
+  M as useRestore
 };
