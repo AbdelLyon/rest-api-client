@@ -1,24 +1,46 @@
-import { useInfiniteQuery as f, useMutation as i, useQuery as p } from "@tanstack/react-query";
-function F({
+import { useInfiniteQuery as m, useSuspenseInfiniteQuery as g, useMutation as s, useQuery as p } from "@tanstack/react-query";
+function P({
   queryKey: e,
   requestFn: t,
-  initialRequest: n,
-  options: a
+  initialRequest: r,
+  options: o
 }) {
-  return f({
+  return m({
     queryKey: e,
-    queryFn: ({ pageParam: u }) => t(u),
-    initialPageParam: n,
-    getNextPageParam: (u, s, r) => {
-      var m;
-      const o = ((m = u.meta) == null ? void 0 : m.perPage) ?? 10, c = r.page ?? 1;
-      if (!(u.data.length < o))
+    queryFn: ({ pageParam: n }) => t(n),
+    initialPageParam: r,
+    getNextPageParam: (n, f, u) => {
+      var a;
+      const i = ((a = n.meta) == null ? void 0 : a.perPage) ?? 10, c = u.page ?? 1;
+      if (!(n.data.length < i))
         return {
-          ...r,
+          ...u,
           page: c + 1
         };
     },
-    ...a
+    ...o
+  });
+}
+function d({
+  queryKey: e,
+  requestFn: t,
+  initialRequest: r,
+  options: o
+}) {
+  return g({
+    queryKey: e,
+    queryFn: ({ pageParam: n }) => t(n),
+    initialPageParam: r,
+    getNextPageParam: (n, f, u) => {
+      var a;
+      const i = ((a = n.meta) == null ? void 0 : a.perPage) ?? 10, c = u.page ?? 1;
+      if (!(n.data.length < i))
+        return {
+          ...u,
+          page: c + 1
+        };
+    },
+    ...o
   });
 }
 function q({
@@ -26,37 +48,46 @@ function q({
   options: t
 }) {
   return {
-    ...i({
-      mutationFn: (u) => e(u),
+    ...s({
+      mutationFn: (n) => e(n),
       ...t
     }),
-    createMutateRequest: (u, s, r, o) => ({
+    createMutateRequest: (n, f, u, i) => ({
       mutate: [{
-        operation: u,
-        attributes: s,
-        ...r !== void 0 && { key: r },
-        ...o && { relations: o }
+        operation: n,
+        attributes: f,
+        ...u !== void 0 && { key: u },
+        ...i && { relations: i }
       }]
     })
   };
 }
-function d({
+function y({
   queryKey: e,
   requestFn: t,
-  options: n
+  options: r
 }) {
   return p({
     queryKey: e,
     queryFn: t,
-    ...n
+    ...r
+  });
+}
+function h({
+  service: e,
+  options: t
+}) {
+  return s({
+    mutationFn: (r) => e.delete(r),
+    ...t
   });
 }
 function l({
   service: e,
   options: t
 }) {
-  return i({
-    mutationFn: (n) => e.delete(n),
+  return s({
+    mutationFn: (r) => e.forceDelete(r),
     ...t
   });
 }
@@ -64,25 +95,17 @@ function D({
   service: e,
   options: t
 }) {
-  return i({
-    mutationFn: (n) => e.forceDelete(n),
-    ...t
-  });
-}
-function M({
-  service: e,
-  options: t
-}) {
-  return i({
-    mutationFn: (n) => e.restore(n),
+  return s({
+    mutationFn: (r) => e.restore(r),
     ...t
   });
 }
 export {
-  l as useDelete,
-  d as useDetails,
-  D as useForceDelete,
-  F as useInfiniteRequest,
+  h as useDelete,
+  y as useDetails,
+  l as useForceDelete,
+  P as useInfiniteSearch,
   q as useMutate,
-  M as useRestore
+  D as useRestore,
+  d as useSuspenseInfiniteSearch
 };

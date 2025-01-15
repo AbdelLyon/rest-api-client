@@ -1,14 +1,15 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+
 import type {
   QueryKey,
-  UseInfiniteQueryOptions,
-  UseInfiniteQueryResult,
+  UseSuspenseInfiniteQueryOptions,
+  UseSuspenseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import type { SearchResponse } from "../interfaces/search";
 import type { PaginationParams } from "../interfaces/common";
 
-export type InfiniteQueryOptions<TReq, TRes> = Omit<
-  UseInfiniteQueryOptions<
+export type SuspenseInfiniteQueryOptions<TReq, TRes> = Omit<
+  UseSuspenseInfiniteQueryOptions<
     SearchResponse<TRes>,
     Error,
     SearchResponse<TRes>,
@@ -19,23 +20,26 @@ export type InfiniteQueryOptions<TReq, TRes> = Omit<
   "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
 >;
 
-export interface UseInfiniteRequestParams<TReq extends PaginationParams, TRes> {
+export interface UseSuespenseInfiniteRequestParams<
+  TReq extends PaginationParams,
+  TRes,
+> {
   queryKey: QueryKey;
   requestFn: (request: TReq) => Promise<SearchResponse<TRes>>;
   initialRequest: TReq;
-  options?: UseInfiniteRequestParams<TReq, TRes>;
+  options?: SuspenseInfiniteQueryOptions<TReq, TRes>;
 }
 
-export function useInfiniteSearch<TReq extends PaginationParams, TRes>({
+export function useSuspenseInfiniteSearch<TReq extends PaginationParams, TRes>({
   queryKey,
   requestFn,
   initialRequest,
   options,
-}: UseInfiniteRequestParams<TReq, TRes>): UseInfiniteQueryResult<
-  SearchResponse<TRes>,
-  Error
-> {
-  return useInfiniteQuery({
+}: UseSuespenseInfiniteRequestParams<
+  TReq,
+  TRes
+>): UseSuspenseInfiniteQueryResult<SearchResponse<TRes>, Error> {
+  return useSuspenseInfiniteQuery({
     queryKey,
     queryFn: ({ pageParam }) => {
       return requestFn(pageParam as TReq);
