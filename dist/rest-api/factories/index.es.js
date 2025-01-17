@@ -1,6 +1,6 @@
 import { I as p, a as q, T as a } from "../../tokens-DbFzGZEv.js";
 import { Container as s } from "../di/index.es.js";
-import { Mutation as h, ApiRequest as l } from "../services/index.es.js";
+import { M as h, A as l } from "../../ApiRequest-D7o1Yy01.js";
 var R = Object.defineProperty, I = Object.getOwnPropertyDescriptor, v = (t, e, r, c) => {
   for (var i = c > 1 ? void 0 : c ? I(e, r) : e, u = t.length - 1, n; u >= 0; u--)
     (n = t[u]) && (i = (c ? n(e, r, i) : n(i)) || i);
@@ -56,7 +56,7 @@ class f {
     return s.reset(), s.bind(a.IHttpConfig).toInstance(e), s.bind(a.IApiRequest).to(l), s.resolve(a.IApiRequest);
   }
 }
-class P {
+class M {
   static createApiRequest(e) {
     return f.create(e);
   }
@@ -79,5 +79,5 @@ export {
   f as ApiRequesteFactory,
   A as MutationFactory,
   y as QueryFactory,
-  P as ServiceFactory
+  M as ServiceFactory
 };
