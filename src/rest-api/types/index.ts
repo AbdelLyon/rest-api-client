@@ -3,7 +3,7 @@ export type {
   ActionFilter,
   ActionRequest,
   ActionResponse,
-} from "@/rest-api/interfaces/action";
+} from "@/rest-api/types/action";
 export type {
   Aggregate,
   AggregateType,
@@ -24,7 +24,7 @@ export type {
   Sort,
   SortDirection,
   SearchResponse,
-} from "@/rest-api/interfaces/search";
+} from "@/rest-api/types/search";
 
 export type {
   MutateRequest,
@@ -40,7 +40,7 @@ export type {
   SyncRelation,
   ToggleRelation,
   UpdateOperation,
-} from "@/rest-api/interfaces/mutate";
+} from "@/rest-api/types/mutate";
 
 export type {
   DetailsAction,
@@ -52,9 +52,6 @@ export type {
   DetailsResource,
   DetailsResponse,
   DetailsValidationRules,
-} from "@/rest-api/interfaces/details";
+} from "@/rest-api/types/details";
 
-export type {
-  DeleteRequest,
-  DeleteResponse,
-} from "@/rest-api/interfaces/delete";
+export type { DeleteRequest, DeleteResponse } from "@/rest-api/types/delete";

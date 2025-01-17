@@ -1,5 +1,5 @@
+import { DetailsResponse } from '../types/details';
 import { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { DetailsResponse } from '../interfaces/details';
 interface UseDetailsParams<TRes> {
     queryKey: Array<string>;
     requestFn: () => Promise<DetailsResponse>;

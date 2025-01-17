@@ -1,4 +1,3 @@
-export { HttpService } from './HttpService';
-export { ApiService } from './ApiService';
-export { QueryService, type IQueryService, } from './QueryService';
-export { MutationService, type IMutationService, } from './MutationService';
+export type { IApiRequest, IHttpConfig, IMutation, IQuery } from './inerfaces';
+export { MutationService } from './Mutation';
+export { ApiRequestService } from './ApiRequest';

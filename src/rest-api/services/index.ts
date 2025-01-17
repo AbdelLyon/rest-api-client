@@ -1,10 +1,4 @@
-export { HttpService } from "@/rest-api/services/HttpService";
-export { ApiService } from "@/rest-api/services/ApiService";
-export {
-  QueryService,
-  type IQueryService,
-} from "@/rest-api/services/QueryService";
-export {
-  MutationService,
-  type IMutationService,
-} from "@/rest-api/services/MutationService";
+// Export des interfaces
+export type { IApiRequest, IHttpConfig, IMutation, IQuery } from "./inerfaces";
+export { MutationService } from "./Mutation";
+export { ApiRequestService } from "./ApiRequest";

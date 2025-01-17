@@ -1,15 +1,15 @@
 import { useMutation } from "@tanstack/react-query";
 import type {
-  UseMutationOptions,
-  UseMutationResult,
-} from "@tanstack/react-query";
-import type {
   MutateRequest,
   MutateResponse,
   MutationOperation,
   OperationType,
   RelationOperation,
-} from "../interfaces/mutate";
+} from "../types/mutate";
+import type {
+  UseMutationOptions,
+  UseMutationResult,
+} from "@tanstack/react-query";
 
 type RelationsMap<
   TAttributes,

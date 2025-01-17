@@ -1,5 +1,5 @@
+import { MutateRequest, MutateResponse, OperationType, RelationOperation } from '../types/mutate';
 import { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-import { MutateRequest, MutateResponse, OperationType, RelationOperation } from '../interfaces/mutate';
 type RelationsMap<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> = Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations, TRelationAttributesMap> | Array<RelationOperation<TAttributes, TRelations, TRelationAttributesMap>>>>;
 interface UseMutateRequestParams<TAttributes, TRelations, TRes, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
     requestFn: (request: MutateRequest<TAttributes, TRelations, TRelationAttributesMap>) => Promise<MutateResponse<TRes>>;

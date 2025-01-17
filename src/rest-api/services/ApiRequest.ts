@@ -1,22 +1,22 @@
-import { HttpService } from "./HttpService";
-import type {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
+import "reflect-metadata";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import type { IApiRequest, IHttpConfig } from "./inerfaces";
+import { Inject, Injectable } from "@/rest-api/di/decorators";
+import { TOKENS } from "@/rest-api/di/tokens";
+import { Container } from "@/rest-api/di/Container";
 
-export class ApiServiceError extends Error {
+export class ApiRequestError extends Error {
   constructor(
     public originalError: AxiosError,
     public requestConfig: AxiosRequestConfig,
   ) {
     super("API Service Request Failed");
-    this.name = "ApiServiceError";
+    this.name = "ApiRequestError";
   }
 }
 
-export abstract class ApiService extends HttpService {
+@Injectable()
+export class ApiRequestService implements IApiRequest {
   protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig> = {
     timeout: 10000,
     headers: {
@@ -25,13 +25,17 @@ export abstract class ApiService extends HttpService {
     },
   };
 
-  constructor(protected domain: string, protected pathname: string) {
-    super(domain, pathname);
-    this.setupApiInterceptors();
+  constructor(
+    @Inject(TOKENS.IHttpConfig) private readonly httpConfig: IHttpConfig,
+  ) {
+    if (this.httpConfig === null) {
+      this.setupApiInterceptors();
+    }
   }
 
   private setupApiInterceptors(): void {
-    this.axiosInstance.interceptors.response.use(
+    const axiosInstance = this.httpConfig.getAxiosInstance();
+    axiosInstance.interceptors.response.use(
       this.successInterceptor,
       this.errorInterceptor,
     );
@@ -43,7 +47,7 @@ export abstract class ApiService extends HttpService {
 
   private errorInterceptor = (error: AxiosError): Promise<never> => {
     this.logError(error);
-    throw new ApiServiceError(error, error.config || {});
+    throw new ApiRequestError(error, error.config || {});
   };
 
   private logError(error: AxiosError): void {
@@ -56,7 +60,7 @@ export abstract class ApiService extends HttpService {
     });
   }
 
-  protected async request<TResponse>(
+  public async request<TResponse>(
     config: AxiosRequestConfig,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<TResponse> {
@@ -67,19 +71,17 @@ export abstract class ApiService extends HttpService {
         ...options,
       };
 
-      const response = await this.axiosInstance.request<TResponse>(
-        mergedConfig,
-      );
+      const response = await this.httpConfig
+        .getAxiosInstance()
+        .request<TResponse>(mergedConfig);
       return response.data;
     } catch (error) {
-      if (error instanceof ApiServiceError) {
+      if (error instanceof ApiRequestError) {
         throw error;
       }
-      throw new ApiServiceError(error as AxiosError, config);
+      throw new ApiRequestError(error as AxiosError, config);
     }
   }
-
-  _setAxiosInstanceForTesting(instance: AxiosInstance): void {
-    this.axiosInstance = instance;
-  }
 }
+
+Container.bind<IApiRequest>(TOKENS.IApiRequest).to(ApiRequestService);

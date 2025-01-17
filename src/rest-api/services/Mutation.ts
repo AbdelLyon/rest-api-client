@@ -1,35 +1,17 @@
-// MutationService.ts
-import { ApiService } from "./ApiService";
-import type { DeleteRequest, DeleteResponse } from "../interfaces/delete";
-import type { ActionRequest, ActionResponse } from "../interfaces/action";
-import type { MutateRequest, MutateResponse } from "../interfaces/mutate";
+import "reflect-metadata";
 import type { AxiosRequestConfig } from "axios";
+import type { DeleteRequest, DeleteResponse } from "../types/delete";
+import type { ActionRequest, ActionResponse } from "../types/action";
+import type { MutateRequest, MutateResponse } from "../types/mutate";
+import type { IApiRequest, IMutation } from "./inerfaces";
+import { Inject, Injectable } from "@/rest-api/di/decorators";
+import { TOKENS } from "@/rest-api/di/tokens";
 
-export interface IMutationService<T> {
-  mutate: <
-    TAttributes,
-    TRelations,
-    TRelationAttributesMap extends Record<keyof TRelations, unknown>,
-  >(
-    mutateRequest: MutateRequest<
-      TAttributes,
-      TRelations,
-      TRelationAttributesMap
-    >,
-  ) => Promise<MutateResponse<T>>;
-  executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
-  delete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-  forceDelete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-  restore: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-}
-
-export abstract class MutationService<T>
-  extends ApiService
-  implements IMutationService<T>
-{
-  public constructor(domain: string, pathname: string) {
-    super(domain, pathname);
-  }
+@Injectable()
+export class MutationService<T> implements IMutation<T> {
+  constructor(
+    @Inject(TOKENS.IApiRequest) private readonly apiRequest: IApiRequest,
+  ) {}
 
   public mutate<
     TAttributes,
@@ -43,7 +25,7 @@ export abstract class MutationService<T>
     >,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
-    return this.request<MutateResponse<T>>(
+    return this.apiRequest.request<MutateResponse<T>>(
       {
         method: "POST",
         url: "/mutate",
@@ -57,7 +39,7 @@ export abstract class MutationService<T>
     actionRequest: ActionRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<ActionResponse> {
-    return this.request<ActionResponse>(
+    return this.apiRequest.request<ActionResponse>(
       {
         method: "POST",
         url: `/actions/${actionRequest.action}`,
@@ -71,7 +53,7 @@ export abstract class MutationService<T>
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.request<DeleteResponse<T>>(
+    return this.apiRequest.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: "",
@@ -85,7 +67,7 @@ export abstract class MutationService<T>
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.request<DeleteResponse<T>>(
+    return this.apiRequest.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: "/force",
@@ -99,7 +81,7 @@ export abstract class MutationService<T>
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.request<DeleteResponse<T>>(
+    return this.apiRequest.request<DeleteResponse<T>>(
       {
         method: "POST",
         url: "/restore",

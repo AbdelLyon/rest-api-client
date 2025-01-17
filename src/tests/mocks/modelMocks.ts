@@ -1,6 +1,5 @@
 // src/tests/mocks/modelMocks.ts
 import type { Role, RoleName, User } from "@/rest-api/models/User";
-import type { SearchResponse } from "@/rest-api/interfaces/search";
 import type {
   Application,
   MediaApplication,
@@ -9,6 +8,7 @@ import type {
 } from "@/rest-api/models/Application";
 import type { Client } from "@/rest-api/models/Client";
 import type { Site } from "@/rest-api/models/Site";
+import type { SearchResponse } from "@/rest-api/types";
 
 interface BaseModelFields {
   id: string;

@@ -1,20 +1,35 @@
-// HttpService.ts
-import axios from "axios";
+import "reflect-metadata";
+import axios, { AxiosError, AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
-import type { AxiosError, AxiosInstance } from "axios";
+import { IHttpConfig } from "./inerfaces";
+import { Injectable } from "@/rest-api/di/decorators";
+import { Container } from "@/rest-api/di/Container";
+import { TOKENS } from "@/rest-api/di/tokens";
 
-export abstract class HttpService {
-  protected axiosInstance: AxiosInstance;
-  protected readonly domain: string;
-  protected readonly baseUrl: string;
-  protected readonly MAX_RETRIES = 3;
+@Injectable()
+export class HttpConfig implements IHttpConfig {
+  private axiosInstance: AxiosInstance;
+  private readonly MAX_RETRIES = 3;
 
-  constructor(domain: string, baseUrl: string) {
-    this.domain = domain;
-    this.baseUrl = baseUrl;
+  constructor(
+    private readonly domain: string,
+    private readonly baseUrl: string,
+  ) {
     this.axiosInstance = this.createAxiosInstance();
     this.setupInterceptors();
     this.configureRetry();
+  }
+
+  public getAxiosInstance(): AxiosInstance {
+    return this.axiosInstance;
+  }
+
+  public setAxiosInstance(instance: AxiosInstance): void {
+    this.axiosInstance = instance;
+  }
+
+  public getFullBaseUrl(): string {
+    return `https://local-${this.domain}-api.xefi-apps.fr/api/${this.baseUrl}`;
   }
 
   private createAxiosInstance(): AxiosInstance {
@@ -29,12 +44,7 @@ export abstract class HttpService {
     });
   }
 
-  protected getFullBaseUrl(): string {
-    return `https://local-${this.domain}-api.xefi-apps.fr/api/${this.baseUrl}`;
-  }
-
   private setupInterceptors(): void {
-    // Ajouter des intercepteurs si nécessaire
     this.axiosInstance.interceptors.request.use(
       (config) => config,
       (error) => Promise.reject(error),
@@ -64,8 +74,6 @@ export abstract class HttpService {
   private handleErrorResponse(error: AxiosError): Promise<never> {
     return Promise.reject(error);
   }
-
-  protected setAxiosInstance(instance: AxiosInstance): void {
-    this.axiosInstance = instance;
-  }
 }
+
+Container.bind<IHttpConfig>(TOKENS.IHttpConfig).to(HttpConfig);

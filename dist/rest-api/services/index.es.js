@@ -1,191 +1,125 @@
-import p from "axios";
-import n from "axios-retry";
-var l = Object.defineProperty, d = (r, e, t) => e in r ? l(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, i = (r, e, t) => d(r, typeof e != "symbol" ? e + "" : e, t);
-class m {
-  constructor(e, t) {
-    i(this, "axiosInstance"), i(this, "domain"), i(this, "baseUrl"), i(this, "MAX_RETRIES", 3), this.domain = e, this.baseUrl = t, this.axiosInstance = this.createAxiosInstance(), this.setupInterceptors(), this.configureRetry();
+import { Injectable as l, Inject as f, TOKENS as p, Container as m } from "../di/index.es.js";
+var d = Object.defineProperty, q = Object.getOwnPropertyDescriptor, E = (t, e, r, o) => {
+  for (var s = o > 1 ? void 0 : o ? q(e, r) : e, i = t.length - 1, n; i >= 0; i--)
+    (n = t[i]) && (s = (o ? n(e, r, s) : n(s)) || s);
+  return o && s && d(e, r, s), s;
+}, I = (t, e) => (r, o) => e(r, o, t);
+let h = class {
+  constructor(t) {
+    this.apiRequest = t;
   }
-  createAxiosInstance() {
-    return p.create({
-      baseURL: this.getFullBaseUrl(),
-      timeout: 1e4,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
+  mutate(t, e = {}) {
+    return this.apiRequest.request(
+      {
+        method: "POST",
+        url: "/mutate",
+        data: t
       },
-      withCredentials: !0
-    });
-  }
-  getFullBaseUrl() {
-    return `https://local-${this.domain}-api.xefi-apps.fr/api/${this.baseUrl}`;
-  }
-  setupInterceptors() {
-    this.axiosInstance.interceptors.request.use(
-      (e) => e,
-      (e) => Promise.reject(e)
-    ), this.axiosInstance.interceptors.response.use(
-      (e) => e,
-      this.handleErrorResponse.bind(this)
+      e
     );
   }
-  configureRetry() {
-    n(this.axiosInstance, {
-      retries: this.MAX_RETRIES,
-      retryDelay: n.exponentialDelay,
-      retryCondition: this.isRetryableError
-    });
+  executeAction(t, e = {}) {
+    return this.apiRequest.request(
+      {
+        method: "POST",
+        url: `/actions/${t.action}`,
+        data: t.params
+      },
+      e
+    );
   }
-  isRetryableError(e) {
-    var t;
-    return n.isNetworkOrIdempotentRequestError(e) || ((t = e.response) == null ? void 0 : t.status) === 429;
+  delete(t, e = {}) {
+    return this.apiRequest.request(
+      {
+        method: "DELETE",
+        url: "",
+        data: t
+      },
+      e
+    );
   }
-  handleErrorResponse(e) {
-    return Promise.reject(e);
+  forceDelete(t, e = {}) {
+    return this.apiRequest.request(
+      {
+        method: "DELETE",
+        url: "/force",
+        data: t
+      },
+      e
+    );
   }
-  setAxiosInstance(e) {
-    this.axiosInstance = e;
+  restore(t, e = {}) {
+    return this.apiRequest.request(
+      {
+        method: "POST",
+        url: "/restore",
+        data: t
+      },
+      e
+    );
+  }
+};
+h = E([
+  l(),
+  I(0, f(p.IApiRequest))
+], h);
+var _ = Object.defineProperty, g = Object.getOwnPropertyDescriptor, v = (t, e, r) => e in t ? _(t, e, { enumerable: !0, configurable: !0, writable: !0, value: r }) : t[e] = r, P = (t, e, r, o) => {
+  for (var s = o > 1 ? void 0 : o ? g(e, r) : e, i = t.length - 1, n; i >= 0; i--)
+    (n = t[i]) && (s = (o ? n(e, r, s) : n(s)) || s);
+  return o && s && _(e, r, s), s;
+}, O = (t, e) => (r, o) => e(r, o, t), a = (t, e, r) => v(t, typeof e != "symbol" ? e + "" : e, r);
+class u extends Error {
+  constructor(e, r) {
+    super("API Service Request Failed"), this.originalError = e, this.requestConfig = r, this.name = "ApiRequestError";
   }
 }
-var E = Object.defineProperty, I = (r, e, t) => e in r ? E(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t, a = (r, e, t) => I(r, typeof e != "symbol" ? e + "" : e, t);
-class c extends Error {
-  constructor(e, t) {
-    super("API Service Request Failed"), this.originalError = e, this.requestConfig = t, this.name = "ApiServiceError";
-  }
-}
-class h extends m {
-  constructor(e, t) {
-    super(e, t), this.domain = e, this.pathname = t, a(this, "DEFAULT_REQUEST_OPTIONS", {
+let c = class {
+  constructor(t) {
+    this.httpConfig = t, a(this, "DEFAULT_REQUEST_OPTIONS", {
       timeout: 1e4,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json"
       }
-    }), a(this, "successInterceptor", (s) => s), a(this, "errorInterceptor", (s) => {
-      throw this.logError(s), new c(s, s.config || {});
-    }), this.setupApiInterceptors();
+    }), a(this, "successInterceptor", (e) => e), a(this, "errorInterceptor", (e) => {
+      throw this.logError(e), new u(e, e.config || {});
+    }), this.httpConfig === null && this.setupApiInterceptors();
   }
   setupApiInterceptors() {
-    this.axiosInstance.interceptors.response.use(
+    this.httpConfig.getAxiosInstance().interceptors.response.use(
       this.successInterceptor,
       this.errorInterceptor
     );
   }
-  logError(e) {
-    var t, s, o, u;
+  logError(t) {
+    var e, r, o, s;
     console.error("API Request Error", {
-      url: (t = e.config) == null ? void 0 : t.url,
-      method: (s = e.config) == null ? void 0 : s.method,
-      status: (o = e.response) == null ? void 0 : o.status,
-      data: (u = e.response) == null ? void 0 : u.data,
-      message: e.message
+      url: (e = t.config) == null ? void 0 : e.url,
+      method: (r = t.config) == null ? void 0 : r.method,
+      status: (o = t.response) == null ? void 0 : o.status,
+      data: (s = t.response) == null ? void 0 : s.data,
+      message: t.message
     });
   }
-  async request(e, t = {}) {
+  async request(t, e = {}) {
     try {
-      const s = {
+      const r = {
         ...this.DEFAULT_REQUEST_OPTIONS,
-        ...e,
-        ...t
+        ...t,
+        ...e
       };
-      return (await this.axiosInstance.request(
-        s
-      )).data;
-    } catch (s) {
-      throw s instanceof c ? s : new c(s, e);
+      return (await this.httpConfig.getAxiosInstance().request(r)).data;
+    } catch (r) {
+      throw r instanceof u ? r : new u(r, t);
     }
   }
-  _setAxiosInstanceForTesting(e) {
-    this.axiosInstance = e;
-  }
-}
-class g extends h {
-  constructor(e, t) {
-    super(e, t);
-  }
-  searchRequest(e, t = {}) {
-    return this.request(
-      {
-        method: "POST",
-        url: "/search",
-        data: { search: e }
-      },
-      t
-    );
-  }
-  async search(e, t = {}) {
-    return (await this.searchRequest(e, t)).data;
-  }
-  searchPaginate(e, t = {}) {
-    return this.searchRequest(e, t);
-  }
-  getdetails(e = {}) {
-    return this.request(
-      {
-        method: "GET",
-        url: ""
-      },
-      e
-    );
-  }
-}
-class R extends h {
-  constructor(e, t) {
-    super(e, t);
-  }
-  mutate(e, t = {}) {
-    return this.request(
-      {
-        method: "POST",
-        url: "/mutate",
-        data: e
-      },
-      t
-    );
-  }
-  executeAction(e, t = {}) {
-    return this.request(
-      {
-        method: "POST",
-        url: `/actions/${e.action}`,
-        data: e.params
-      },
-      t
-    );
-  }
-  delete(e, t = {}) {
-    return this.request(
-      {
-        method: "DELETE",
-        url: "",
-        data: e
-      },
-      t
-    );
-  }
-  forceDelete(e, t = {}) {
-    return this.request(
-      {
-        method: "DELETE",
-        url: "/force",
-        data: e
-      },
-      t
-    );
-  }
-  restore(e, t = {}) {
-    return this.request(
-      {
-        method: "POST",
-        url: "/restore",
-        data: e
-      },
-      t
-    );
-  }
-}
+};
+c = P([
+  l(),
+  O(0, f(p.IHttpConfig))
+], c);
+m.bind(p.IApiRequest).to(c);
 export {
-  h as ApiService,
-  m as HttpService,
-  R as MutationService,
-  g as QueryService
+  c as ApiRequestService,
+  h as MutationService
 };

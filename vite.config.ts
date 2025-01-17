@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
 
-const modules = ["hooks", "services", "models", "interfaces"];
+const modules = ["hooks", "services", "models", "types", "factories", "di"];
 
 const entries = {
   ...modules.reduce<Record<string, string>>((acc, module) => {

@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import type { PaginationParams } from "../types/common";
+import type { SearchResponse } from "../types/search";
 import type {
   QueryKey,
   UseInfiniteQueryOptions,
   UseInfiniteQueryResult,
 } from "@tanstack/react-query";
-import type { SearchResponse } from "../interfaces/search";
-import type { PaginationParams } from "../interfaces/common";
 
 export type InfiniteQueryOptions<TReq, TRes> = Omit<
   UseInfiniteQueryOptions<

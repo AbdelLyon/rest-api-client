@@ -44,6 +44,8 @@ export default tseslint.config(
       ],
 
       // TypeScript
+      "@typescript-eslint/no-extraneous-class": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/explicit-function-return-type": [
         "error",
         {
