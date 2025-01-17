@@ -10,7 +10,7 @@ export interface IHttpConfig {
   setAxiosInstance: (instance: AxiosInstance) => void;
 }
 
-export interface IApiRequest {
+export interface IHttp {
   request: <TResponse>(
     config: AxiosRequestConfig,
     options?: Partial<AxiosRequestConfig>,

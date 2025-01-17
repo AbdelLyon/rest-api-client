@@ -1,4 +1,4 @@
-import { IApiRequest, IHttpConfig } from '../services/inerfaces';
+import { IHttp, IHttpConfig } from '../services/inerfaces';
 export declare class ApiRequesteFactory {
-    static create(httpConfig: IHttpConfig): IApiRequest;
+    static create(httpConfig: IHttpConfig): IHttp;
 }

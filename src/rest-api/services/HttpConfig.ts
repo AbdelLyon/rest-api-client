@@ -1,11 +1,10 @@
 import "reflect-metadata";
-import axios, { AxiosError, AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
-import { IHttpConfig } from "./inerfaces";
-import { Injectable } from "@/rest-api/di/decorators";
+import axios from "axios";
+import type { IHttpConfig } from "./inerfaces";
+import type { AxiosError, AxiosInstance } from "axios";
 
-@Injectable()
-export class HttpConfig implements IHttpConfig {
+export abstract class HttpConfig implements IHttpConfig {
   private axiosInstance: AxiosInstance;
   private readonly MAX_RETRIES = 3;
 

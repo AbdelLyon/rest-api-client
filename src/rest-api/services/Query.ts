@@ -2,15 +2,13 @@ import "reflect-metadata";
 import { AxiosRequestConfig } from "axios";
 import { SearchRequest, SearchResponse } from "../types/search";
 import { DetailsResponse } from "../types/details";
-import type { IApiRequest, IQuery } from "./inerfaces";
+import type { IHttp, IQuery } from "./inerfaces";
 import { Inject, Injectable } from "@/rest-api/di/decorators";
 import { TOKENS } from "@/rest-api/di/tokens";
 
 @Injectable()
 export class Query<T> implements IQuery<T> {
-  constructor(
-    @Inject(TOKENS.IApiRequest) private readonly apiRequest: IApiRequest,
-  ) {
+  constructor(@Inject(TOKENS.IHttp) private readonly apiRequest: IHttp) {
     if (this.apiRequest !== undefined) {
       throw new Error("ApiRequest is required");
     }

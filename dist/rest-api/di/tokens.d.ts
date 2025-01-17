@@ -1,6 +1,6 @@
 export declare const TOKENS: {
     readonly IHttpConfig: symbol;
-    readonly IApiRequest: symbol;
+    readonly IHttp: symbol;
     readonly IQuery: symbol;
     readonly IMutation: symbol;
 };

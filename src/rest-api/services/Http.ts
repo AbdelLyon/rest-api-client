@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import type { IApiRequest, IHttpConfig } from "./inerfaces";
-import { Inject, Injectable } from "@/rest-api/di/decorators";
-import { TOKENS } from "@/rest-api/di/tokens";
+import { HttpConfig } from "./HttpConfig";
+import type { IHttp } from "./inerfaces";
+import { Injectable } from "@/rest-api/di/decorators";
 
 export class ApiRequestError extends Error {
   constructor(
@@ -15,7 +15,7 @@ export class ApiRequestError extends Error {
 }
 
 @Injectable()
-export class ApiRequest implements IApiRequest {
+export class Http extends HttpConfig implements IHttp {
   protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig> = {
     timeout: 10000,
     headers: {
@@ -24,16 +24,13 @@ export class ApiRequest implements IApiRequest {
     },
   };
 
-  constructor(
-    @Inject(TOKENS.IHttpConfig) private readonly httpConfig: IHttpConfig,
-  ) {
-    if (this.httpConfig === null) {
-      this.setupApiInterceptors();
-    }
+  constructor(domain: string, baseUrl: string) {
+    super(domain, baseUrl);
+    this.setupApiInterceptors();
   }
 
   private setupApiInterceptors(): void {
-    const axiosInstance = this.httpConfig.getAxiosInstance();
+    const axiosInstance = this.getAxiosInstance();
     axiosInstance.interceptors.response.use(
       this.successInterceptor,
       this.errorInterceptor,
@@ -70,9 +67,9 @@ export class ApiRequest implements IApiRequest {
         ...options,
       };
 
-      const response = await this.httpConfig
-        .getAxiosInstance()
-        .request<TResponse>(mergedConfig);
+      const response = await this.getAxiosInstance().request<TResponse>(
+        mergedConfig,
+      );
       return response.data;
     } catch (error) {
       if (error instanceof ApiRequestError) {

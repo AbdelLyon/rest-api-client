@@ -2,28 +2,28 @@ import { ApiRequesteFactory } from "./HttpRequestFactory";
 import { QueryFactory } from "./QueryFactory";
 import { MutationFactory } from "./MutationFactory";
 import type {
-  IApiRequest,
+  IHttp,
   IHttpConfig,
   IMutation,
   IQuery,
 } from "../services/inerfaces";
 
 interface ServiceBundle<T> {
-  apiRequest: IApiRequest;
+  apiRequest: IHttp;
   queryService: IQuery<T>;
   mutationService: IMutation<T>;
 }
 
 export class ServiceFactory {
-  static createApiRequest(httpConfig: IHttpConfig): IApiRequest {
+  static createApiRequest(httpConfig: IHttpConfig): IHttp {
     return ApiRequesteFactory.create(httpConfig);
   }
 
-  static createQuery<T>(apiRequest: IApiRequest): IQuery<T> {
+  static createQuery<T>(apiRequest: IHttp): IQuery<T> {
     return QueryFactory.create<T>(apiRequest);
   }
 
-  static createMutation<T>(apiRequest: IApiRequest): IMutation<T> {
+  static createMutation<T>(apiRequest: IHttp): IMutation<T> {
     return MutationFactory.create<T>(apiRequest);
   }
 

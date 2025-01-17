@@ -3,15 +3,13 @@ import type { AxiosRequestConfig } from "axios";
 import type { DeleteRequest, DeleteResponse } from "../types/delete";
 import type { ActionRequest, ActionResponse } from "../types/action";
 import type { MutateRequest, MutateResponse } from "../types/mutate";
-import type { IApiRequest, IMutation } from "./inerfaces";
+import type { IHttp, IMutation } from "./inerfaces";
 import { Inject, Injectable } from "@/rest-api/di/decorators";
 import { TOKENS } from "@/rest-api/di/tokens";
 
 @Injectable()
 export class Mutation<T> implements IMutation<T> {
-  constructor(
-    @Inject(TOKENS.IApiRequest) private readonly apiRequest: IApiRequest,
-  ) {}
+  constructor(@Inject(TOKENS.IHttp) private readonly apiRequest: IHttp) {}
 
   public mutate<
     TAttributes,

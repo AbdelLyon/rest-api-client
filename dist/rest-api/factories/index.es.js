@@ -1,73 +1,73 @@
-import { I as p, a as q, T as a } from "../../tokens-DbFzGZEv.js";
-import { Container as s } from "../di/index.es.js";
-import { M as h, A as l } from "../../ApiRequest-D7o1Yy01.js";
-var R = Object.defineProperty, I = Object.getOwnPropertyDescriptor, v = (t, e, r, c) => {
-  for (var i = c > 1 ? void 0 : c ? I(e, r) : e, u = t.length - 1, n; u >= 0; u--)
-    (n = t[u]) && (i = (c ? n(e, r, i) : n(i)) || i);
-  return c && i && R(e, r, i), i;
-}, d = (t, e) => (r, c) => e(r, c, t);
+import { I as p, a as h, T as s } from "../../tokens-A-CxIPtm.js";
+import { Container as a } from "../di/index.es.js";
+import { M as l, H as q } from "../../Http-Dq3y9Co0.js";
+var I = Object.defineProperty, v = Object.getOwnPropertyDescriptor, d = (e, t, r, c) => {
+  for (var i = c > 1 ? void 0 : c ? v(t, r) : t, n = e.length - 1, u; n >= 0; n--)
+    (u = e[n]) && (i = (c ? u(t, r, i) : u(i)) || i);
+  return c && i && I(t, r, i), i;
+}, y = (e, t) => (r, c) => t(r, c, e);
 let o = class {
-  constructor(t) {
-    if (this.apiRequest = t, this.apiRequest !== void 0)
+  constructor(e) {
+    if (this.apiRequest = e, this.apiRequest !== void 0)
       throw new Error("ApiRequest is required");
   }
-  searchRequest(t, e = {}) {
+  searchRequest(e, t = {}) {
     return this.apiRequest.request(
       {
         method: "POST",
         url: "/search",
-        data: { search: t }
+        data: { search: e }
       },
-      e
+      t
     );
   }
-  async search(t, e = {}) {
-    return (await this.searchRequest(t, e)).data;
+  async search(e, t = {}) {
+    return (await this.searchRequest(e, t)).data;
   }
-  searchPaginate(t, e = {}) {
-    return this.searchRequest(t, e);
+  searchPaginate(e, t = {}) {
+    return this.searchRequest(e, t);
   }
-  getdetails(t = {}) {
+  getdetails(e = {}) {
     return this.apiRequest.request(
       {
         method: "GET",
         url: ""
       },
-      t
+      e
     );
   }
 };
-o = v([
+o = d([
   p(),
-  d(0, q(a.IApiRequest))
+  y(0, h(s.IHttp))
 ], o);
-class y {
-  static create(e) {
-    return s.bind(a.IApiRequest).toInstance(e), s.bind(a.IQuery).to(o), s.resolve(a.IQuery);
-  }
-}
-class A {
-  static create(e) {
-    return s.bind(a.IApiRequest).toInstance(e), s.bind(a.IMutation).to(h), s.resolve(a.IMutation);
+class R {
+  static create(t) {
+    return a.bind(s.IHttp).toInstance(t), a.bind(s.IQuery).to(o), a.resolve(s.IQuery);
   }
 }
 class f {
-  static create(e) {
-    return s.reset(), s.bind(a.IHttpConfig).toInstance(e), s.bind(a.IApiRequest).to(l), s.resolve(a.IApiRequest);
+  static create(t) {
+    return a.bind(s.IHttp).toInstance(t), a.bind(s.IMutation).to(l), a.resolve(s.IMutation);
+  }
+}
+class m {
+  static create(t) {
+    return a.reset(), a.bind(s.IHttpConfig).toInstance(t), a.bind(s.IHttp).to(q), a.resolve(s.IHttp);
   }
 }
 class M {
-  static createApiRequest(e) {
-    return f.create(e);
+  static createApiRequest(t) {
+    return m.create(t);
   }
-  static createQuery(e) {
-    return y.create(e);
+  static createQuery(t) {
+    return R.create(t);
   }
-  static createMutation(e) {
-    return A.create(e);
+  static createMutation(t) {
+    return f.create(t);
   }
-  static createAll(e) {
-    const r = this.createApiRequest(e);
+  static createAll(t) {
+    const r = this.createApiRequest(t);
     return {
       apiRequest: r,
       queryService: this.createQuery(r),
@@ -76,8 +76,8 @@ class M {
   }
 }
 export {
-  f as ApiRequesteFactory,
-  A as MutationFactory,
-  y as QueryFactory,
+  m as ApiRequesteFactory,
+  f as MutationFactory,
+  R as QueryFactory,
   M as ServiceFactory
 };

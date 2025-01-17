@@ -1,6 +1,6 @@
-import { AxiosInstance } from 'axios';
 import { IHttpConfig } from './inerfaces';
-export declare class HttpConfig implements IHttpConfig {
+import { AxiosInstance } from 'axios';
+export declare abstract class HttpConfig implements IHttpConfig {
     private readonly domain;
     private readonly baseUrl;
     private axiosInstance;

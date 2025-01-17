@@ -1,14 +1,14 @@
 import { AxiosError, AxiosRequestConfig } from 'axios';
-import { IApiRequest, IHttpConfig } from './inerfaces';
+import { HttpConfig } from './HttpConfig';
+import { IHttp } from './inerfaces';
 export declare class ApiRequestError extends Error {
     originalError: AxiosError;
     requestConfig: AxiosRequestConfig;
     constructor(originalError: AxiosError, requestConfig: AxiosRequestConfig);
 }
-export declare class ApiRequest implements IApiRequest {
-    private readonly httpConfig;
+export declare class Http extends HttpConfig implements IHttp {
     protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig>;
-    constructor(httpConfig: IHttpConfig);
+    constructor(domain: string, baseUrl: string);
     private setupApiInterceptors;
     private successInterceptor;
     private errorInterceptor;

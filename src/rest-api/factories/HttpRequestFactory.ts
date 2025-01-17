@@ -1,13 +1,13 @@
-import { ApiRequest } from "../services/ApiRequest";
-import type { IApiRequest, IHttpConfig } from "../services/inerfaces";
+import { Http } from "../services/Http";
+import type { IHttp, IHttpConfig } from "../services/inerfaces";
 import { Container } from "@/rest-api/di/Container";
 import { TOKENS } from "@/rest-api/di/tokens";
 
 export class ApiRequesteFactory {
-  static create(httpConfig: IHttpConfig): IApiRequest {
+  static create(httpConfig: IHttpConfig): IHttp {
     Container.reset();
     Container.bind<IHttpConfig>(TOKENS.IHttpConfig).toInstance(httpConfig);
-    Container.bind<IApiRequest>(TOKENS.IApiRequest).to(ApiRequest);
-    return Container.resolve<IApiRequest>(TOKENS.IApiRequest);
+    Container.bind<IHttp>(TOKENS.IHttp).to(Http);
+    return Container.resolve<IHttp>(TOKENS.IHttp);
   }
 }
