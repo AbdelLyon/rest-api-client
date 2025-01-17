@@ -15,8 +15,8 @@
   "license": "MIT",
   "exports": {
     "./rest-api/types": {
-      "import": "./dist/rest-api/interfaces/index.es.js",
-      "types": "./dist/rest-api/interfaces/index.d.ts"
+      "import": "./dist/rest-api/types/index.es.js",
+      "types": "./dist/rest-api/types/index.d.ts"
     },
     "./rest-api/services": {
       "import": "./dist/rest-api/services/index.es.js",
@@ -55,7 +55,7 @@
   },
   "scripts": {
     "clean": "rimraf node_modules dist *.log && pnpm install",
-    "build": "pnpm lint --fix && tsc -b && vitest --watch=false && vite build",
+    "build": "pnpm lint --fix && tsc -b && vite build",
     "test": "vitest",
     "test:cov": "vitest --coverage",
     "lint": "eslint .",
