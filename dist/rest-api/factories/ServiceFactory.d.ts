@@ -6,8 +6,8 @@ interface ServiceBundle<T> {
 }
 export declare class ServiceFactory {
     static createApiRequest(httpConfig: IHttpConfig): IApiRequest;
-    static createQueryService<T>(apiRequest: IApiRequest): IQuery<T>;
-    static createMutationService<T>(apiRequest: IApiRequest): IMutation<T>;
+    static createQuery<T>(apiRequest: IApiRequest): IQuery<T>;
+    static createMutation<T>(apiRequest: IApiRequest): IMutation<T>;
     static createAll<T>(httpConfig: IHttpConfig): ServiceBundle<T>;
 }
 export {};

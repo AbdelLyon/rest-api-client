@@ -7,7 +7,7 @@ import { Inject, Injectable } from "@/rest-api/di/decorators";
 import { TOKENS } from "@/rest-api/di/tokens";
 
 @Injectable()
-export class QueryService<T> implements IQuery<T> {
+export class Query<T> implements IQuery<T> {
   constructor(
     @Inject(TOKENS.IApiRequest) private readonly apiRequest: IApiRequest,
   ) {

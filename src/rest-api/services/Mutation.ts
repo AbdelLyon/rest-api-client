@@ -8,7 +8,7 @@ import { Inject, Injectable } from "@/rest-api/di/decorators";
 import { TOKENS } from "@/rest-api/di/tokens";
 
 @Injectable()
-export class MutationService<T> implements IMutation<T> {
+export class Mutation<T> implements IMutation<T> {
   constructor(
     @Inject(TOKENS.IApiRequest) private readonly apiRequest: IApiRequest,
   ) {}

@@ -3,7 +3,6 @@ import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import type { IApiRequest, IHttpConfig } from "./inerfaces";
 import { Inject, Injectable } from "@/rest-api/di/decorators";
 import { TOKENS } from "@/rest-api/di/tokens";
-import { Container } from "@/rest-api/di/Container";
 
 export class ApiRequestError extends Error {
   constructor(
@@ -16,7 +15,7 @@ export class ApiRequestError extends Error {
 }
 
 @Injectable()
-export class ApiRequestService implements IApiRequest {
+export class ApiRequest implements IApiRequest {
   protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig> = {
     timeout: 10000,
     headers: {
@@ -83,5 +82,3 @@ export class ApiRequestService implements IApiRequest {
     }
   }
 }
-
-Container.bind<IApiRequest>(TOKENS.IApiRequest).to(ApiRequestService);

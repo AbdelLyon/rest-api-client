@@ -5,7 +5,7 @@ export declare class ApiRequestError extends Error {
     requestConfig: AxiosRequestConfig;
     constructor(originalError: AxiosError, requestConfig: AxiosRequestConfig);
 }
-export declare class ApiRequestService implements IApiRequest {
+export declare class ApiRequest implements IApiRequest {
     private readonly httpConfig;
     protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig>;
     constructor(httpConfig: IHttpConfig);

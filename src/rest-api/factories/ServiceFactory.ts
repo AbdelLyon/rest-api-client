@@ -1,6 +1,6 @@
-import { ApiRequestServiceFactory } from "./ApiRequestServiceFactory";
-import { MutationServiceFactory } from "./MutationServiceFactory";
-import { QueryServiceFactory } from "./QueryServiceFactory";
+import { ApiRequesteFactory } from "./HttpRequestFactory";
+import { QueryFactory } from "./QueryFactory";
+import { MutationFactory } from "./MutationFactory";
 import type {
   IApiRequest,
   IHttpConfig,
@@ -16,15 +16,15 @@ interface ServiceBundle<T> {
 
 export class ServiceFactory {
   static createApiRequest(httpConfig: IHttpConfig): IApiRequest {
-    return ApiRequestServiceFactory.create(httpConfig);
+    return ApiRequesteFactory.create(httpConfig);
   }
 
-  static createQueryService<T>(apiRequest: IApiRequest): IQuery<T> {
-    return QueryServiceFactory.create<T>(apiRequest);
+  static createQuery<T>(apiRequest: IApiRequest): IQuery<T> {
+    return QueryFactory.create<T>(apiRequest);
   }
 
-  static createMutationService<T>(apiRequest: IApiRequest): IMutation<T> {
-    return MutationServiceFactory.create<T>(apiRequest);
+  static createMutation<T>(apiRequest: IApiRequest): IMutation<T> {
+    return MutationFactory.create<T>(apiRequest);
   }
 
   static createAll<T>(httpConfig: IHttpConfig): ServiceBundle<T> {
@@ -32,8 +32,8 @@ export class ServiceFactory {
 
     return {
       apiRequest,
-      queryService: this.createQueryService<T>(apiRequest),
-      mutationService: this.createMutationService<T>(apiRequest),
+      queryService: this.createQuery<T>(apiRequest),
+      mutationService: this.createMutation<T>(apiRequest),
     };
   }
 }

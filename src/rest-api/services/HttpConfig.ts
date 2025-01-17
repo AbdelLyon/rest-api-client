@@ -3,8 +3,6 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import axiosRetry from "axios-retry";
 import { IHttpConfig } from "./inerfaces";
 import { Injectable } from "@/rest-api/di/decorators";
-import { Container } from "@/rest-api/di/Container";
-import { TOKENS } from "@/rest-api/di/tokens";
 
 @Injectable()
 export class HttpConfig implements IHttpConfig {
@@ -75,5 +73,3 @@ export class HttpConfig implements IHttpConfig {
     return Promise.reject(error);
   }
 }
-
-Container.bind<IHttpConfig>(TOKENS.IHttpConfig).to(HttpConfig);

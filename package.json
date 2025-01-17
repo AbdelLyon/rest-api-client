@@ -55,7 +55,7 @@
   },
   "scripts": {
     "clean": "rimraf node_modules dist *.log && pnpm install",
-    "build": "pnpm lint --fix && tsc -b && vite build",
+    "build": "pnpm tsc -b && vite build",
     "test": "vitest",
     "test:cov": "vitest --coverage",
     "lint": "eslint .",

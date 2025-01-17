@@ -1,10 +1,11 @@
-import { Injectable as p, Inject as v, TOKENS as i, Container as s } from "../di/index.es.js";
-import { MutationService as q, ApiRequestService as h } from "../services/index.es.js";
-var l = Object.defineProperty, R = Object.getOwnPropertyDescriptor, I = (t, e, r, c) => {
-  for (var a = c > 1 ? void 0 : c ? R(e, r) : e, u = t.length - 1, n; u >= 0; u--)
-    (n = t[u]) && (a = (c ? n(e, r, a) : n(a)) || a);
-  return c && a && l(e, r, a), a;
-}, S = (t, e) => (r, c) => e(r, c, t);
+import { I as p, a as q, T as a } from "../../tokens-DbFzGZEv.js";
+import { Container as s } from "../di/index.es.js";
+import { Mutation as h, ApiRequest as l } from "../services/index.es.js";
+var R = Object.defineProperty, I = Object.getOwnPropertyDescriptor, v = (t, e, r, c) => {
+  for (var i = c > 1 ? void 0 : c ? I(e, r) : e, u = t.length - 1, n; u >= 0; u--)
+    (n = t[u]) && (i = (c ? n(e, r, i) : n(i)) || i);
+  return c && i && R(e, r, i), i;
+}, d = (t, e) => (r, c) => e(r, c, t);
 let o = class {
   constructor(t) {
     if (this.apiRequest = t, this.apiRequest !== void 0)
@@ -36,47 +37,47 @@ let o = class {
     );
   }
 };
-o = I([
+o = v([
   p(),
-  S(0, v(i.IApiRequest))
+  d(0, q(a.IApiRequest))
 ], o);
-class d {
-  static create(e) {
-    return s.bind(i.IApiRequest).toInstance(e), s.bind(i.IQuery).to(o), s.resolve(i.IQuery);
-  }
-}
 class y {
   static create(e) {
-    return s.bind(i.IApiRequest).toInstance(e), s.bind(i.IMutation).to(q), s.resolve(i.IMutation);
+    return s.bind(a.IApiRequest).toInstance(e), s.bind(a.IQuery).to(o), s.resolve(a.IQuery);
   }
 }
 class A {
   static create(e) {
-    return s.reset(), s.bind(i.IHttpConfig).toInstance(e), s.bind(i.IApiRequest).to(h), s.resolve(i.IApiRequest);
+    return s.bind(a.IApiRequest).toInstance(e), s.bind(a.IMutation).to(h), s.resolve(a.IMutation);
   }
 }
-class m {
+class f {
+  static create(e) {
+    return s.reset(), s.bind(a.IHttpConfig).toInstance(e), s.bind(a.IApiRequest).to(l), s.resolve(a.IApiRequest);
+  }
+}
+class P {
   static createApiRequest(e) {
-    return A.create(e);
+    return f.create(e);
   }
-  static createQueryService(e) {
-    return d.create(e);
-  }
-  static createMutationService(e) {
+  static createQuery(e) {
     return y.create(e);
+  }
+  static createMutation(e) {
+    return A.create(e);
   }
   static createAll(e) {
     const r = this.createApiRequest(e);
     return {
       apiRequest: r,
-      queryService: this.createQueryService(r),
-      mutationService: this.createMutationService(r)
+      queryService: this.createQuery(r),
+      mutationService: this.createMutation(r)
     };
   }
 }
 export {
-  A as ApiRequestServiceFactory,
-  y as MutationServiceFactory,
-  d as QueryServiceFactory,
-  m as ServiceFactory
+  f as ApiRequesteFactory,
+  A as MutationFactory,
+  y as QueryFactory,
+  P as ServiceFactory
 };
