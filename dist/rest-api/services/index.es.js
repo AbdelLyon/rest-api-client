@@ -1,5 +1,5 @@
-import B from "axios-retry";
-import Le from "axios";
+import N from "axios-retry";
+import Ne from "axios";
 var ce = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, de = {};
 /*! *****************************************************************************
 Copyright (C) Microsoft. All rights reserved.
@@ -19,14 +19,14 @@ var le;
 function Be() {
   if (le) return de;
   le = 1;
-  var g;
-  return function(a) {
-    (function(c) {
-      var h = typeof globalThis == "object" ? globalThis : typeof ce == "object" ? ce : typeof self == "object" ? self : typeof this == "object" ? this : A(), M = E(a);
-      typeof h.Reflect < "u" && (M = E(h.Reflect, M)), c(M, h), typeof h.Reflect > "u" && (h.Reflect = a);
-      function E(P, x) {
+  var y;
+  return function(n) {
+    (function(f) {
+      var p = typeof globalThis == "object" ? globalThis : typeof ce == "object" ? ce : typeof self == "object" ? self : typeof this == "object" ? this : A(), M = E(n);
+      typeof p.Reflect < "u" && (M = E(p.Reflect, M)), f(M, p), typeof p.Reflect > "u" && (p.Reflect = n);
+      function E(I, x) {
         return function(T, S) {
-          Object.defineProperty(P, T, { configurable: !0, writable: !0, value: S }), x && x(T, S);
+          Object.defineProperty(I, T, { configurable: !0, writable: !0, value: S }), x && x(T, S);
         };
       }
       function F() {
@@ -35,21 +35,21 @@ function Be() {
         } catch {
         }
       }
-      function I() {
+      function P() {
         try {
           return (0, eval)("(function() { return this; })()");
         } catch {
         }
       }
       function A() {
-        return F() || I();
+        return F() || P();
       }
-    })(function(c, h) {
-      var M = Object.prototype.hasOwnProperty, E = typeof Symbol == "function", F = E && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", I = E && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", A = typeof Object.create == "function", P = { __proto__: [] } instanceof Array, x = !A && !P, T = {
+    })(function(f, p) {
+      var M = Object.prototype.hasOwnProperty, E = typeof Symbol == "function", F = E && typeof Symbol.toPrimitive < "u" ? Symbol.toPrimitive : "@@toPrimitive", P = E && typeof Symbol.iterator < "u" ? Symbol.iterator : "@@iterator", A = typeof Object.create == "function", I = { __proto__: [] } instanceof Array, x = !A && !I, T = {
         // create an object in dictionary mode (a.k.a. "slow" mode in v8)
         create: A ? function() {
           return L(/* @__PURE__ */ Object.create(null));
-        } : P ? function() {
+        } : I ? function() {
           return L({ __proto__: null });
         } : function() {
           return L({});
@@ -64,176 +64,176 @@ function Be() {
         } : function(e, t) {
           return e[t];
         }
-      }, S = Object.getPrototypeOf(Function), C = typeof Map == "function" && typeof Map.prototype.entries == "function" ? Map : Ge(), G = typeof Set == "function" && typeof Set.prototype.entries == "function" ? Set : He(), H = typeof WeakMap == "function" ? WeakMap : Ue(), k = E ? Symbol.for("@reflect-metadata:registry") : void 0, q = qe(), z = De(q);
-      function we(e, t, r, n) {
+      }, S = Object.getPrototypeOf(Function), C = typeof Map == "function" && typeof Map.prototype.entries == "function" ? Map : He(), G = typeof Set == "function" && typeof Set.prototype.entries == "function" ? Set : Ue(), H = typeof WeakMap == "function" ? WeakMap : $e(), R = E ? Symbol.for("@reflect-metadata:registry") : void 0, q = De(), z = Fe(q);
+      function _e(e, t, r, a) {
         if (d(r)) {
           if (!re(e))
             throw new TypeError();
           if (!ne(t))
             throw new TypeError();
-          return Pe(e, t);
+          return Re(e, t);
         } else {
           if (!re(e))
             throw new TypeError();
-          if (!w(t))
+          if (!_(t))
             throw new TypeError();
-          if (!w(n) && !d(n) && !R(n))
+          if (!_(a) && !d(a) && !k(a))
             throw new TypeError();
-          return R(n) && (n = void 0), r = O(r), ke(e, t, r, n);
+          return k(a) && (a = void 0), r = O(r), ke(e, t, r, a);
         }
       }
-      c("decorate", we);
-      function _e(e, t) {
-        function r(n, f) {
-          if (!w(n))
+      f("decorate", _e);
+      function me(e, t) {
+        function r(a, c) {
+          if (!_(a))
             throw new TypeError();
-          if (!d(f) && !je(f))
+          if (!d(c) && !Ae(c))
             throw new TypeError();
-          X(e, t, n, f);
+          X(e, t, a, c);
         }
         return r;
       }
-      c("metadata", _e);
-      function me(e, t, r, n) {
-        if (!w(r))
+      f("metadata", me);
+      function ge(e, t, r, a) {
+        if (!_(r))
           throw new TypeError();
-        return d(n) || (n = O(n)), X(e, t, r, n);
+        return d(a) || (a = O(a)), X(e, t, r, a);
       }
-      c("defineMetadata", me);
-      function ge(e, t, r) {
-        if (!w(t))
+      f("defineMetadata", ge);
+      function Me(e, t, r) {
+        if (!_(t))
           throw new TypeError();
         return d(r) || (r = O(r)), Z(e, t, r);
       }
-      c("hasMetadata", ge);
-      function Me(e, t, r) {
-        if (!w(t))
+      f("hasMetadata", Me);
+      function be(e, t, r) {
+        if (!_(t))
           throw new TypeError();
         return d(r) || (r = O(r)), U(e, t, r);
       }
-      c("hasOwnMetadata", Me);
-      function be(e, t, r) {
-        if (!w(t))
+      f("hasOwnMetadata", be);
+      function Oe(e, t, r) {
+        if (!_(t))
           throw new TypeError();
         return d(r) || (r = O(r)), Q(e, t, r);
       }
-      c("getMetadata", be);
-      function Oe(e, t, r) {
-        if (!w(t))
+      f("getMetadata", Oe);
+      function Ee(e, t, r) {
+        if (!_(t))
           throw new TypeError();
         return d(r) || (r = O(r)), J(e, t, r);
       }
-      c("getOwnMetadata", Oe);
-      function Ee(e, t) {
-        if (!w(e))
+      f("getOwnMetadata", Ee);
+      function Te(e, t) {
+        if (!_(e))
           throw new TypeError();
         return d(t) || (t = O(t)), Y(e, t);
       }
-      c("getMetadataKeys", Ee);
-      function Te(e, t) {
-        if (!w(e))
+      f("getMetadataKeys", Te);
+      function Pe(e, t) {
+        if (!_(e))
           throw new TypeError();
         return d(t) || (t = O(t)), K(e, t);
       }
-      c("getOwnMetadataKeys", Te);
+      f("getOwnMetadataKeys", Pe);
       function Ie(e, t, r) {
-        if (!w(t))
+        if (!_(t))
           throw new TypeError();
-        if (d(r) || (r = O(r)), !w(t))
+        if (d(r) || (r = O(r)), !_(t))
           throw new TypeError();
         d(r) || (r = O(r));
-        var n = j(
+        var a = j(
           t,
           r,
           /*Create*/
           !1
         );
-        return d(n) ? !1 : n.OrdinaryDeleteMetadata(e, t, r);
+        return d(a) ? !1 : a.OrdinaryDeleteMetadata(e, t, r);
       }
-      c("deleteMetadata", Ie);
-      function Pe(e, t) {
+      f("deleteMetadata", Ie);
+      function Re(e, t) {
         for (var r = e.length - 1; r >= 0; --r) {
-          var n = e[r], f = n(t);
-          if (!d(f) && !R(f)) {
-            if (!ne(f))
+          var a = e[r], c = a(t);
+          if (!d(c) && !k(c)) {
+            if (!ne(c))
               throw new TypeError();
-            t = f;
+            t = c;
           }
         }
         return t;
       }
-      function ke(e, t, r, n) {
-        for (var f = e.length - 1; f >= 0; --f) {
-          var m = e[f], _ = m(t, r, n);
-          if (!d(_) && !R(_)) {
-            if (!w(_))
+      function ke(e, t, r, a) {
+        for (var c = e.length - 1; c >= 0; --c) {
+          var g = e[c], m = g(t, r, a);
+          if (!d(m) && !k(m)) {
+            if (!_(m))
               throw new TypeError();
-            n = _;
+            a = m;
           }
         }
-        return n;
+        return a;
       }
       function Z(e, t, r) {
-        var n = U(e, t, r);
-        if (n)
+        var a = U(e, t, r);
+        if (a)
           return !0;
-        var f = W(t);
-        return R(f) ? !1 : Z(e, f, r);
+        var c = W(t);
+        return k(c) ? !1 : Z(e, c, r);
       }
       function U(e, t, r) {
-        var n = j(
+        var a = j(
           t,
           r,
           /*Create*/
           !1
         );
-        return d(n) ? !1 : te(n.OrdinaryHasOwnMetadata(e, t, r));
+        return d(a) ? !1 : te(a.OrdinaryHasOwnMetadata(e, t, r));
       }
       function Q(e, t, r) {
-        var n = U(e, t, r);
-        if (n)
+        var a = U(e, t, r);
+        if (a)
           return J(e, t, r);
-        var f = W(t);
-        if (!R(f))
-          return Q(e, f, r);
+        var c = W(t);
+        if (!k(c))
+          return Q(e, c, r);
       }
       function J(e, t, r) {
-        var n = j(
+        var a = j(
           t,
           r,
           /*Create*/
           !1
         );
-        if (!d(n))
-          return n.OrdinaryGetOwnMetadata(e, t, r);
+        if (!d(a))
+          return a.OrdinaryGetOwnMetadata(e, t, r);
       }
-      function X(e, t, r, n) {
-        var f = j(
+      function X(e, t, r, a) {
+        var c = j(
           r,
-          n,
+          a,
           /*Create*/
           !0
         );
-        f.OrdinaryDefineOwnMetadata(e, t, r, n);
+        c.OrdinaryDefineOwnMetadata(e, t, r, a);
       }
       function Y(e, t) {
-        var r = K(e, t), n = W(e);
-        if (n === null)
+        var r = K(e, t), a = W(e);
+        if (a === null)
           return r;
-        var f = Y(n, t);
-        if (f.length <= 0)
+        var c = Y(a, t);
+        if (c.length <= 0)
           return r;
         if (r.length <= 0)
-          return f;
-        for (var m = new G(), _ = [], l = 0, i = r; l < i.length; l++) {
-          var s = i[l], o = m.has(s);
-          o || (m.add(s), _.push(s));
+          return c;
+        for (var g = new G(), m = [], l = 0, i = r; l < i.length; l++) {
+          var s = i[l], o = g.has(s);
+          o || (g.add(s), m.push(s));
         }
-        for (var u = 0, v = f; u < v.length; u++) {
-          var s = v[u], o = m.has(s);
-          o || (m.add(s), _.push(s));
+        for (var u = 0, h = c; u < h.length; u++) {
+          var s = h[u], o = g.has(s);
+          o || (g.add(s), m.push(s));
         }
-        return _;
+        return m;
       }
       function K(e, t) {
         var r = j(
@@ -267,16 +267,16 @@ function Be() {
       function d(e) {
         return e === void 0;
       }
-      function R(e) {
+      function k(e) {
         return e === null;
       }
-      function Re(e) {
+      function xe(e) {
         return typeof e == "symbol";
       }
-      function w(e) {
+      function _(e) {
         return typeof e == "object" ? e !== null : typeof e == "function";
       }
-      function xe(e, t) {
+      function Se(e, t) {
         switch (ee(e)) {
           case 0:
             return e;
@@ -291,29 +291,29 @@ function Be() {
           case 5:
             return e;
         }
-        var r = "string", n = ae(e, F);
-        if (n !== void 0) {
-          var f = n.call(e, r);
-          if (w(f))
+        var r = "string", a = ae(e, F);
+        if (a !== void 0) {
+          var c = a.call(e, r);
+          if (_(c))
             throw new TypeError();
-          return f;
+          return c;
         }
-        return Se(e);
+        return Ce(e);
       }
-      function Se(e, t) {
-        var r, n;
+      function Ce(e, t) {
+        var r, a;
         {
-          var f = e.toString;
-          if (D(f)) {
-            var n = f.call(e);
-            if (!w(n))
-              return n;
+          var c = e.toString;
+          if (D(c)) {
+            var a = c.call(e);
+            if (!_(a))
+              return a;
           }
           var r = e.valueOf;
           if (D(r)) {
-            var n = r.call(e);
-            if (!w(n))
-              return n;
+            var a = r.call(e);
+            if (!_(a))
+              return a;
           }
         }
         throw new TypeError();
@@ -321,12 +321,12 @@ function Be() {
       function te(e) {
         return !!e;
       }
-      function Ce(e) {
+      function je(e) {
         return "" + e;
       }
       function O(e) {
-        var t = xe(e);
-        return Re(t) ? t : Ce(t);
+        var t = Se(e);
+        return xe(t) ? t : je(t);
       }
       function re(e) {
         return Array.isArray ? Array.isArray(e) : e instanceof Object ? e instanceof Array : Object.prototype.toString.call(e) === "[object Array]";
@@ -337,7 +337,7 @@ function Be() {
       function ne(e) {
         return typeof e == "function";
       }
-      function je(e) {
+      function Ae(e) {
         switch (ee(e)) {
           case 3:
             return !0;
@@ -359,11 +359,11 @@ function Be() {
         }
       }
       function ie(e) {
-        var t = ae(e, I);
+        var t = ae(e, P);
         if (!D(t))
           throw new TypeError();
         var r = t.call(e);
-        if (!w(r))
+        if (!_(r))
           throw new TypeError();
         return r;
       }
@@ -382,23 +382,23 @@ function Be() {
         var t = Object.getPrototypeOf(e);
         if (typeof e != "function" || e === S || t !== S)
           return t;
-        var r = e.prototype, n = r && Object.getPrototypeOf(r);
-        if (n == null || n === Object.prototype)
+        var r = e.prototype, a = r && Object.getPrototypeOf(r);
+        if (a == null || a === Object.prototype)
           return t;
-        var f = n.constructor;
-        return typeof f != "function" || f === e ? t : f;
+        var c = a.constructor;
+        return typeof c != "function" || c === e ? t : c;
       }
-      function Ae() {
+      function qe() {
         var e;
-        !d(k) && typeof h.Reflect < "u" && !(k in h.Reflect) && typeof h.Reflect.defineMetadata == "function" && (e = Fe(h.Reflect));
-        var t, r, n, f = new H(), m = {
-          registerProvider: _,
+        !d(R) && typeof p.Reflect < "u" && !(R in p.Reflect) && typeof p.Reflect.defineMetadata == "function" && (e = Ge(p.Reflect));
+        var t, r, a, c = new H(), g = {
+          registerProvider: m,
           getProvider: i,
           setProvider: o
         };
-        return m;
-        function _(u) {
-          if (!Object.isExtensible(m))
+        return g;
+        function m(u) {
+          if (!Object.isExtensible(g))
             throw new Error("Cannot add provider to a frozen registry.");
           switch (!0) {
             case e === u:
@@ -414,186 +414,186 @@ function Be() {
             case r === u:
               break;
             default:
-              n === void 0 && (n = new G()), n.add(u);
+              a === void 0 && (a = new G()), a.add(u);
               break;
           }
         }
-        function l(u, v) {
+        function l(u, h) {
           if (!d(t)) {
-            if (t.isProviderFor(u, v))
+            if (t.isProviderFor(u, h))
               return t;
             if (!d(r)) {
-              if (r.isProviderFor(u, v))
+              if (r.isProviderFor(u, h))
                 return t;
-              if (!d(n))
-                for (var y = ie(n); ; ) {
-                  var p = oe(y);
-                  if (!p)
+              if (!d(a))
+                for (var v = ie(a); ; ) {
+                  var w = oe(v);
+                  if (!w)
                     return;
-                  var b = se(p);
-                  if (b.isProviderFor(u, v))
-                    return ue(y), b;
+                  var b = se(w);
+                  if (b.isProviderFor(u, h))
+                    return ue(v), b;
                 }
             }
           }
-          if (!d(e) && e.isProviderFor(u, v))
+          if (!d(e) && e.isProviderFor(u, h))
             return e;
         }
-        function i(u, v) {
-          var y = f.get(u), p;
-          return d(y) || (p = y.get(v)), d(p) && (p = l(u, v), d(p) || (d(y) && (y = new C(), f.set(u, y)), y.set(v, p))), p;
+        function i(u, h) {
+          var v = c.get(u), w;
+          return d(v) || (w = v.get(h)), d(w) && (w = l(u, h), d(w) || (d(v) && (v = new C(), c.set(u, v)), v.set(h, w))), w;
         }
         function s(u) {
           if (d(u))
             throw new TypeError();
-          return t === u || r === u || !d(n) && n.has(u);
+          return t === u || r === u || !d(a) && a.has(u);
         }
-        function o(u, v, y) {
-          if (!s(y))
+        function o(u, h, v) {
+          if (!s(v))
             throw new Error("Metadata provider not registered.");
-          var p = i(u, v);
-          if (p !== y) {
-            if (!d(p))
+          var w = i(u, h);
+          if (w !== v) {
+            if (!d(w))
               return !1;
-            var b = f.get(u);
-            d(b) && (b = new C(), f.set(u, b)), b.set(v, y);
+            var b = c.get(u);
+            d(b) && (b = new C(), c.set(u, b)), b.set(h, v);
           }
           return !0;
         }
       }
-      function qe() {
+      function De() {
         var e;
-        return !d(k) && w(h.Reflect) && Object.isExtensible(h.Reflect) && (e = h.Reflect[k]), d(e) && (e = Ae()), !d(k) && w(h.Reflect) && Object.isExtensible(h.Reflect) && Object.defineProperty(h.Reflect, k, {
+        return !d(R) && _(p.Reflect) && Object.isExtensible(p.Reflect) && (e = p.Reflect[R]), d(e) && (e = qe()), !d(R) && _(p.Reflect) && Object.isExtensible(p.Reflect) && Object.defineProperty(p.Reflect, R, {
           enumerable: !1,
           configurable: !1,
           writable: !1,
           value: e
         }), e;
       }
-      function De(e) {
+      function Fe(e) {
         var t = new H(), r = {
           isProviderFor: function(s, o) {
             var u = t.get(s);
             return d(u) ? !1 : u.has(o);
           },
-          OrdinaryDefineOwnMetadata: _,
-          OrdinaryHasOwnMetadata: f,
-          OrdinaryGetOwnMetadata: m,
+          OrdinaryDefineOwnMetadata: m,
+          OrdinaryHasOwnMetadata: c,
+          OrdinaryGetOwnMetadata: g,
           OrdinaryOwnMetadataKeys: l,
           OrdinaryDeleteMetadata: i
         };
         return q.registerProvider(r), r;
-        function n(s, o, u) {
-          var v = t.get(s), y = !1;
-          if (d(v)) {
+        function a(s, o, u) {
+          var h = t.get(s), v = !1;
+          if (d(h)) {
             if (!u)
               return;
-            v = new C(), t.set(s, v), y = !0;
+            h = new C(), t.set(s, h), v = !0;
           }
-          var p = v.get(o);
-          if (d(p)) {
+          var w = h.get(o);
+          if (d(w)) {
             if (!u)
               return;
-            if (p = new C(), v.set(o, p), !e.setProvider(s, o, r))
-              throw v.delete(o), y && t.delete(s), new Error("Wrong provider for target.");
+            if (w = new C(), h.set(o, w), !e.setProvider(s, o, r))
+              throw h.delete(o), v && t.delete(s), new Error("Wrong provider for target.");
           }
-          return p;
+          return w;
         }
-        function f(s, o, u) {
-          var v = n(
+        function c(s, o, u) {
+          var h = a(
             o,
             u,
             /*Create*/
             !1
           );
-          return d(v) ? !1 : te(v.has(s));
+          return d(h) ? !1 : te(h.has(s));
         }
-        function m(s, o, u) {
-          var v = n(
+        function g(s, o, u) {
+          var h = a(
             o,
             u,
             /*Create*/
             !1
           );
-          if (!d(v))
-            return v.get(s);
+          if (!d(h))
+            return h.get(s);
         }
-        function _(s, o, u, v) {
-          var y = n(
+        function m(s, o, u, h) {
+          var v = a(
             u,
-            v,
+            h,
             /*Create*/
             !0
           );
-          y.set(s, o);
+          v.set(s, o);
         }
         function l(s, o) {
-          var u = [], v = n(
+          var u = [], h = a(
             s,
             o,
             /*Create*/
             !1
           );
-          if (d(v))
+          if (d(h))
             return u;
-          for (var y = v.keys(), p = ie(y), b = 0; ; ) {
-            var fe = oe(p);
+          for (var v = h.keys(), w = ie(v), b = 0; ; ) {
+            var fe = oe(w);
             if (!fe)
               return u.length = b, u;
-            var $e = se(fe);
+            var We = se(fe);
             try {
-              u[b] = $e;
-            } catch (We) {
+              u[b] = We;
+            } catch (Le) {
               try {
-                ue(p);
+                ue(w);
               } finally {
-                throw We;
+                throw Le;
               }
             }
             b++;
           }
         }
         function i(s, o, u) {
-          var v = n(
+          var h = a(
             o,
             u,
             /*Create*/
             !1
           );
-          if (d(v) || !v.delete(s))
+          if (d(h) || !h.delete(s))
             return !1;
-          if (v.size === 0) {
-            var y = t.get(o);
-            d(y) || (y.delete(u), y.size === 0 && t.delete(y));
+          if (h.size === 0) {
+            var v = t.get(o);
+            d(v) || (v.delete(u), v.size === 0 && t.delete(v));
           }
           return !0;
         }
       }
-      function Fe(e) {
-        var t = e.defineMetadata, r = e.hasOwnMetadata, n = e.getOwnMetadata, f = e.getOwnMetadataKeys, m = e.deleteMetadata, _ = new H(), l = {
+      function Ge(e) {
+        var t = e.defineMetadata, r = e.hasOwnMetadata, a = e.getOwnMetadata, c = e.getOwnMetadataKeys, g = e.deleteMetadata, m = new H(), l = {
           isProviderFor: function(i, s) {
-            var o = _.get(i);
-            return !d(o) && o.has(s) ? !0 : f(i, s).length ? (d(o) && (o = new G(), _.set(i, o)), o.add(s), !0) : !1;
+            var o = m.get(i);
+            return !d(o) && o.has(s) ? !0 : c(i, s).length ? (d(o) && (o = new G(), m.set(i, o)), o.add(s), !0) : !1;
           },
           OrdinaryDefineOwnMetadata: t,
           OrdinaryHasOwnMetadata: r,
-          OrdinaryGetOwnMetadata: n,
-          OrdinaryOwnMetadataKeys: f,
-          OrdinaryDeleteMetadata: m
+          OrdinaryGetOwnMetadata: a,
+          OrdinaryOwnMetadataKeys: c,
+          OrdinaryDeleteMetadata: g
         };
         return l;
       }
       function j(e, t, r) {
-        var n = q.getProvider(e, t);
-        if (!d(n))
-          return n;
+        var a = q.getProvider(e, t);
+        if (!d(a))
+          return a;
         if (r) {
           if (q.setProvider(e, t, z))
             return z;
           throw new Error("Illegal state.");
         }
       }
-      function Ge() {
+      function He() {
         var e = {}, t = [], r = (
           /** @class */
           function() {
@@ -602,7 +602,7 @@ function Be() {
             }
             return l.prototype["@@iterator"] = function() {
               return this;
-            }, l.prototype[I] = function() {
+            }, l.prototype[P] = function() {
               return this;
             }, l.prototype.next = function() {
               var i = this._index;
@@ -617,7 +617,7 @@ function Be() {
               return this._index >= 0 && (this._index = -1, this._keys = t, this._values = t), { value: i, done: !0 };
             }, l;
           }()
-        ), n = (
+        ), a = (
           /** @class */
           function() {
             function l() {
@@ -664,14 +664,14 @@ function Be() {
             }, l.prototype.clear = function() {
               this._keys.length = 0, this._values.length = 0, this._cacheKey = e, this._cacheIndex = -2;
             }, l.prototype.keys = function() {
-              return new r(this._keys, this._values, f);
+              return new r(this._keys, this._values, c);
             }, l.prototype.values = function() {
-              return new r(this._keys, this._values, m);
+              return new r(this._keys, this._values, g);
             }, l.prototype.entries = function() {
-              return new r(this._keys, this._values, _);
+              return new r(this._keys, this._values, m);
             }, l.prototype["@@iterator"] = function() {
               return this.entries();
-            }, l.prototype[I] = function() {
+            }, l.prototype[P] = function() {
               return this.entries();
             }, l.prototype._find = function(i, s) {
               if (!$(this._cacheKey, i)) {
@@ -686,18 +686,18 @@ function Be() {
             }, l;
           }()
         );
-        return n;
-        function f(l, i) {
+        return a;
+        function c(l, i) {
           return l;
         }
-        function m(l, i) {
+        function g(l, i) {
           return i;
         }
-        function _(l, i) {
+        function m(l, i) {
           return [l, i];
         }
       }
-      function He() {
+      function Ue() {
         var e = (
           /** @class */
           function() {
@@ -726,62 +726,62 @@ function Be() {
               return this._map.entries();
             }, t.prototype["@@iterator"] = function() {
               return this.keys();
-            }, t.prototype[I] = function() {
+            }, t.prototype[P] = function() {
               return this.keys();
             }, t;
           }()
         );
         return e;
       }
-      function Ue() {
-        var e = 16, t = T.create(), r = n();
+      function $e() {
+        var e = 16, t = T.create(), r = a();
         return (
           /** @class */
           function() {
             function i() {
-              this._key = n();
+              this._key = a();
             }
             return i.prototype.has = function(s) {
-              var o = f(
+              var o = c(
                 s,
                 /*create*/
                 !1
               );
               return o !== void 0 ? T.has(o, this._key) : !1;
             }, i.prototype.get = function(s) {
-              var o = f(
+              var o = c(
                 s,
                 /*create*/
                 !1
               );
               return o !== void 0 ? T.get(o, this._key) : void 0;
             }, i.prototype.set = function(s, o) {
-              var u = f(
+              var u = c(
                 s,
                 /*create*/
                 !0
               );
               return u[this._key] = o, this;
             }, i.prototype.delete = function(s) {
-              var o = f(
+              var o = c(
                 s,
                 /*create*/
                 !1
               );
               return o !== void 0 ? delete o[this._key] : !1;
             }, i.prototype.clear = function() {
-              this._key = n();
+              this._key = a();
             }, i;
           }()
         );
-        function n() {
+        function a() {
           var i;
           do
             i = "@@WeakMap@@" + l();
           while (T.has(t, i));
           return t[i] = !0, i;
         }
-        function f(i, s) {
+        function c(i, s) {
           if (!M.call(i, r)) {
             if (!s)
               return;
@@ -789,20 +789,20 @@ function Be() {
           }
           return i[r];
         }
-        function m(i, s) {
+        function g(i, s) {
           for (var o = 0; o < s; ++o)
             i[o] = Math.random() * 255 | 0;
           return i;
         }
-        function _(i) {
+        function m(i) {
           if (typeof Uint8Array == "function") {
             var s = new Uint8Array(i);
-            return typeof crypto < "u" ? crypto.getRandomValues(s) : typeof msCrypto < "u" ? msCrypto.getRandomValues(s) : m(s, i), s;
+            return typeof crypto < "u" ? crypto.getRandomValues(s) : typeof msCrypto < "u" ? msCrypto.getRandomValues(s) : g(s, i), s;
           }
-          return m(new Array(i), i);
+          return g(new Array(i), i);
         }
         function l() {
-          var i = _(e);
+          var i = m(e);
           i[6] = i[6] & 79 | 64, i[8] = i[8] & 191 | 128;
           for (var s = "", o = 0; o < e; ++o) {
             var u = i[o];
@@ -815,21 +815,21 @@ function Be() {
         return e.__ = void 0, delete e.__, e;
       }
     });
-  }(g || (g = {})), de;
+  }(y || (y = {})), de;
 }
 Be();
-var Ne = Object.defineProperty, Ve = (g, a, c) => a in g ? Ne(g, a, { enumerable: !0, configurable: !0, writable: !0, value: c }) : g[a] = c, V = (g, a, c) => Ve(g, typeof a != "symbol" ? a + "" : a, c);
-class N extends Error {
-  constructor(a, c) {
-    super("API Service Request Failed"), this.originalError = a, this.requestConfig = c, this.name = "ApiRequestError";
+var Ve = Object.defineProperty, ze = (y, n, f) => n in y ? Ve(y, n, { enumerable: !0, configurable: !0, writable: !0, value: f }) : y[n] = f, V = (y, n, f) => ze(y, typeof n != "symbol" ? n + "" : n, f);
+class B extends Error {
+  constructor(n, f) {
+    super("API Service Request Failed"), this.originalError = n, this.requestConfig = f, this.name = "ApiRequestError";
   }
 }
 const ve = class ye {
   constructor() {
     V(this, "axiosInstance"), V(this, "maxRetries");
   }
-  static init(a) {
-    return this.instance || (this.instance = new ye(), this.instance.maxRetries = a.maxRetries ?? 3, this.instance.axiosInstance = this.instance.createAxiosInstance(a), this.instance.setupInterceptors(), this.instance.configureRetry()), this.instance;
+  static init(n) {
+    return this.instance || (this.instance = new ye(), this.instance.maxRetries = n.maxRetries ?? 3, this.instance.axiosInstance = this.instance.createAxiosInstance(n), this.instance.setupInterceptors(), this.instance.configureRetry()), this.instance;
   }
   static getInstance() {
     if (!this.instance)
@@ -839,167 +839,171 @@ const ve = class ye {
   getAxiosInstance() {
     return this.axiosInstance;
   }
-  setAxiosInstance(a) {
-    this.axiosInstance = a;
+  setAxiosInstance(n) {
+    this.axiosInstance = n;
   }
-  getFullBaseUrl(a) {
-    return a.baseURL;
+  getFullBaseUrl(n) {
+    return n.baseURL;
   }
-  createAxiosInstance(a) {
-    const c = {
-      baseURL: this.getFullBaseUrl(a),
-      timeout: a.timeout ?? 1e4,
+  createAxiosInstance(n) {
+    const f = {
+      baseURL: this.getFullBaseUrl(n),
+      timeout: n.timeout ?? 1e4,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        ...a.headers
+        ...n.headers
       },
-      withCredentials: a.withCredentials ?? !0
+      withCredentials: n.withCredentials ?? !0
     };
-    return Le.create(c);
+    return Ne.create(f);
   }
   setupInterceptors() {
     this.axiosInstance.interceptors.request.use(
-      (a) => a,
-      (a) => Promise.reject(a)
+      (n) => n,
+      (n) => Promise.reject(n)
     ), this.axiosInstance.interceptors.response.use(
-      (a) => a,
+      (n) => n,
       this.handleErrorResponse.bind(this)
     );
   }
   configureRetry() {
-    B(this.axiosInstance, {
+    N(this.axiosInstance, {
       retries: this.maxRetries,
-      retryDelay: B.exponentialDelay,
+      retryDelay: N.exponentialDelay,
       retryCondition: this.isRetryableError
     });
   }
-  isRetryableError(a) {
-    var c;
-    return B.isNetworkOrIdempotentRequestError(a) || ((c = a.response) == null ? void 0 : c.status) === 429;
+  isRetryableError(n) {
+    var f;
+    return N.isNetworkOrIdempotentRequestError(n) || ((f = n.response) == null ? void 0 : f.status) === 429;
   }
-  handleErrorResponse(a) {
-    return this.logError(a), Promise.reject(new N(a, a.config || {}));
+  handleErrorResponse(n) {
+    return this.logError(n), Promise.reject(new B(n, n.config || {}));
   }
-  logError(a) {
-    var c, h, M, E;
+  logError(n) {
+    var f, p, M, E;
     console.error("API Request Error", {
-      url: (c = a.config) == null ? void 0 : c.url,
-      method: (h = a.config) == null ? void 0 : h.method,
-      status: (M = a.response) == null ? void 0 : M.status,
-      data: (E = a.response) == null ? void 0 : E.data,
-      message: a.message
+      url: (f = n.config) == null ? void 0 : f.url,
+      method: (p = n.config) == null ? void 0 : p.method,
+      status: (M = n.response) == null ? void 0 : M.status,
+      data: (E = n.response) == null ? void 0 : E.data,
+      message: n.message
     });
   }
-  async request(a, c = {}) {
+  async request(n, f = {}) {
     try {
-      const h = {
+      const p = {
         timeout: 1e4,
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json"
         },
-        ...a,
-        ...c
+        ...n,
+        ...f
       };
       return (await this.axiosInstance.request(
-        h
+        p
       )).data;
-    } catch (h) {
-      throw h instanceof N ? h : new N(h, a);
+    } catch (p) {
+      throw p instanceof B ? p : new B(p, n);
     }
   }
-  _setAxiosInstanceForTesting(a) {
-    this.axiosInstance = a;
+  _setAxiosInstanceForTesting(n) {
+    this.axiosInstance = n;
   }
 };
 V(ve, "instance");
-let pe = ve;
-class Xe extends pe {
-  mutate(a, c = {}, h) {
-    return this.request(
+let we = ve;
+var Ze = Object.defineProperty, Qe = (y, n, f) => n in y ? Ze(y, n, { enumerable: !0, configurable: !0, writable: !0, value: f }) : y[n] = f, he = (y, n, f) => Qe(y, typeof n != "symbol" ? n + "" : n, f);
+class et {
+  constructor(n) {
+    he(this, "http"), he(this, "pathname"), this.http = we.getInstance(), this.pathname = n;
+  }
+  mutate(n, f = {}) {
+    return this.http.request(
       {
         method: "POST",
-        url: `{${h}/mutate}`,
-        data: a
+        url: `${this.pathname}/mutate`,
+        data: n
       },
-      c
+      f
     );
   }
-  executeAction(a, c = {}, h) {
-    return this.request(
+  executeAction(n, f = {}) {
+    return this.http.request(
       {
         method: "POST",
-        url: `${h}/actions/${a.action}`,
-        data: a.params
+        url: `${this.pathname}/actions/${n.action}`,
+        data: n.params
       },
-      c
+      f
     );
   }
-  delete(a, c = {}, h) {
-    return this.request(
+  delete(n, f = {}) {
+    return this.http.request(
       {
         method: "DELETE",
-        url: h,
-        data: a
+        url: this.pathname,
+        data: n
       },
-      c
+      f
     );
   }
-  forceDelete(a, c = {}, h) {
-    return this.request(
+  forceDelete(n, f = {}) {
+    return this.http.request(
       {
         method: "DELETE",
-        url: `$${h}/force`,
-        data: a
+        url: `${this.pathname}/force`,
+        data: n
       },
-      c
+      f
     );
   }
-  restore(a, c = {}, h) {
-    return this.request(
+  restore(n, f = {}) {
+    return this.http.request(
       {
         method: "POST",
-        url: `$${h}/restore`,
-        data: a
+        url: `${this.pathname}/restore`,
+        data: n
       },
-      c
+      f
     );
   }
 }
-var ze = Object.defineProperty, Ze = (g, a, c) => a in g ? ze(g, a, { enumerable: !0, configurable: !0, writable: !0, value: c }) : g[a] = c, he = (g, a, c) => Ze(g, typeof a != "symbol" ? a + "" : a, c);
-class Ye {
-  constructor(a) {
-    he(this, "http"), he(this, "pathname"), this.http = pe.getInstance(), this.pathname = a;
+var Je = Object.defineProperty, Xe = (y, n, f) => n in y ? Je(y, n, { enumerable: !0, configurable: !0, writable: !0, value: f }) : y[n] = f, pe = (y, n, f) => Xe(y, typeof n != "symbol" ? n + "" : n, f);
+class tt {
+  constructor(n) {
+    pe(this, "http"), pe(this, "pathname"), this.http = we.getInstance(), this.pathname = n;
   }
-  searchRequest(a, c = {}) {
+  searchRequest(n, f = {}) {
     return this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/search`,
-        data: { search: a }
+        data: { search: n }
       },
-      c
+      f
     );
   }
-  async search(a, c = {}) {
-    return (await this.searchRequest(a, c)).data;
+  async search(n, f = {}) {
+    return (await this.searchRequest(n, f)).data;
   }
-  searchPaginate(a, c = {}) {
-    return this.searchRequest(a, c);
+  searchPaginate(n, f = {}) {
+    return this.searchRequest(n, f);
   }
-  getdetails(a = {}) {
+  getdetails(n = {}) {
     return this.http.request(
       {
         method: "GET",
         url: this.pathname
       },
-      a
+      n
     );
   }
 }
 export {
-  pe as Http,
-  Xe as Mutation,
-  Ye as Query
+  we as Http,
+  et as Mutation,
+  tt as Query
 };

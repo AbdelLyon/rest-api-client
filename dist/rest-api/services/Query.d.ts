@@ -1,7 +1,8 @@
 import { Http } from './Http';
+import { IQuery } from './inerfaces';
 import { AxiosRequestConfig } from 'axios';
 import { DetailsResponse, SearchRequest, SearchResponse } from '../types';
-export declare abstract class Query<T> {
+export declare abstract class Query<T> implements IQuery<T> {
     protected http: Http;
     protected pathname: string;
     constructor(pathname: string);
