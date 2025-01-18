@@ -6,20 +6,15 @@ import type { DetailsResponse } from "../types/details";
 import type { IQuery } from "./inerfaces";
 
 export class Query<T> extends Http implements IQuery<T> {
-  constructor(pathname: string) {
-    super({
-      baseURL: `/${pathname}`,
-    });
-  }
-
   private searchRequest(
     search: SearchRequest,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<SearchResponse<T>> {
     return this.request<SearchResponse<T>>(
       {
         method: "POST",
-        url: "/search",
+        url: `{${pathname}/search}`,
         data: { search },
       },
       options,
@@ -43,11 +38,13 @@ export class Query<T> extends Http implements IQuery<T> {
 
   public getdetails(
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<DetailsResponse> {
     return this.request<DetailsResponse>(
       {
         method: "GET",
-        url: "",
+
+        url: pathname,
       },
       options,
     );

@@ -22,26 +22,23 @@ export interface HttpConfigOptions {
 }
 
 export class Http {
-  private static instance: Http;
-  private axiosInstance: AxiosInstance;
-  private readonly maxRetries: number;
-
-  protected constructor(options: HttpConfigOptions) {
-    this.maxRetries = options.maxRetries ?? 3;
-    this.axiosInstance = this.createAxiosInstance(options);
-    this.setupInterceptors();
-    this.configureRetry();
-  }
+  private static instance: Http | undefined;
+  private axiosInstance!: AxiosInstance;
+  private maxRetries!: number;
 
   static init(options: HttpConfigOptions): Http {
-    if (this.instance !== undefined) {
-      this.instance = new Http(options);
+    if (!this.instance) {
+      this.instance = new Http();
+      this.instance.maxRetries = options.maxRetries ?? 3;
+      this.instance.axiosInstance = this.instance.createAxiosInstance(options);
+      this.instance.setupInterceptors();
+      this.instance.configureRetry();
     }
     return this.instance;
   }
 
   static getInstance(): Http {
-    if (this.instance !== undefined) {
+    if (!this.instance) {
       throw new Error("Http not initialized. Call Http.init() first.");
     }
     return this.instance;
@@ -143,7 +140,6 @@ export class Http {
     }
   }
 
-  // Méthode pour les tests
   protected _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void {
     this.axiosInstance = axiosInstance;
   }

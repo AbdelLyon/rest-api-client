@@ -14,8 +14,7 @@ export interface HttpConfigOptions {
 export declare class Http {
     private static instance;
     private axiosInstance;
-    private readonly maxRetries;
-    protected constructor(options: HttpConfigOptions);
+    private maxRetries;
     static init(options: HttpConfigOptions): Http;
     static getInstance(): Http;
     protected getAxiosInstance(): AxiosInstance;

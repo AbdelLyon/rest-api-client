@@ -7,12 +7,6 @@ import type { MutateRequest, MutateResponse } from "../types/mutate";
 import type { IMutation } from "./inerfaces";
 
 export class Mutation<T> extends Http implements IMutation<T> {
-  constructor(pathname: string) {
-    super({
-      baseURL: `/${pathname}`,
-    });
-  }
-
   public mutate<
     TAttributes,
     TRelations,
@@ -24,11 +18,12 @@ export class Mutation<T> extends Http implements IMutation<T> {
       TRelationAttributesMap
     >,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<MutateResponse<T>> {
     return this.request<MutateResponse<T>>(
       {
         method: "POST",
-        url: "/mutate",
+        url: `{${pathname}/mutate}`,
         data: mutateRequest,
       },
       options,
@@ -38,11 +33,12 @@ export class Mutation<T> extends Http implements IMutation<T> {
   public executeAction(
     actionRequest: ActionRequest,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<ActionResponse> {
     return this.request<ActionResponse>(
       {
         method: "POST",
-        url: `/actions/${actionRequest.action}`,
+        url: `${pathname}/actions/${actionRequest.action}`,
         data: actionRequest.params,
       },
       options,
@@ -52,11 +48,12 @@ export class Mutation<T> extends Http implements IMutation<T> {
   public delete(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<DeleteResponse<T>> {
     return this.request<DeleteResponse<T>>(
       {
         method: "DELETE",
-        url: "",
+        url: pathname,
         data: request,
       },
       options,
@@ -66,11 +63,12 @@ export class Mutation<T> extends Http implements IMutation<T> {
   public forceDelete(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<DeleteResponse<T>> {
     return this.request<DeleteResponse<T>>(
       {
         method: "DELETE",
-        url: "/force",
+        url: `$${pathname}/force`,
         data: request,
       },
       options,
@@ -80,11 +78,12 @@ export class Mutation<T> extends Http implements IMutation<T> {
   public restore(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
+    pathname?: string,
   ): Promise<DeleteResponse<T>> {
     return this.request<DeleteResponse<T>>(
       {
         method: "POST",
-        url: "/restore",
+        url: `$${pathname}/restore`,
         data: request,
       },
       options,
