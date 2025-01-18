@@ -12,9 +12,12 @@ export interface HttpConfigOptions {
     maxRetries?: number;
 }
 export declare class Http {
+    private static instance;
     private axiosInstance;
-    private readonly MAX_RETRIES;
-    constructor(options: HttpConfigOptions);
+    private readonly maxRetries;
+    protected constructor(options: HttpConfigOptions);
+    static init(options: HttpConfigOptions): Http;
+    static getInstance(): Http;
     protected getAxiosInstance(): AxiosInstance;
     protected setAxiosInstance(instance: AxiosInstance): void;
     protected getFullBaseUrl(options: HttpConfigOptions): string;
@@ -25,4 +28,5 @@ export declare class Http {
     private handleErrorResponse;
     private logError;
     request<TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>): Promise<TResponse>;
+    protected _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void;
 }

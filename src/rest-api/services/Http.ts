@@ -22,14 +22,29 @@ export interface HttpConfigOptions {
 }
 
 export class Http {
+  private static instance: Http;
   private axiosInstance: AxiosInstance;
-  private readonly MAX_RETRIES: number;
+  private readonly maxRetries: number;
 
-  constructor(options: HttpConfigOptions) {
-    this.MAX_RETRIES = options.maxRetries ?? 3;
+  protected constructor(options: HttpConfigOptions) {
+    this.maxRetries = options.maxRetries ?? 3;
     this.axiosInstance = this.createAxiosInstance(options);
     this.setupInterceptors();
     this.configureRetry();
+  }
+
+  static init(options: HttpConfigOptions): Http {
+    if (this.instance !== undefined) {
+      this.instance = new Http(options);
+    }
+    return this.instance;
+  }
+
+  static getInstance(): Http {
+    if (this.instance !== undefined) {
+      throw new Error("Http not initialized. Call Http.init() first.");
+    }
+    return this.instance;
   }
 
   protected getAxiosInstance(): AxiosInstance {
@@ -73,7 +88,7 @@ export class Http {
 
   private configureRetry(): void {
     axiosRetry(this.axiosInstance, {
-      retries: this.MAX_RETRIES,
+      retries: this.maxRetries,
       retryDelay: axiosRetry.exponentialDelay,
       retryCondition: this.isRetryableError,
     });
@@ -126,5 +141,10 @@ export class Http {
       }
       throw new ApiRequestError(error as AxiosError, config);
     }
+  }
+
+  // Méthode pour les tests
+  protected _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void {
+    this.axiosInstance = axiosInstance;
   }
 }
