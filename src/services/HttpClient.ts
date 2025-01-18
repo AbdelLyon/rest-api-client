@@ -1,8 +1,8 @@
 import axiosRetry from "axios-retry";
 import axios from "axios";
 import type { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
-import type { HttpConfigOptions } from "@/types/common";
 import type { IHttpClient } from "@/interfaces";
+import type { HttpConfigOptions } from "@/types/common";
 
 export class ApiRequestError extends Error {
   constructor(
