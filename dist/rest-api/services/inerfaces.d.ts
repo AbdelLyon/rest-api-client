@@ -1,13 +1,8 @@
 import { MutateRequest, MutateResponse } from '../types/mutate';
 import { ActionRequest, ActionResponse } from '../types/action';
 import { DeleteRequest, DeleteResponse } from '../types/delete';
-import { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { AxiosRequestConfig } from 'axios';
 import { DetailsResponse, SearchRequest, SearchResponse } from '../types';
-export interface IHttpConfig {
-    getAxiosInstance: () => AxiosInstance;
-    getFullBaseUrl: () => string;
-    setAxiosInstance: (instance: AxiosInstance) => void;
-}
 export interface IHttp {
     request: <TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>) => Promise<TResponse>;
 }

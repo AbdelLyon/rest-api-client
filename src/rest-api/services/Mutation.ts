@@ -1,15 +1,17 @@
 import "reflect-metadata";
+import { Http } from "./Http";
 import type { AxiosRequestConfig } from "axios";
 import type { DeleteRequest, DeleteResponse } from "../types/delete";
 import type { ActionRequest, ActionResponse } from "../types/action";
 import type { MutateRequest, MutateResponse } from "../types/mutate";
-import type { IHttp, IMutation } from "./inerfaces";
-import { Inject, Injectable } from "@/rest-api/di/decorators";
-import { TOKENS } from "@/rest-api/di/tokens";
+import type { IMutation } from "./inerfaces";
 
-@Injectable()
-export class Mutation<T> implements IMutation<T> {
-  constructor(@Inject(TOKENS.IHttp) private readonly apiRequest: IHttp) {}
+export class Mutation<T> extends Http implements IMutation<T> {
+  constructor(pathname: string) {
+    super({
+      baseURL: `/${pathname}`,
+    });
+  }
 
   public mutate<
     TAttributes,
@@ -23,7 +25,7 @@ export class Mutation<T> implements IMutation<T> {
     >,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
-    return this.apiRequest.request<MutateResponse<T>>(
+    return this.request<MutateResponse<T>>(
       {
         method: "POST",
         url: "/mutate",
@@ -37,7 +39,7 @@ export class Mutation<T> implements IMutation<T> {
     actionRequest: ActionRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<ActionResponse> {
-    return this.apiRequest.request<ActionResponse>(
+    return this.request<ActionResponse>(
       {
         method: "POST",
         url: `/actions/${actionRequest.action}`,
@@ -51,7 +53,7 @@ export class Mutation<T> implements IMutation<T> {
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.apiRequest.request<DeleteResponse<T>>(
+    return this.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: "",
@@ -65,7 +67,7 @@ export class Mutation<T> implements IMutation<T> {
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.apiRequest.request<DeleteResponse<T>>(
+    return this.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: "/force",
@@ -79,7 +81,7 @@ export class Mutation<T> implements IMutation<T> {
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.apiRequest.request<DeleteResponse<T>>(
+    return this.request<DeleteResponse<T>>(
       {
         method: "POST",
         url: "/restore",

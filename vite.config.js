@@ -13,7 +13,7 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
-var modules = ["hooks", "services", "models", "types", "factories", "di"];
+var modules = ["hooks", "services", "models", "types"];
 var entries = __assign(__assign({}, modules.reduce(function (acc, module) {
     acc["rest-api/".concat(module)] = path.resolve(__dirname, "src/rest-api/".concat(module, "/index.ts"));
     return acc;

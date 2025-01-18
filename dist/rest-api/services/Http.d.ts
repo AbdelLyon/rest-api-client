@@ -1,17 +1,28 @@
-import { AxiosError, AxiosRequestConfig } from 'axios';
-import { HttpConfig } from './HttpConfig';
-import { IHttp } from './inerfaces';
+import { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 export declare class ApiRequestError extends Error {
     originalError: AxiosError;
     requestConfig: AxiosRequestConfig;
     constructor(originalError: AxiosError, requestConfig: AxiosRequestConfig);
 }
-export declare class Http extends HttpConfig implements IHttp {
-    protected readonly DEFAULT_REQUEST_OPTIONS: Partial<AxiosRequestConfig>;
-    constructor(domain: string, baseUrl: string);
-    private setupApiInterceptors;
-    private successInterceptor;
-    private errorInterceptor;
+export interface HttpConfigOptions {
+    baseURL: string;
+    timeout?: number;
+    headers?: Record<string, string>;
+    withCredentials?: boolean;
+    maxRetries?: number;
+}
+export declare abstract class Http {
+    private axiosInstance;
+    private readonly MAX_RETRIES;
+    constructor(options: HttpConfigOptions);
+    protected getAxiosInstance(): AxiosInstance;
+    protected setAxiosInstance(instance: AxiosInstance): void;
+    protected getFullBaseUrl(options: HttpConfigOptions): string;
+    private createAxiosInstance;
+    private setupInterceptors;
+    private configureRetry;
+    private isRetryableError;
+    private handleErrorResponse;
     private logError;
     request<TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>): Promise<TResponse>;
 }

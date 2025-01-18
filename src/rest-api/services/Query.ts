@@ -1,24 +1,22 @@
 import "reflect-metadata";
-import { AxiosRequestConfig } from "axios";
-import { SearchRequest, SearchResponse } from "../types/search";
-import { DetailsResponse } from "../types/details";
-import type { IHttp, IQuery } from "./inerfaces";
-import { Inject, Injectable } from "@/rest-api/di/decorators";
-import { TOKENS } from "@/rest-api/di/tokens";
+import { Http } from "./Http";
+import type { AxiosRequestConfig } from "axios";
+import type { SearchRequest, SearchResponse } from "../types/search";
+import type { DetailsResponse } from "../types/details";
+import type { IQuery } from "./inerfaces";
 
-@Injectable()
-export class Query<T> implements IQuery<T> {
-  constructor(@Inject(TOKENS.IHttp) private readonly apiRequest: IHttp) {
-    if (this.apiRequest !== undefined) {
-      throw new Error("ApiRequest is required");
-    }
+export class Query<T> extends Http implements IQuery<T> {
+  constructor(pathname: string) {
+    super({
+      baseURL: `/${pathname}`,
+    });
   }
 
   private searchRequest(
     search: SearchRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<SearchResponse<T>> {
-    return this.apiRequest.request<SearchResponse<T>>(
+    return this.request<SearchResponse<T>>(
       {
         method: "POST",
         url: "/search",
@@ -46,7 +44,7 @@ export class Query<T> implements IQuery<T> {
   public getdetails(
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DetailsResponse> {
-    return this.apiRequest.request<DetailsResponse>(
+    return this.request<DetailsResponse>(
       {
         method: "GET",
         url: "",
