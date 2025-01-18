@@ -1,20 +1,24 @@
-import "reflect-metadata";
 import { Http } from "./Http";
 import type { AxiosRequestConfig } from "axios";
-import type { SearchRequest, SearchResponse } from "../types/search";
-import type { DetailsResponse } from "../types/details";
-import type { IQuery } from "./inerfaces";
+import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
 
-export class Query<T> extends Http implements IQuery<T> {
+export abstract class Query<T> {
+  protected http: Http;
+  protected pathname: string;
+
+  constructor(pathname: string) {
+    this.http = Http.getInstance();
+    this.pathname = pathname;
+  }
+
   private searchRequest(
     search: SearchRequest,
     options: Partial<AxiosRequestConfig> = {},
-    pathname?: string,
   ): Promise<SearchResponse<T>> {
-    return this.request<SearchResponse<T>>(
+    return this.http.request<SearchResponse<T>>(
       {
         method: "POST",
-        url: `{${pathname}/search}`,
+        url: `${this.pathname}/search`,
         data: { search },
       },
       options,
@@ -38,13 +42,11 @@ export class Query<T> extends Http implements IQuery<T> {
 
   public getdetails(
     options: Partial<AxiosRequestConfig> = {},
-    pathname?: string,
   ): Promise<DetailsResponse> {
-    return this.request<DetailsResponse>(
+    return this.http.request<DetailsResponse>(
       {
         method: "GET",
-
-        url: pathname,
+        url: this.pathname,
       },
       options,
     );
