@@ -18,6 +18,10 @@
       "import": "./dist/types/index.es.js",
       "types": "./dist/types/index.d.ts"
     },
+    "./interfaces": {
+      "import": "./dist/interfaces/index.es.js",
+      "types": "./dist/interfaces/index.d.ts"
+    },
     "./services": {
       "import": "./dist/services/index.es.js",
       "types": "./dist/services/index.d.ts"
