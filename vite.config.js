@@ -13,17 +13,16 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
-var modules = ["hooks", "services", "models", "types"];
-var entries = __assign(__assign({}, modules.reduce(function (acc, module) {
-    acc["rest-api/".concat(module)] = path.resolve(__dirname, "src/rest-api/".concat(module, "/index.ts"));
+var modules = ["services", "types"];
+var entries = __assign({}, modules.reduce(function (acc, module) {
+    acc[module] = path.resolve(__dirname, "src/".concat(module, "/index.ts"));
     return acc;
-}, {})), { "react-query": path.resolve(__dirname, "src/react-query/index.ts") });
+}, {}));
 export default defineConfig({
     plugins: [
         react(),
         dts({
-            exclude: ["src/tests/**/*"],
-            include: ["src/rest-api/**/*", "src/react-query/**/*"],
+            exclude: ["src/tests/**/*", "src/models/**/*"],
         }),
     ],
     resolve: {
@@ -38,20 +37,39 @@ export default defineConfig({
             fileName: function (format, entryName) { return "".concat(entryName, "/index.").concat(format, ".js"); },
         },
         rollupOptions: {
-            external: [
-                "react",
-                "react-dom",
-                "@tanstack/react-query",
-                "axios",
-                "axios-retry",
-                /^@tanstack\/.*/,
-            ],
+            external: ["react", "react-dom", "axios", "axios-retry", "cookies-next"],
             output: {
+                preserveModulesRoot: "src",
+                preserveModules: true,
+                exports: "named",
                 globals: {
                     react: "React",
                     "react-dom": "ReactDOM",
-                    "@tanstack/react-query": "ReactQuery",
                 },
+            },
+            treeshake: {
+                moduleSideEffects: false,
+                propertyReadSideEffects: false,
+                tryCatchDeoptimization: false,
+            },
+        },
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true,
+                pure_funcs: [
+                    "console.log",
+                    "console.info",
+                    "console.debug",
+                    "console.warn",
+                ],
+                passes: 2,
+            },
+            mangle: {
+                safari10: true,
+            },
+            format: {
+                comments: false,
             },
         },
     },
