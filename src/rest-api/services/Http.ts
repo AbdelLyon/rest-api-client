@@ -21,7 +21,7 @@ export interface HttpConfigOptions {
   maxRetries?: number;
 }
 
-export abstract class Http {
+export class Http {
   private axiosInstance: AxiosInstance;
   private readonly MAX_RETRIES: number;
 

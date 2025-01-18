@@ -11,7 +11,7 @@ export interface HttpConfigOptions {
     withCredentials?: boolean;
     maxRetries?: number;
 }
-export declare abstract class Http {
+export declare class Http {
     private axiosInstance;
     private readonly MAX_RETRIES;
     constructor(options: HttpConfigOptions);
