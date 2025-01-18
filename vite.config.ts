@@ -34,7 +34,7 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external: ["react", "react-dom", "axios", "axios-retry", "cookies-next"],
+      external: ["axios", "axios-retry", "cookies-next"],
 
       output: {
         preserveModulesRoot: "src",

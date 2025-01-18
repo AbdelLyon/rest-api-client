@@ -6,7 +6,7 @@
   "files": [
     "dist"
   ],
-  "description": "Xefi rest-api-client sdk",
+  "description": "Xefi rest-api-client",
   "repository": {
     "type": "git",
     "url": "https://github.com/AbdelLyon/rest-api-react.git"

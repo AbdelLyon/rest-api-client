@@ -37,7 +37,7 @@ export default defineConfig({
             fileName: function (format, entryName) { return "".concat(entryName, "/index.").concat(format, ".js"); },
         },
         rollupOptions: {
-            external: ["react", "react-dom", "axios", "axios-retry", "cookies-next"],
+            external: ["axios", "axios-retry", "cookies-next"],
             output: {
                 preserveModulesRoot: "src",
                 preserveModules: true,
