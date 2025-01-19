@@ -44,7 +44,7 @@ export abstract class Mutation<T> implements IMutation<T> {
       {
         method: "POST",
         url: `${this.pathname}/actions/${actionRequest.action}`,
-        data: actionRequest.params,
+        data: actionRequest.payload,
       },
       options,
     );

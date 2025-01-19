@@ -13,7 +13,7 @@ export declare interface ActionFilter {
 
 export declare interface ActionRequest {
     action: string;
-    params: paramsAction;
+    payload: payloadAction;
 }
 
 export declare interface ActionResponse {
@@ -238,7 +238,7 @@ export declare interface PaginationParams {
     limit?: number;
 }
 
-declare interface paramsAction {
+declare interface payloadAction {
     fields: Array<ActionField>;
     search?: {
         filters?: Array<ActionFilter>;

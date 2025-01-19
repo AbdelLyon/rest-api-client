@@ -117,7 +117,7 @@ class P {
       {
         method: "POST",
         url: `${this.pathname}/actions/${t.action}`,
-        data: t.params
+        data: t.payload
       },
       e
     );

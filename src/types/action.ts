@@ -8,7 +8,7 @@ export interface ActionFilter {
   value: boolean | string | number;
 }
 
-export interface paramsAction {
+export interface payloadAction {
   fields: Array<ActionField>;
   search?: {
     filters?: Array<ActionFilter>;
@@ -17,7 +17,7 @@ export interface paramsAction {
 
 export interface ActionRequest {
   action: string;
-  params: paramsAction;
+  payload: payloadAction;
 }
 
 export interface ActionResponse {
