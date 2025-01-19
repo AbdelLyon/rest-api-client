@@ -1,9 +1,16 @@
-export type ScopeParameter = string | number | boolean;
-export type FilterOperator = "=" | ">" | "<" | "in";
-export type FilterType = "and" | "or";
+// Types simples
+export type ScopeParameterValue = string | number | boolean;
+export type ComparisonOperator = "=" | ">" | "<" | "in";
+export type LogicalOperator = "and" | "or";
 export type SortDirection = "asc" | "desc";
-export type AggregateType = "min" | "max" | "avg" | "sum" | "count" | "exists";
-export type Gate =
+export type AggregationFunction =
+  | "min"
+  | "max"
+  | "avg"
+  | "sum"
+  | "count"
+  | "exists";
+export type SearchPermission =
   | "create"
   | "view"
   | "update"
@@ -11,34 +18,34 @@ export type Gate =
   | "restore"
   | "forceDelete";
 
-export interface SearchText {
+export interface TextSearch {
   value: string;
 }
 
-export interface Scope {
+export interface ScopeDefinition {
   name: string;
-  parameters: Array<ScopeParameter>;
+  parameters: Array<ScopeParameterValue>;
 }
 
-export interface BaseFilter {
+export interface FilterCriteria {
   field: string;
-  operator: FilterOperator;
+  operator: ComparisonOperator;
   value: string | number | boolean | Array<string | number | boolean>;
-  type?: FilterType;
+  type?: LogicalOperator;
 }
 
-export interface NestedFilter {
-  nested: Array<BaseFilter>;
+export interface NestedFilterCriteria {
+  nested: Array<FilterCriteria>;
 }
 
-export type Filter = BaseFilter | NestedFilter;
+export type Filter = FilterCriteria | NestedFilterCriteria;
 
-export interface Sort {
+export interface SortCriteria {
   field: string;
   direction: SortDirection;
 }
 
-export interface Select {
+export interface FieldSelection {
   field: string;
 }
 
@@ -52,32 +59,35 @@ export interface Instruction {
   fields: Array<InstructionField>;
 }
 
-export interface Include {
+export interface RelationInclude {
   relation: string;
   filters?: Array<Filter>;
-  sorts?: Array<Sort>;
-  selects?: Array<Select>;
-  scopes?: Array<Scope>;
+  sorts?: Array<SortCriteria>;
+  selects?: Array<FieldSelection>;
+  scopes?: Array<ScopeDefinition>;
   limit?: number;
 }
 
-export interface Aggregate {
+export interface AggregationCriteria {
   relation: string;
-  type: AggregateType;
+  type: AggregationFunction;
   field?: string;
   filters?: Array<Filter>;
 }
 
 export interface SearchRequest {
-  text?: SearchText;
-  scopes?: Array<Scope>;
+  text?: TextSearch;
+  scopes?: Array<ScopeDefinition>;
   filters?: Array<Filter>;
-  sorts?: Array<Sort>;
-  selects?: Array<Select>;
-  includes?: Array<Include>;
-  aggregates?: Array<Aggregate>;
+  sorts?: Array<SortCriteria>;
+  selects?: Array<FieldSelection>;
+  includes?: Array<RelationInclude>;
+  aggregates?: Array<AggregationCriteria>;
   instructions?: Array<Instruction>;
-  gates?: Array<Gate>;
+  Gates?: Array<SearchPermission>;
+}
+
+export interface PaginatedSearchRequest extends SearchRequest {
   page?: number;
   limit?: number;
 }

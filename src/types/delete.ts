@@ -1,3 +1,5 @@
+import { Permission } from "./common";
+
 export interface DeleteRequest {
   resources: Array<number | string>;
 }
@@ -5,9 +7,6 @@ export interface DeleteRequest {
 export interface DeleteResponse<T> {
   data: Array<T>;
   meta?: {
-    gates?: {
-      authorized_to_create?: boolean;
-      [key: string]: boolean | undefined;
-    };
+    gates?: Partial<Permission>;
   };
 }

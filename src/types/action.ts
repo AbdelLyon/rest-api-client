@@ -1,23 +1,23 @@
-export interface ActionField {
+export interface ActionFieldDefinition {
   name: string;
   value: string | number | boolean;
 }
 
-export interface ActionFilter {
+export interface ActionFilterCriteria {
   field: string;
   value: boolean | string | number;
 }
 
-export interface payloadAction {
-  fields: Array<ActionField>;
+export interface ActionPayload {
+  fields: Array<ActionFieldDefinition>;
   search?: {
-    filters?: Array<ActionFilter>;
+    filters?: Array<ActionFilterCriteria>;
   };
 }
 
 export interface ActionRequest {
   action: string;
-  payload: payloadAction;
+  payload: ActionPayload;
 }
 
 export interface ActionResponse {

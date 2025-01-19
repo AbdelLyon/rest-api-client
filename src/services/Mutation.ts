@@ -2,7 +2,7 @@ import { HttpClient } from "./HttpClient";
 import type { AxiosRequestConfig } from "axios";
 import type { DeleteRequest, DeleteResponse } from "../types/delete";
 import type { ActionRequest, ActionResponse } from "../types/action";
-import type { MutateRequest, MutateResponse } from "../types/mutate";
+import type { MutationRequest, MutationResponse } from "../types/mutate";
 import type { IMutation } from "@/interfaces";
 
 export abstract class Mutation<T> implements IMutation<T> {
@@ -15,10 +15,10 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public mutate<TAttributes, TRelations>(
-    mutateRequest: MutateRequest<TAttributes, TRelations>,
+    mutateRequest: MutationRequest<TAttributes, TRelations>,
     options: Partial<AxiosRequestConfig> = {},
-  ): Promise<MutateResponse<T>> {
-    return this.http.request<MutateResponse<T>>(
+  ): Promise<MutationResponse<T>> {
+    return this.http.request<MutationResponse<T>>(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,

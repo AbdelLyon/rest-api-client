@@ -2,6 +2,7 @@ import { HttpClient } from "./HttpClient";
 import type { AxiosRequestConfig } from "axios";
 import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
 import type { IQuery } from "@/interfaces";
+import { PaginatedSearchRequest } from "@/types/search";
 
 export abstract class Query<T> implements IQuery<T> {
   protected http: HttpClient;
@@ -35,7 +36,7 @@ export abstract class Query<T> implements IQuery<T> {
   }
 
   public searchPaginate(
-    search: SearchRequest,
+    search: PaginatedSearchRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<SearchResponse<T>> {
     return this.searchRequest(search, options);

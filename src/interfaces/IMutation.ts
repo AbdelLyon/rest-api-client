@@ -3,16 +3,16 @@ import {
   ActionResponse,
   DeleteRequest,
   DeleteResponse,
-  MutateRequest,
-  MutateResponse,
+  MutationRequest,
+  MutationResponse,
 } from "@/types";
 import { AxiosRequestConfig } from "axios";
 
 export interface IMutation<T> {
   mutate<TAttributes, TRelations>(
-    mutateRequest: MutateRequest<TAttributes, TRelations>,
+    mutateRequest: MutationRequest<TAttributes, TRelations>,
     options?: Partial<AxiosRequestConfig>,
-  ): Promise<MutateResponse<T>>;
+  ): Promise<MutationResponse<T>>;
 
   executeAction(
     actionRequest: ActionRequest,

@@ -1,45 +1,49 @@
 export type {
-  ActionField,
-  ActionFilter,
+  ActionFieldDefinition,
+  ActionFilterCriteria,
+  ActionPayload,
   ActionRequest,
   ActionResponse,
 } from "@/types/action";
 export type {
-  Aggregate,
-  AggregateType,
-  BaseFilter,
   Filter,
-  FilterOperator,
-  FilterType,
-  Gate,
-  Include,
+  SearchPermission,
   Instruction,
   InstructionField,
-  NestedFilter,
-  Scope,
-  ScopeParameter,
-  SearchRequest,
-  SearchText,
-  Select,
-  Sort,
+  NestedFilterCriteria,
+  AggregationCriteria,
+  AggregationFunction,
+  FieldSelection,
+  FilterCriteria,
+  LogicalOperator,
+  PaginatedSearchRequest,
+  ComparisonOperator,
+  RelationInclude,
+  ScopeDefinition,
+  ScopeParameterValue,
+  SortCriteria,
   SortDirection,
+  TextSearch,
+  SearchRequest,
   SearchResponse,
 } from "@/types/search";
 
 export type {
-  MutateRequest,
-  OperationType,
-  AttachRelation,
-  BaseMutationOperation,
-  CreateOperation,
-  CreateRelation,
-  DetachRelation,
-  MutateResponse,
-  MutationOperation,
+  AttachRelationOperation,
+  BaseMutationData,
+  CreateRelationOperation,
   RelationOperation,
-  SyncRelation,
-  ToggleRelation,
-  UpdateOperation,
+  CreateMutationOperation,
+  DetachRelationOperation,
+  SyncRelationOperation,
+  MutationOperation,
+  MutationRequest,
+  MutationResponse,
+  RelationAttributes,
+  RelationDefinitions,
+  RelationOperationType,
+  ToggleRelationOperation,
+  UpdateMutationOperation,
 } from "@/types/mutate";
 
 export type {
@@ -56,4 +60,8 @@ export type {
 
 export type { DeleteRequest, DeleteResponse } from "@/types/delete";
 
-export type { HttpConfigOptions, PaginationParams } from "@/types/common";
+export type {
+  HttpConfigOptions,
+  PaginationParams,
+  Permission,
+} from "@/types/common";

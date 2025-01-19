@@ -1,12 +1,10 @@
-// Relations génériques
-export type RelationsConfig = Record<string, unknown>;
+export type RelationDefinitions = Record<string, unknown>;
 
-export type RelationAttributesMap<T> = {
+export type RelationAttributes<T> = {
   [K in keyof T]: T[K];
 };
 
-// Le reste du code reste identique
-export type OperationType =
+export type RelationOperationType =
   | "create"
   | "update"
   | "attach"
@@ -14,17 +12,17 @@ export type OperationType =
   | "sync"
   | "toggle";
 
-export interface AttachRelation {
+export interface AttachRelationOperation {
   operation: "attach";
   key: string | number;
 }
 
-export interface DetachRelation {
+export interface DetachRelationOperation {
   operation: "detach";
   key: string | number;
 }
 
-export interface SyncRelation<T, K extends keyof T> {
+export interface SyncRelationOperation<T, K extends keyof T> {
   operation: "sync";
   without_detaching?: boolean;
   key: string | number;
@@ -32,62 +30,62 @@ export interface SyncRelation<T, K extends keyof T> {
   pivot?: Record<string, string | number>;
 }
 
-export interface ToggleRelation<T, K extends keyof T> {
+export interface ToggleRelationOperation<T, K extends keyof T> {
   operation: "toggle";
   key: string | number;
   attributes?: T[K];
   pivot?: Record<string, string | number>;
 }
 
-export interface CreateRelation<TAttributes, TRelations> {
+export interface CreateRelationOperation<TModelAttributes, TRelations> {
   operation: "create";
   attributes?: TRelations[keyof TRelations];
   relations?: Partial<
     Record<
       keyof TRelations,
-      | RelationOperation<TAttributes, TRelations>
-      | Array<RelationOperation<TAttributes, TRelations>>
+      | RelationOperation<TModelAttributes, TRelations>
+      | Array<RelationOperation<TModelAttributes, TRelations>>
     >
   >;
 }
 
-export type RelationOperation<TAttributes, TRelations> =
-  | CreateRelation<TAttributes, TRelations>
-  | AttachRelation
-  | DetachRelation
-  | SyncRelation<TRelations, keyof TRelations>
-  | ToggleRelation<TRelations, keyof TRelations>;
+export type RelationOperation<TModelAttributes, TRelations> =
+  | CreateRelationOperation<TModelAttributes, TRelations>
+  | AttachRelationOperation
+  | DetachRelationOperation
+  | SyncRelationOperation<TRelations, keyof TRelations>
+  | ToggleRelationOperation<TRelations, keyof TRelations>;
 
-export interface BaseMutationOperation<TAttributes, TRelations> {
-  attributes?: TAttributes;
+export interface BaseMutationData<TModelAttributes, TRelations> {
+  attributes?: TModelAttributes;
   relations?: Partial<
     Record<
       keyof TRelations,
-      | RelationOperation<TAttributes, TRelations>
-      | Array<RelationOperation<TAttributes, TRelations>>
+      | RelationOperation<TModelAttributes, TRelations>
+      | Array<RelationOperation<TModelAttributes, TRelations>>
     >
   >;
 }
 
-export interface CreateOperation<TAttributes, TRelations>
-  extends BaseMutationOperation<TAttributes, TRelations> {
+export interface CreateMutationOperation<TModelAttributes, TRelations>
+  extends BaseMutationData<TModelAttributes, TRelations> {
   operation: "create";
 }
 
-export interface UpdateOperation<TAttributes, TRelations>
-  extends BaseMutationOperation<TAttributes, TRelations> {
+export interface UpdateMutationOperation<TModelAttributes, TRelations>
+  extends BaseMutationData<TModelAttributes, TRelations> {
   operation: "update";
   key: string | number;
 }
 
-export type MutationOperation<TAttributes, TRelations> =
-  | CreateOperation<TAttributes, TRelations>
-  | UpdateOperation<TAttributes, TRelations>;
+export type MutationOperation<TModelAttributes, TRelations> =
+  | CreateMutationOperation<TModelAttributes, TRelations>
+  | UpdateMutationOperation<TModelAttributes, TRelations>;
 
-export interface MutateRequest<TAttributes, TRelations> {
-  mutate: Array<MutationOperation<TAttributes, TRelations>>;
+export interface MutationRequest<TModelAttributes, TRelations> {
+  mutate: Array<MutationOperation<TModelAttributes, TRelations>>;
 }
 
-export interface MutateResponse<T> {
-  data: Array<T>;
+export interface MutationResponse<TModel> {
+  data: Array<TModel>;
 }
