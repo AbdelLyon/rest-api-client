@@ -43,19 +43,19 @@ export declare interface BaseFilter {
     type?: FilterType;
 }
 
-export declare interface BaseMutationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
+export declare interface BaseMutationOperation<TAttributes, TRelations> {
     attributes?: TAttributes;
-    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations, TRelationAttributesMap> | Array<RelationOperation<TAttributes, TRelations, TRelationAttributesMap>>>>;
+    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>>>;
 }
 
-export declare interface CreateOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> extends BaseMutationOperation<TAttributes, TRelations, TRelationAttributesMap> {
+export declare interface CreateOperation<TAttributes, TRelations> extends BaseMutationOperation<TAttributes, TRelations> {
     operation: "create";
 }
 
-export declare interface CreateRelation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
+export declare interface CreateRelation<TAttributes, TRelations> {
     operation: "create";
-    attributes?: TRelationAttributesMap[keyof TRelations];
-    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations, TRelationAttributesMap> | Array<RelationOperation<TAttributes, TRelations, TRelationAttributesMap>>>>;
+    attributes?: TRelations[keyof TRelations];
+    relations?: Partial<Record<keyof TRelations, RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>>>;
 }
 
 export declare interface DeleteRequest {
@@ -174,11 +174,11 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate: <TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>>(mutateRequest: MutateRequest<TAttributes, TRelations, TRelationAttributesMap>) => Promise<MutateResponse<T>>;
-    executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
-    delete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-    forceDelete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-    restore: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutateRequest<TAttributes, TRelations>, options?: Partial<AxiosRequestConfig>): Promise<MutateResponse<T>>;
+    executeAction(actionRequest: ActionRequest, options?: Partial<AxiosRequestConfig>): Promise<ActionResponse>;
+    delete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
+    forceDelete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
+    restore(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
 }
 
 export declare interface Include {
@@ -206,8 +206,8 @@ export declare interface IQuery<T> {
     getdetails: (options?: Partial<AxiosRequestConfig>) => Promise<DetailsResponse>;
 }
 
-export declare interface MutateRequest<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> {
-    mutate: Array<MutationOperation<TAttributes, TRelations, TRelationAttributesMap>>;
+export declare interface MutateRequest<TAttributes, TRelations> {
+    mutate: Array<MutationOperation<TAttributes, TRelations>>;
 }
 
 export declare interface MutateResponse<T> {
@@ -218,14 +218,14 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
     protected pathname: string;
     constructor(pathname: string);
-    mutate<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>>(mutateRequest: MutateRequest<TAttributes, TRelations, TRelationAttributesMap>, options?: Partial<AxiosRequestConfig>): Promise<MutateResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutateRequest<TAttributes, TRelations>, options?: Partial<AxiosRequestConfig>): Promise<MutateResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<AxiosRequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
     restore(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-export declare type MutationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> = CreateOperation<TAttributes, TRelations, TRelationAttributesMap> | UpdateOperation<TAttributes, TRelations, TRelationAttributesMap>;
+export declare type MutationOperation<TAttributes, TRelations> = CreateOperation<TAttributes, TRelations> | UpdateOperation<TAttributes, TRelations>;
 
 export declare interface NestedFilter {
     nested: Array<BaseFilter>;
@@ -255,7 +255,7 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<AxiosRequestConfig>): Promise<DetailsResponse>;
 }
 
-export declare type RelationOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> = CreateRelation<TAttributes, TRelations, TRelationAttributesMap> | AttachRelation | DetachRelation | SyncRelation<TRelationAttributesMap[keyof TRelations]> | ToggleRelation<TRelationAttributesMap[keyof TRelations]>;
+export declare type RelationOperation<TAttributes, TRelations> = CreateRelation<TAttributes, TRelations> | AttachRelation | DetachRelation | SyncRelation<TRelations, keyof TRelations> | ToggleRelation<TRelations, keyof TRelations>;
 
 export declare interface Scope {
     name: string;
@@ -302,22 +302,22 @@ export declare interface Sort {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelation<TRelationAttributes> {
+export declare interface SyncRelation<T, K extends keyof T> {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
-    attributes?: TRelationAttributes;
+    attributes?: T[K];
     pivot?: Record<string, string | number>;
 }
 
-export declare interface ToggleRelation<TRelationAttributes> {
+export declare interface ToggleRelation<T, K extends keyof T> {
     operation: "toggle";
     key: string | number;
-    attributes?: TRelationAttributes;
+    attributes?: T[K];
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateOperation<TAttributes, TRelations, TRelationAttributesMap extends Record<keyof TRelations, unknown>> extends BaseMutationOperation<TAttributes, TRelations, TRelationAttributesMap> {
+export declare interface UpdateOperation<TAttributes, TRelations> extends BaseMutationOperation<TAttributes, TRelations> {
     operation: "update";
     key: string | number;
 }

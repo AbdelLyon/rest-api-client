@@ -14,16 +14,8 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.pathname = pathname;
   }
 
-  public mutate<
-    TAttributes,
-    TRelations,
-    TRelationAttributesMap extends Record<keyof TRelations, unknown>,
-  >(
-    mutateRequest: MutateRequest<
-      TAttributes,
-      TRelations,
-      TRelationAttributesMap
-    >,
+  public mutate<TAttributes, TRelations>(
+    mutateRequest: MutateRequest<TAttributes, TRelations>,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutateResponse<T>> {
     return this.http.request<MutateResponse<T>>(

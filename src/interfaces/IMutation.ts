@@ -1,21 +1,36 @@
-import type { MutateRequest, MutateResponse } from "../types/mutate";
-import type { ActionRequest, ActionResponse } from "../types/action";
-import type { DeleteRequest, DeleteResponse } from "../types/delete";
+import {
+  ActionRequest,
+  ActionResponse,
+  DeleteRequest,
+  DeleteResponse,
+  MutateRequest,
+  MutateResponse,
+} from "@/types";
+import { AxiosRequestConfig } from "axios";
 
 export interface IMutation<T> {
-  mutate: <
-    TAttributes,
-    TRelations,
-    TRelationAttributesMap extends Record<keyof TRelations, unknown>,
-  >(
-    mutateRequest: MutateRequest<
-      TAttributes,
-      TRelations,
-      TRelationAttributesMap
-    >,
-  ) => Promise<MutateResponse<T>>;
-  executeAction: (actionRequest: ActionRequest) => Promise<ActionResponse>;
-  delete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-  forceDelete: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
-  restore: (request: DeleteRequest) => Promise<DeleteResponse<T>>;
+  mutate<TAttributes, TRelations>(
+    mutateRequest: MutateRequest<TAttributes, TRelations>,
+    options?: Partial<AxiosRequestConfig>,
+  ): Promise<MutateResponse<T>>;
+
+  executeAction(
+    actionRequest: ActionRequest,
+    options?: Partial<AxiosRequestConfig>,
+  ): Promise<ActionResponse>;
+
+  delete(
+    request: DeleteRequest,
+    options?: Partial<AxiosRequestConfig>,
+  ): Promise<DeleteResponse<T>>;
+
+  forceDelete(
+    request: DeleteRequest,
+    options?: Partial<AxiosRequestConfig>,
+  ): Promise<DeleteResponse<T>>;
+
+  restore(
+    request: DeleteRequest,
+    options?: Partial<AxiosRequestConfig>,
+  ): Promise<DeleteResponse<T>>;
 }
