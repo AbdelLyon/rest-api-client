@@ -1,22 +1,12 @@
 import path from "path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
-
-const modules = ["services"];
-
-const entries = {
-  ...modules.reduce<Record<string, string>>((acc, module) => {
-    acc[module] = path.resolve(__dirname, `src/${module}/index.ts`);
-    return acc;
-  }, {}),
-};
 
 export default defineConfig({
   plugins: [
-    react(),
     dts({
       exclude: ["src/tests/**/*", "src/models/**/*"],
+      rollupTypes: true,
     }),
   ],
 
@@ -28,22 +18,19 @@ export default defineConfig({
 
   build: {
     lib: {
-      entry: entries,
+      entry: path.resolve(__dirname, "src/index.ts"),
       formats: ["es"],
-      fileName: (format, entryName) => `${entryName}/index.${format}.js`,
+      fileName: () => "index.js",
     },
 
     rollupOptions: {
       external: ["axios", "axios-retry", "cookies-next"],
-
       output: {
-        preserveModulesRoot: "src",
-        preserveModules: true,
+        format: "es",
+        entryFileNames: "index.js",
+        chunkFileNames: "[name].js",
+        assetFileNames: "[name].[ext]",
         exports: "named",
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
-        },
       },
       treeshake: {
         moduleSideEffects: false,
@@ -51,6 +38,7 @@ export default defineConfig({
         tryCatchDeoptimization: false,
       },
     },
+
     terserOptions: {
       compress: {
         drop_console: true,
