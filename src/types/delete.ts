@@ -1,5 +1,5 @@
 export interface DeleteRequest {
-  resources: Array<number>;
+  resources: Array<number | string>;
 }
 
 export interface DeleteResponse<T> {

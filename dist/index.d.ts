@@ -59,7 +59,7 @@ export declare interface CreateRelation<TAttributes, TRelations, TRelationAttrib
 }
 
 export declare interface DeleteRequest {
-    resources: Array<number>;
+    resources: Array<number | string>;
 }
 
 export declare interface DeleteResponse<T> {
