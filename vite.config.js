@@ -1,29 +1,11 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import path from "path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import dts from "vite-plugin-dts";
-var modules = ["hooks", "services", "models", "interfaces"];
-var entries = __assign(__assign({}, modules.reduce(function (acc, module) {
-    acc["rest-api/".concat(module)] = path.resolve(__dirname, "src/rest-api/".concat(module, "/index.ts"));
-    return acc;
-}, {})), { "react-query": path.resolve(__dirname, "src/react-query/index.ts") });
 export default defineConfig({
     plugins: [
-        react(),
         dts({
-            exclude: ["src/tests/**/*"],
-            include: ["src/rest-api/**/*", "src/react-query/**/*"],
+            exclude: ["src/tests/**/*", "src/models/**/*"],
+            rollupTypes: true,
         }),
     ],
     resolve: {
@@ -33,25 +15,42 @@ export default defineConfig({
     },
     build: {
         lib: {
-            entry: entries,
+            entry: path.resolve(__dirname, "src/index.ts"),
             formats: ["es"],
-            fileName: function (format, entryName) { return "".concat(entryName, "/index.").concat(format, ".js"); },
+            fileName: function () { return "index.js"; },
         },
         rollupOptions: {
-            external: [
-                "react",
-                "react-dom",
-                "@tanstack/react-query",
-                "axios",
-                "axios-retry",
-                /^@tanstack\/.*/,
-            ],
+            external: ["axios", "axios-retry", "cookies-next"],
             output: {
-                globals: {
-                    react: "React",
-                    "react-dom": "ReactDOM",
-                    "@tanstack/react-query": "ReactQuery",
-                },
+                format: "es",
+                entryFileNames: "index.js",
+                chunkFileNames: "[name].js",
+                assetFileNames: "[name].[ext]",
+                exports: "named",
+            },
+            treeshake: {
+                moduleSideEffects: false,
+                propertyReadSideEffects: false,
+                tryCatchDeoptimization: false,
+            },
+        },
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true,
+                pure_funcs: [
+                    "console.log",
+                    "console.info",
+                    "console.debug",
+                    "console.warn",
+                ],
+                passes: 2,
+            },
+            mangle: {
+                safari10: true,
+            },
+            format: {
+                comments: false,
             },
         },
     },

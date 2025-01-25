@@ -1,34 +1,31 @@
-import type { User } from "@/rest-api/models";
-import { QueryService } from "@/rest-api/services/QueryService";
+// import type { AxiosInstance } from "axios";
+// import type { User } from "@/rest-api/models";
+// import { Query } from "@/rest-api/services";
 
-export class UserTestService extends QueryService<User> {
-  private static instances: Map<string, UserTestService> = new Map();
+// export class QueryTestService extends Query<User> {
+//   private static instances: Map<string, QueryTestService> = new Map();
 
-  private constructor(domain: string, pathname: string) {
-    super(domain, pathname);
-  }
+//   private constructor(pathname: string) {
+//     super(pathname);
+//   }
 
-  static getInstance(domain: string, pathname: string): UserTestService {
-    const key = `${domain}:${pathname}`;
+//   static getInstance(pathname: string): QueryTestService {
+//     if (!this.instances.has(pathname)) {
+//       this.instances.set(pathname, new QueryTestService(pathname));
+//     }
 
-    if (!this.instances.has(key)) {
-      this.instances.set(key, new UserTestService(domain, pathname));
-    }
+//     return this.instances.get(pathname) ?? new QueryTestService(pathname);
+//   }
 
-    return this.instances.get(key) ?? new UserTestService(domain, pathname);
-  }
+//   static resetInstance(pathname?: string): void {
+//     if (pathname !== undefined && pathname !== "") {
+//       this.instances.delete(pathname);
+//     } else {
+//       this.instances.clear();
+//     }
+//   }
 
-  static resetInstance(domain?: string, pathname?: string): void {
-    if (
-      domain !== undefined &&
-      domain !== "" &&
-      pathname !== undefined &&
-      pathname !== ""
-    ) {
-      const key = `${domain}:${pathname}`;
-      this.instances.delete(key);
-    } else {
-      this.instances.clear();
-    }
-  }
-}
+//   public _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void {
+//     this.setAxiosInstance(axiosInstance);
+//   }
+// }
