@@ -1,5 +1,7 @@
+import { AxiosError } from 'axios';
 import { AxiosInstance } from 'axios';
 import { AxiosRequestConfig } from 'axios';
+import { z } from 'zod';
 
 export declare interface ActionFieldDefinition {
     name: string;
@@ -158,11 +160,11 @@ export declare class HttpClient implements IHttpClient {
     private createAxiosInstance;
     private setupInterceptors;
     private configureRetry;
-    private isRetryableError;
+    protected isRetryableError(error: AxiosError): boolean;
     private handleErrorResponse;
-    private logError;
+    protected logError(error: AxiosError): void;
     request<TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>): Promise<TResponse>;
-    protected _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void;
+    static resetInstance(): void;
 }
 
 export declare interface HttpConfigOptions {
@@ -171,6 +173,8 @@ export declare interface HttpConfigOptions {
     headers?: Record<string, string>;
     withCredentials?: boolean;
     maxRetries?: number;
+    apiPrefix?: string;
+    apiVersion?: string | number;
 }
 
 export declare interface IHttpClient {
@@ -206,7 +210,9 @@ export declare type LogicalOperator = "and" | "or";
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
     protected pathname: string;
-    constructor(pathname: string);
+    protected schema: z.ZodType<T>;
+    constructor(pathname: string, schema: z.ZodType<T>);
+    private validateData;
     mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<AxiosRequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<AxiosRequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
@@ -250,7 +256,9 @@ export declare interface Permission {
 export declare abstract class Query<T> implements IQuery<T> {
     protected http: HttpClient;
     protected pathname: string;
-    constructor(pathname: string);
+    protected schema: z.ZodType<T>;
+    constructor(pathname: string, schema: z.ZodType<T>);
+    private validateData;
     private searchRequest;
     search(search: SearchRequest, options?: Partial<AxiosRequestConfig>): Promise<Array<T>>;
     searchPaginate(search: PaginatedSearchRequest, options?: Partial<AxiosRequestConfig>): Promise<SearchResponse<T>>;

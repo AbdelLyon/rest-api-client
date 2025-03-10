@@ -1,17 +1,17 @@
-import n from "axios-retry";
-import d from "axios";
-var f = Object.defineProperty, g = (s, t, e) => t in s ? f(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, o = (s, t, e) => g(s, typeof t != "symbol" ? t + "" : t, e);
-class i extends Error {
+import i from "axios-retry";
+import m from "axios";
+class n extends Error {
   constructor(t, e) {
     super("API Service Request Failed"), this.originalError = t, this.requestConfig = e, this.name = "ApiRequestError";
   }
 }
-const p = class l {
+var f = Object.defineProperty, g = (s, t, e) => t in s ? f(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, c = (s, t, e) => g(s, typeof t != "symbol" ? t + "" : t, e);
+const l = class p {
   constructor() {
-    o(this, "axiosInstance"), o(this, "maxRetries");
+    c(this, "axiosInstance"), c(this, "maxRetries");
   }
   static init(t) {
-    return this.instance || (this.instance = new l(), this.instance.maxRetries = t.maxRetries ?? 3, this.instance.axiosInstance = this.instance.createAxiosInstance(t), this.instance.setupInterceptors(), this.instance.configureRetry()), this.instance;
+    return this.instance || (this.instance = new p(), this.instance.maxRetries = t.maxRetries ?? 3, this.instance.axiosInstance = this.instance.createAxiosInstance(t), this.instance.setupInterceptors(), this.instance.configureRetry()), this.instance;
   }
   static getInstance() {
     if (!this.instance)
@@ -25,7 +25,14 @@ const p = class l {
     this.axiosInstance = t;
   }
   getFullBaseUrl(t) {
-    return t.baseURL;
+    if (!t.baseURL)
+      throw new Error("baseURL is required in HttpConfigOptions");
+    let e = t.baseURL.trim();
+    if (e.endsWith("/") && (e = e.slice(0, -1)), t.apiPrefix) {
+      let r = t.apiPrefix.trim();
+      return r.startsWith("/") || (r = "/" + r), r.endsWith("/") && (r = r.slice(0, -1)), e + r;
+    }
+    return t.apiVersion ? `${e}/v${t.apiVersion}` : e;
   }
   createAxiosInstance(t) {
     const e = {
@@ -38,7 +45,7 @@ const p = class l {
       },
       withCredentials: t.withCredentials ?? !0
     };
-    return d.create(e);
+    return m.create(e);
   }
   setupInterceptors() {
     this.axiosInstance.interceptors.request.use(
@@ -50,26 +57,29 @@ const p = class l {
     );
   }
   configureRetry() {
-    n(this.axiosInstance, {
+    i(this.axiosInstance, {
       retries: this.maxRetries,
-      retryDelay: n.exponentialDelay,
-      retryCondition: this.isRetryableError
+      retryDelay: i.exponentialDelay,
+      retryCondition: this.isRetryableError.bind(this)
     });
   }
+  // Rendons cette méthode non-privée pour faciliter les tests
+  // Vous pouvez aussi la laisser privée et utiliser des techniques d'accès via l'indexation dans les tests
   isRetryableError(t) {
     var e;
-    return n.isNetworkOrIdempotentRequestError(t) || ((e = t.response) == null ? void 0 : e.status) === 429;
+    return i.isNetworkOrIdempotentRequestError(t) || ((e = t.response) == null ? void 0 : e.status) === 429;
   }
   handleErrorResponse(t) {
-    return this.logError(t), Promise.reject(new i(t, t.config || {}));
+    return this.logError(t), Promise.reject(new n(t, t.config || {}));
   }
+  // Rendons cette méthode non-privée pour faciliter les tests
   logError(t) {
-    var e, r, a, h;
+    var e, r, a, u;
     console.error("API Request Error", {
       url: (e = t.config) == null ? void 0 : e.url,
       method: (r = t.config) == null ? void 0 : r.method,
       status: (a = t.response) == null ? void 0 : a.status,
-      data: (h = t.response) == null ? void 0 : h.data,
+      data: (u = t.response) == null ? void 0 : u.data,
       message: t.message
     });
   }
@@ -88,22 +98,32 @@ const p = class l {
         r
       )).data;
     } catch (r) {
-      throw r instanceof i ? r : new i(r, t);
+      throw r instanceof n ? r : new n(r, t);
     }
   }
-  _setAxiosInstanceForTesting(t) {
-    this.axiosInstance = t;
+  static resetInstance() {
+    this.instance && (this.instance = void 0);
   }
 };
-o(p, "instance");
-let m = p;
-var x = Object.defineProperty, I = (s, t, e) => t in s ? x(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, c = (s, t, e) => I(s, typeof t != "symbol" ? t + "" : t, e);
-class P {
-  constructor(t) {
-    c(this, "http"), c(this, "pathname"), this.http = m.getInstance(), this.pathname = t;
+c(l, "instance");
+let d = l;
+var w = Object.defineProperty, x = (s, t, e) => t in s ? w(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, o = (s, t, e) => x(s, typeof t != "symbol" ? t + "" : t, e);
+class b {
+  constructor(t, e) {
+    o(this, "http"), o(this, "pathname"), o(this, "schema"), this.http = d.getInstance(), this.pathname = t, this.schema = e;
   }
-  mutate(t, e = {}) {
-    return this.http.request(
+  validateData(t) {
+    return t.map((e) => {
+      const r = this.schema.safeParse(e);
+      if (!r.success)
+        throw console.error("Type validation failed:", r.error.errors), new Error(
+          `Type validation failed: ${JSON.stringify(r.error.errors)}`
+        );
+      return r.data;
+    });
+  }
+  async mutate(t, e = {}) {
+    const r = await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
@@ -111,6 +131,10 @@ class P {
       },
       e
     );
+    return {
+      ...r,
+      data: this.validateData(r.data)
+    };
   }
   executeAction(t, e = {}) {
     return this.http.request(
@@ -122,8 +146,8 @@ class P {
       e
     );
   }
-  delete(t, e = {}) {
-    return this.http.request(
+  async delete(t, e = {}) {
+    const r = await this.http.request(
       {
         method: "DELETE",
         url: this.pathname,
@@ -131,9 +155,13 @@ class P {
       },
       e
     );
+    return {
+      ...r,
+      data: this.validateData(r.data)
+    };
   }
-  forceDelete(t, e = {}) {
-    return this.http.request(
+  async forceDelete(t, e = {}) {
+    const r = await this.http.request(
       {
         method: "DELETE",
         url: `${this.pathname}/force`,
@@ -141,9 +169,13 @@ class P {
       },
       e
     );
+    return {
+      ...r,
+      data: this.validateData(r.data)
+    };
   }
-  restore(t, e = {}) {
-    return this.http.request(
+  async restore(t, e = {}) {
+    const r = await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/restore`,
@@ -151,12 +183,26 @@ class P {
       },
       e
     );
+    return {
+      ...r,
+      data: this.validateData(r.data)
+    };
   }
 }
-var E = Object.defineProperty, R = (s, t, e) => t in s ? E(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, u = (s, t, e) => R(s, typeof t != "symbol" ? t + "" : t, e);
-class b {
-  constructor(t) {
-    u(this, "http"), u(this, "pathname"), this.http = m.getInstance(), this.pathname = t;
+var y = Object.defineProperty, E = (s, t, e) => t in s ? y(s, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : s[t] = e, h = (s, t, e) => E(s, typeof t != "symbol" ? t + "" : t, e);
+class I {
+  constructor(t, e) {
+    h(this, "http"), h(this, "pathname"), h(this, "schema"), this.http = d.getInstance(), this.pathname = t, this.schema = e;
+  }
+  validateData(t) {
+    return t.map((e) => {
+      const r = this.schema.safeParse(e);
+      if (!r.success)
+        throw console.error("Type validation failed:", r.error.errors), new Error(
+          `Type validation failed: ${JSON.stringify(r.error.errors)}`
+        );
+      return r.data;
+    });
   }
   searchRequest(t, e = {}) {
     return this.http.request(
@@ -169,10 +215,15 @@ class b {
     );
   }
   async search(t, e = {}) {
-    return (await this.searchRequest(t, e)).data;
+    const r = await this.searchRequest(t, e);
+    return this.validateData(r.data);
   }
-  searchPaginate(t, e = {}) {
-    return this.searchRequest(t, e);
+  async searchPaginate(t, e = {}) {
+    const r = await this.searchRequest(t, e);
+    return {
+      ...r,
+      data: this.validateData(r.data)
+    };
   }
   getdetails(t = {}) {
     return this.http.request(
@@ -185,7 +236,7 @@ class b {
   }
 }
 export {
-  m as HttpClient,
-  P as Mutation,
-  b as Query
+  d as HttpClient,
+  b as Mutation,
+  I as Query
 };
