@@ -1,3 +1,4 @@
+// vite.config.js
 import path from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
@@ -9,59 +10,26 @@ export default defineConfig({
       rollupTypes: true,
     }),
   ],
-
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       formats: ["es"],
-      fileName: () => "index.js",
+      fileName: (format) => `index.${format}.js`,
     },
-
     rollupOptions: {
-      external: ["axios", "axios-retry", "cookies-next"],
+      external: ["axios", "axios-retry", "cookies-next", "zod"],
       output: {
         format: "es",
-        entryFileNames: "index.js",
-        chunkFileNames: "[name].js",
-        assetFileNames: "[name].[ext]",
         exports: "named",
       },
-      treeshake: {
-        moduleSideEffects: false,
-        propertyReadSideEffects: false,
-        tryCatchDeoptimization: false,
-      },
     },
-
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: [
-          "console.log",
-          "console.info",
-          "console.debug",
-          "console.warn",
-        ],
-        passes: 2,
-      },
-      mangle: {
-        safari10: true,
-      },
-      format: {
-        comments: false,
-      },
-    },
-  },
-
-  esbuild: {
-    target: "es2020",
-    include: /\.(tsx?|jsx?)$/,
+    outDir: "dist",
+    emptyOutDir: true,
+    sourcemap: true,
   },
 });
