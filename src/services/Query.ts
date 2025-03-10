@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { AxiosRequestConfig } from "axios";
 import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
@@ -7,10 +8,25 @@ import { PaginatedSearchRequest } from "@/types/search";
 export abstract class Query<T> implements IQuery<T> {
   protected http: HttpClient;
   protected pathname: string;
+  protected schema: z.ZodType<T>;
 
-  constructor(pathname: string) {
+  constructor(pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
     this.pathname = pathname;
+    this.schema = schema;
+  }
+
+  private validateData(data: unknown[]): T[] {
+    return data.map((item) => {
+      const result = this.schema.safeParse(item);
+      if (!result.success) {
+        console.error("Type validation failed:", result.error.errors);
+        throw new Error(
+          `Type validation failed: ${JSON.stringify(result.error.errors)}`,
+        );
+      }
+      return result.data;
+    });
   }
 
   private searchRequest(
@@ -32,14 +48,19 @@ export abstract class Query<T> implements IQuery<T> {
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<Array<T>> {
     const response = await this.searchRequest(search, options);
-    return response.data;
+    return this.validateData(response.data);
   }
 
-  public searchPaginate(
+  public async searchPaginate(
     search: PaginatedSearchRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<SearchResponse<T>> {
-    return this.searchRequest(search, options);
+    const response = await this.searchRequest(search, options);
+
+    return {
+      ...response,
+      data: this.validateData(response.data),
+    };
   }
 
   public getdetails(

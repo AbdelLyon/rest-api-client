@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { AxiosRequestConfig } from "axios";
 import type { DeleteRequest, DeleteResponse } from "../types/delete";
@@ -8,17 +9,32 @@ import type { IMutation } from "@/interfaces";
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
   protected pathname: string;
+  protected schema: z.ZodType<T>;
 
-  constructor(pathname: string) {
+  constructor(pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
     this.pathname = pathname;
+    this.schema = schema;
   }
 
-  public mutate<TAttributes, TRelations>(
+  private validateData(data: unknown[]): T[] {
+    return data.map((item) => {
+      const result = this.schema.safeParse(item);
+      if (!result.success) {
+        console.error("Type validation failed:", result.error.errors);
+        throw new Error(
+          `Type validation failed: ${JSON.stringify(result.error.errors)}`,
+        );
+      }
+      return result.data;
+    });
+  }
+
+  public async mutate<TAttributes, TRelations>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<MutationResponse<T>> {
-    return this.http.request<MutationResponse<T>>(
+    const response = await this.http.request<MutationResponse<T>>(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
@@ -26,6 +42,11 @@ export abstract class Mutation<T> implements IMutation<T> {
       },
       options,
     );
+
+    return {
+      ...response,
+      data: this.validateData(response.data),
+    };
   }
 
   public executeAction(
@@ -42,11 +63,11 @@ export abstract class Mutation<T> implements IMutation<T> {
     );
   }
 
-  public delete(
+  public async delete(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.http.request<DeleteResponse<T>>(
+    const response = await this.http.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: this.pathname,
@@ -54,13 +75,18 @@ export abstract class Mutation<T> implements IMutation<T> {
       },
       options,
     );
+
+    return {
+      ...response,
+      data: this.validateData(response.data),
+    };
   }
 
-  public forceDelete(
+  public async forceDelete(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.http.request<DeleteResponse<T>>(
+    const response = await this.http.request<DeleteResponse<T>>(
       {
         method: "DELETE",
         url: `${this.pathname}/force`,
@@ -68,13 +94,18 @@ export abstract class Mutation<T> implements IMutation<T> {
       },
       options,
     );
+
+    return {
+      ...response,
+      data: this.validateData(response.data),
+    };
   }
 
-  public restore(
+  public async restore(
     request: DeleteRequest,
     options: Partial<AxiosRequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
-    return this.http.request<DeleteResponse<T>>(
+    const response = await this.http.request<DeleteResponse<T>>(
       {
         method: "POST",
         url: `${this.pathname}/restore`,
@@ -82,5 +113,10 @@ export abstract class Mutation<T> implements IMutation<T> {
       },
       options,
     );
+
+    return {
+      ...response,
+      data: this.validateData(response.data),
+    };
   }
 }

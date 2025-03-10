@@ -3,16 +3,7 @@ import axios from "axios";
 import type { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 import type { IHttpClient } from "@/interfaces";
 import type { HttpConfigOptions } from "@/types/common";
-
-export class ApiRequestError extends Error {
-  constructor(
-    public originalError: AxiosError,
-    public requestConfig: AxiosRequestConfig,
-  ) {
-    super("API Service Request Failed");
-    this.name = "ApiRequestError";
-  }
-}
+import { ApiRequestError } from "./ApiRequestError";
 
 export class HttpClient implements IHttpClient {
   private static instance?: HttpClient;
@@ -46,7 +37,37 @@ export class HttpClient implements IHttpClient {
   }
 
   protected getFullBaseUrl(options: HttpConfigOptions): string {
-    return options.baseURL;
+    // Vérifier si l'URL de base est fournie
+    if (!options.baseURL) {
+      throw new Error("baseURL is required in HttpConfigOptions");
+    }
+
+    // Normaliser l'URL de base (s'assurer qu'elle n'a pas de / à la fin)
+    let baseUrl = options.baseURL.trim();
+    if (baseUrl.endsWith("/")) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
+
+    // Ajouter un préfixe d'API si nécessaire
+    if (options.apiPrefix) {
+      // S'assurer que le préfixe est correctement formaté
+      let prefix = options.apiPrefix.trim();
+      if (!prefix.startsWith("/")) {
+        prefix = "/" + prefix;
+      }
+      if (prefix.endsWith("/")) {
+        prefix = prefix.slice(0, -1);
+      }
+
+      return baseUrl + prefix;
+    }
+
+    // Ajouter un préfixe de version si nécessaire
+    if (options.apiVersion) {
+      return `${baseUrl}/v${options.apiVersion}`;
+    }
+
+    return baseUrl;
   }
 
   private createAxiosInstance(options: HttpConfigOptions): AxiosInstance {
@@ -80,11 +101,13 @@ export class HttpClient implements IHttpClient {
     axiosRetry(this.axiosInstance, {
       retries: this.maxRetries,
       retryDelay: axiosRetry.exponentialDelay,
-      retryCondition: this.isRetryableError,
+      retryCondition: this.isRetryableError.bind(this),
     });
   }
 
-  private isRetryableError(error: AxiosError): boolean {
+  // Rendons cette méthode non-privée pour faciliter les tests
+  // Vous pouvez aussi la laisser privée et utiliser des techniques d'accès via l'indexation dans les tests
+  protected isRetryableError(error: AxiosError): boolean {
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
       error.response?.status === 429
@@ -96,7 +119,8 @@ export class HttpClient implements IHttpClient {
     return Promise.reject(new ApiRequestError(error, error.config || {}));
   }
 
-  private logError(error: AxiosError): void {
+  // Rendons cette méthode non-privée pour faciliter les tests
+  protected logError(error: AxiosError): void {
     console.error("API Request Error", {
       url: error.config?.url,
       method: error.config?.method,
@@ -133,7 +157,9 @@ export class HttpClient implements IHttpClient {
     }
   }
 
-  protected _setAxiosInstanceForTesting(axiosInstance: AxiosInstance): void {
-    this.axiosInstance = axiosInstance;
+  static resetInstance(): void {
+    if (this.instance) {
+      this.instance = undefined;
+    }
   }
 }

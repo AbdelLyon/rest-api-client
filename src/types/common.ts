@@ -9,6 +9,8 @@ export interface HttpConfigOptions {
   headers?: Record<string, string>;
   withCredentials?: boolean;
   maxRetries?: number;
+  apiPrefix?: string;
+  apiVersion?: string | number;
 }
 
 export interface Permission {
