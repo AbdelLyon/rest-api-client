@@ -149,11 +149,14 @@ export declare interface FilterCriteria {
 }
 
 export declare class HttpClient implements IHttpClient {
-    private static instance?;
+    private static instances;
+    private static defaultInstanceName;
     private axiosInstance;
     private maxRetries;
-    static init(options: HttpConfigOptions): HttpClient;
-    static getInstance(): HttpClient;
+    static init(options: HttpConfigOptions, instanceName?: string): HttpClient;
+    static getInstance(instanceName?: string): HttpClient;
+    static setDefaultInstance(instanceName: string): void;
+    static getAvailableInstances(): string[];
     protected getAxiosInstance(): AxiosInstance;
     protected setAxiosInstance(instance: AxiosInstance): void;
     protected getFullBaseUrl(options: HttpConfigOptions): string;
@@ -164,7 +167,7 @@ export declare class HttpClient implements IHttpClient {
     private handleErrorResponse;
     protected logError(error: AxiosError): void;
     request<TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>): Promise<TResponse>;
-    static resetInstance(): void;
+    static resetInstance(instanceName?: string): void;
 }
 
 export declare interface HttpConfigOptions {

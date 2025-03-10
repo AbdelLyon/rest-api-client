@@ -1,6 +1,6 @@
-var d = Object.defineProperty;
-var l = (r, t, e) => t in r ? d(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
-var a = (r, t, e) => l(r, typeof t != "symbol" ? t + "" : t, e);
+var l = Object.defineProperty;
+var d = (r, t, e) => t in r ? l(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
+var a = (r, t, e) => d(r, typeof t != "symbol" ? t + "" : t, e);
 import h from "axios-retry";
 import p from "axios";
 class c extends Error {
@@ -8,18 +8,35 @@ class c extends Error {
     super("API Service Request Failed"), this.originalError = t, this.requestConfig = e, this.name = "ApiRequestError";
   }
 }
-const n = class n {
+const i = class i {
   constructor() {
     a(this, "axiosInstance");
     a(this, "maxRetries");
   }
-  static init(t) {
-    return this.instance || (this.instance = new n(), this.instance.maxRetries = t.maxRetries ?? 3, this.instance.axiosInstance = this.instance.createAxiosInstance(t), this.instance.setupInterceptors(), this.instance.configureRetry()), this.instance;
+  static init(t, e = "default") {
+    if (!this.instances.has(e)) {
+      const s = new i();
+      s.maxRetries = t.maxRetries ?? 3, s.axiosInstance = s.createAxiosInstance(t), s.setupInterceptors(), s.configureRetry(), this.instances.set(e, s), this.instances.size === 1 && (this.defaultInstanceName = e);
+    }
+    return this.instances.get(e);
   }
-  static getInstance() {
-    if (!this.instance)
-      throw new Error("Http not initialized. Call Http.init() first.");
-    return this.instance;
+  static getInstance(t) {
+    const e = t || this.defaultInstanceName;
+    if (!this.instances.has(e))
+      throw new Error(
+        `Http instance '${e}' not initialized. Call Http.init() first.`
+      );
+    return this.instances.get(e);
+  }
+  static setDefaultInstance(t) {
+    if (!this.instances.has(t))
+      throw new Error(
+        `Cannot set default: Http instance '${t}' not initialized.`
+      );
+    this.defaultInstanceName = t;
+  }
+  static getAvailableInstances() {
+    return Array.from(this.instances.keys());
   }
   getAxiosInstance() {
     return this.axiosInstance;
@@ -66,8 +83,6 @@ const n = class n {
       retryCondition: this.isRetryableError.bind(this)
     });
   }
-  // Rendons cette méthode non-privée pour faciliter les tests
-  // Vous pouvez aussi la laisser privée et utiliser des techniques d'accès via l'indexation dans les tests
   isRetryableError(t) {
     var e;
     return h.isNetworkOrIdempotentRequestError(t) || ((e = t.response) == null ? void 0 : e.status) === 429;
@@ -75,7 +90,6 @@ const n = class n {
   handleErrorResponse(t) {
     return this.logError(t), Promise.reject(new c(t, t.config || {}));
   }
-  // Rendons cette méthode non-privée pour faciliter les tests
   logError(t) {
     var e, s, o, u;
     console.error("API Request Error", {
@@ -104,18 +118,18 @@ const n = class n {
       throw s instanceof c ? s : new c(s, t);
     }
   }
-  static resetInstance() {
-    this.instance && (this.instance = void 0);
+  static resetInstance(t) {
+    t ? (this.instances.delete(t), t === this.defaultInstanceName && this.instances.size > 0 && (this.defaultInstanceName = this.instances.keys().next().value ?? "default")) : (this.instances.clear(), this.defaultInstanceName = "default");
   }
 };
-a(n, "instance");
-let i = n;
-class x {
+a(i, "instances", /* @__PURE__ */ new Map()), a(i, "defaultInstanceName", "default");
+let n = i;
+class I {
   constructor(t, e) {
     a(this, "http");
     a(this, "pathname");
     a(this, "schema");
-    this.http = i.getInstance(), this.pathname = t, this.schema = e;
+    this.http = n.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -199,7 +213,7 @@ class g {
     a(this, "http");
     a(this, "pathname");
     a(this, "schema");
-    this.http = i.getInstance(), this.pathname = t, this.schema = e;
+    this.http = n.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -243,8 +257,8 @@ class g {
   }
 }
 export {
-  i as HttpClient,
-  x as Mutation,
+  n as HttpClient,
+  I as Mutation,
   g as Query
 };
 //# sourceMappingURL=index.es.js.map
