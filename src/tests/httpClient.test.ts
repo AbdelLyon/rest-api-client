@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { HttpClient } from "@/services";
-import { ApiRequestError } from "@/services/ApiRequestError";
+import { HttpClient } from "../services/HttpClient";
+import { ApiRequestError } from "../services/ApiRequestError";
 
 // Mock des dépendances
 vi.mock("axios");
