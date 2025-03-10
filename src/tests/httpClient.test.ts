@@ -30,15 +30,14 @@ describe("HttpClient", () => {
     vi.clearAllMocks();
     axios.create = vi.fn().mockReturnValue(mockAxiosInstance);
     vi.spyOn(console, "error").mockImplementation(() => {});
-    HttpClient.resetInstance();
+    HttpClient.resetInstance(); // Réinitialiser toutes les instances
   });
 
   afterEach(() => {
-    HttpClient.resetInstance();
+    HttpClient.resetInstance(); // Réinitialiser toutes les instances
   });
 
-  // Groupe de tests 1: Méthodes statiques et initialisation
-  describe("Méthodes statiques et initialisation", () => {
+  describe("Gestion d'instances multiples", () => {
     describe("init", () => {
       it("devrait créer une nouvelle instance avec les options fournies", () => {
         const options = {
@@ -68,6 +67,22 @@ describe("HttpClient", () => {
         expect(httpClient).toBeInstanceOf(HttpClient);
       });
 
+      it("devrait créer des instances distinctes avec des noms différents", () => {
+        const mainInstance = HttpClient.init(
+          { baseURL: "https://api.example.com" },
+          "main",
+        );
+        const authInstance = HttpClient.init(
+          { baseURL: "https://auth.example.com" },
+          "auth",
+        );
+
+        expect(mainInstance).toBeInstanceOf(HttpClient);
+        expect(authInstance).toBeInstanceOf(HttpClient);
+        expect(mainInstance).not.toBe(authInstance);
+        expect(axios.create).toHaveBeenCalledTimes(2);
+      });
+
       it("devrait utiliser les valeurs par défaut quand les options sont omises", () => {
         const options = {
           baseURL: "https://api.example.com",
@@ -86,11 +101,11 @@ describe("HttpClient", () => {
         });
       });
 
-      it("devrait retourner la même instance si déjà initialisée", () => {
+      it("devrait retourner la même instance si déjà initialisée avec le même nom", () => {
         const options = { baseURL: "https://api.example.com" };
 
-        const instance1 = HttpClient.init(options);
-        const instance2 = HttpClient.init(options);
+        const instance1 = HttpClient.init(options, "test");
+        const instance2 = HttpClient.init(options, "test");
 
         expect(instance1).toBe(instance2);
         expect(axios.create).toHaveBeenCalledTimes(1);
@@ -98,35 +113,111 @@ describe("HttpClient", () => {
     });
 
     describe("getInstance", () => {
-      it("devrait retourner l'instance initialisée", () => {
-        const options = { baseURL: "https://api.example.com" };
-        const instance = HttpClient.init(options);
-
+      it("devrait retourner l'instance initialisée par défaut", () => {
+        const instance = HttpClient.init({
+          baseURL: "https://api.example.com",
+        });
         expect(HttpClient.getInstance()).toBe(instance);
+      });
+
+      it("devrait retourner l'instance spécifique demandée", () => {
+        const mainInstance = HttpClient.init(
+          { baseURL: "https://api.example.com" },
+          "main",
+        );
+        const authInstance = HttpClient.init(
+          { baseURL: "https://auth.example.com" },
+          "auth",
+        );
+
+        expect(HttpClient.getInstance("main")).toBe(mainInstance);
+        expect(HttpClient.getInstance("auth")).toBe(authInstance);
       });
 
       it("devrait lancer une erreur si appelé avant init", () => {
         expect(() => HttpClient.getInstance()).toThrow(
-          "Http not initialized. Call Http.init() first.",
+          /Http instance .* not initialized/,
+        );
+      });
+
+      it("devrait lancer une erreur si l'instance demandée n'existe pas", () => {
+        HttpClient.init({ baseURL: "https://api.example.com" }, "main");
+        expect(() => HttpClient.getInstance("nonexistent")).toThrow(
+          /Http instance 'nonexistent' not initialized/,
         );
       });
     });
 
-    describe("resetInstance", () => {
-      it("devrait réinitialiser l'instance singleton", () => {
-        const options = { baseURL: "https://api.example.com" };
+    describe("setDefaultInstance", () => {
+      it("devrait définir l'instance par défaut", () => {
+        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
 
-        HttpClient.init(options);
-        expect(HttpClient.getInstance()).toBeDefined();
+        HttpClient.setDefaultInstance("api2");
+
+        expect(HttpClient.getInstance()).toBe(HttpClient.getInstance("api2"));
+      });
+
+      it("devrait lancer une erreur si l'instance n'existe pas", () => {
+        expect(() => HttpClient.setDefaultInstance("nonexistent")).toThrow(
+          /Cannot set default: Http instance 'nonexistent' not initialized/,
+        );
+      });
+    });
+
+    describe("getAvailableInstances", () => {
+      it("devrait retourner la liste des instances disponibles", () => {
+        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+
+        const instances = HttpClient.getAvailableInstances();
+
+        expect(instances).toContain("api1");
+        expect(instances).toContain("api2");
+        expect(instances.length).toBe(2);
+      });
+
+      it("devrait retourner une liste vide si aucune instance n'est initialisée", () => {
+        const instances = HttpClient.getAvailableInstances();
+        expect(instances).toEqual([]);
+      });
+    });
+
+    describe("resetInstance", () => {
+      it("devrait réinitialiser toutes les instances", () => {
+        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
 
         HttpClient.resetInstance();
 
-        expect(() => HttpClient.getInstance()).toThrow("Http not initialized");
+        expect(HttpClient.getAvailableInstances()).toEqual([]);
+        expect(() => HttpClient.getInstance()).toThrow(/not initialized/);
+      });
+
+      it("devrait réinitialiser une instance spécifique", () => {
+        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+
+        HttpClient.resetInstance("api1");
+
+        expect(HttpClient.getAvailableInstances()).toEqual(["api2"]);
+        expect(() => HttpClient.getInstance("api1")).toThrow(/not initialized/);
+        expect(HttpClient.getInstance("api2")).toBeDefined();
+      });
+
+      it("devrait mettre à jour l'instance par défaut si elle est supprimée", () => {
+        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.setDefaultInstance("api1");
+
+        HttpClient.resetInstance("api1");
+
+        // L'instance par défaut devrait maintenant être api2
+        expect(HttpClient.getInstance()).toBe(HttpClient.getInstance("api2"));
       });
     });
   });
 
-  // Groupe de tests 2: Méthodes protégées
   describe("Méthodes protégées", () => {
     describe("getAxiosInstance et setAxiosInstance", () => {
       it("devrait permettre d'obtenir et définir l'instance axios", () => {
@@ -216,7 +307,6 @@ describe("HttpClient", () => {
     });
   });
 
-  // Groupe de tests 3: Méthodes publiques
   describe("Méthodes publiques", () => {
     describe("request", () => {
       beforeEach(() => {
@@ -301,7 +391,6 @@ describe("HttpClient", () => {
     });
   });
 
-  // Groupe de tests 4: Configuration des intercepteurs et gestion des erreurs
   describe("Intercepteurs et gestion des erreurs", () => {
     describe("Intercepteurs HTTP", () => {
       it("devrait configurer les intercepteurs de requête correctement", () => {
@@ -444,7 +533,6 @@ describe("HttpClient", () => {
     });
   });
 
-  // Groupe de tests 5: Configuration des mécanismes de retry
   describe("Mécanismes de retry", () => {
     describe("configureRetry", () => {
       it("devrait configurer axiosRetry avec les bonnes options", () => {
@@ -524,6 +612,92 @@ describe("HttpClient", () => {
         expect(retryOptions).toHaveProperty("retryCondition");
         expect(typeof retryOptions.retryCondition).toBe("function");
       });
+    });
+  });
+
+  describe("Utilisation avec plusieurs domaines", () => {
+    it("devrait permettre d'utiliser plusieurs instances pour différentes API", async () => {
+      // Initialiser deux instances
+      const mainApi = HttpClient.init(
+        { baseURL: "https://api.example.com" },
+        "main",
+      );
+      const authApi = HttpClient.init(
+        { baseURL: "https://auth.example.com" },
+        "auth",
+      );
+
+      // Mock pour simuler deux réponses différentes
+      const mainMockResponse = { data: { resource: "main data" } };
+      const authMockResponse = { data: { token: "abc123" } };
+
+      mockAxiosInstance.request
+        .mockResolvedValueOnce(mainMockResponse)
+        .mockResolvedValueOnce(authMockResponse);
+
+      // Exécuter des requêtes sur les deux instances
+      const mainResult = await mainApi.request({
+        url: "/resources",
+        method: "GET",
+      });
+      const authResult = await authApi.request({
+        url: "/token",
+        method: "POST",
+      });
+
+      // Vérifier les résultats
+      expect(mainResult).toEqual(mainMockResponse.data);
+      expect(authResult).toEqual(authMockResponse.data);
+      expect(mockAxiosInstance.request).toHaveBeenCalledTimes(2);
+    });
+
+    it("devrait être possible d'accéder au même service depuis différents points du code", async () => {
+      // Initialiser une instance
+      HttpClient.init({ baseURL: "https://api.example.com" }, "main");
+
+      // Simuler l'accès depuis un autre emplacement du code
+      const sameInstance = HttpClient.getInstance("main");
+
+      // Mock pour simuler une réponse
+      const mockResponse = { data: { success: true } };
+      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
+
+      // Effectuer une requête
+      const result = await sameInstance.request({
+        url: "/test",
+        method: "GET",
+      });
+
+      // Vérifier le résultat
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it("devrait gérer correctement un changement d'instance par défaut", async () => {
+      // Initialiser deux instances
+      HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
+      HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+
+      // api1 est l'instance par défaut initialement
+
+      // Changer l'instance par défaut à api2
+      HttpClient.setDefaultInstance("api2");
+
+      // Récupérer l'instance par défaut
+      const defaultInstance = HttpClient.getInstance();
+
+      // Mock pour simuler une réponse
+      const mockResponse = { data: { source: "api2" } };
+      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
+
+      // Effectuer une requête
+      const result = await defaultInstance.request({
+        url: "/test",
+        method: "GET",
+      });
+
+      // Vérifier que nous avons bien l'instance api2
+      expect(result).toEqual(mockResponse.data);
+      expect(defaultInstance).toBe(HttpClient.getInstance("api2"));
     });
   });
 });

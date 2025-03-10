@@ -6,26 +6,53 @@ import type { HttpConfigOptions } from "@/types/common";
 import { ApiRequestError } from "./ApiRequestError";
 
 export class HttpClient implements IHttpClient {
-  private static instance?: HttpClient;
+  private static instances: Map<string, HttpClient> = new Map();
+  private static defaultInstanceName: string = "default";
   private axiosInstance!: AxiosInstance;
   private maxRetries!: number;
 
-  static init(options: HttpConfigOptions): HttpClient {
-    if (!this.instance) {
-      this.instance = new HttpClient();
-      this.instance.maxRetries = options.maxRetries ?? 3;
-      this.instance.axiosInstance = this.instance.createAxiosInstance(options);
-      this.instance.setupInterceptors();
-      this.instance.configureRetry();
+  static init(
+    options: HttpConfigOptions,
+    instanceName: string = "default",
+  ): HttpClient {
+    if (!this.instances.has(instanceName)) {
+      const instance = new HttpClient();
+      instance.maxRetries = options.maxRetries ?? 3;
+      instance.axiosInstance = instance.createAxiosInstance(options);
+      instance.setupInterceptors();
+      instance.configureRetry();
+      this.instances.set(instanceName, instance);
+
+      // Si c'est la première instance, la définir comme instance par défaut
+      if (this.instances.size === 1) {
+        this.defaultInstanceName = instanceName;
+      }
     }
-    return this.instance;
+    return this.instances.get(instanceName)!;
   }
 
-  static getInstance(): HttpClient {
-    if (!this.instance) {
-      throw new Error("Http not initialized. Call Http.init() first.");
+  static getInstance(instanceName?: string): HttpClient {
+    const name = instanceName || this.defaultInstanceName;
+
+    if (!this.instances.has(name)) {
+      throw new Error(
+        `Http instance '${name}' not initialized. Call Http.init() first.`,
+      );
     }
-    return this.instance;
+    return this.instances.get(name)!;
+  }
+
+  static setDefaultInstance(instanceName: string): void {
+    if (!this.instances.has(instanceName)) {
+      throw new Error(
+        `Cannot set default: Http instance '${instanceName}' not initialized.`,
+      );
+    }
+    this.defaultInstanceName = instanceName;
+  }
+
+  static getAvailableInstances(): string[] {
+    return Array.from(this.instances.keys());
   }
 
   protected getAxiosInstance(): AxiosInstance {
@@ -105,8 +132,6 @@ export class HttpClient implements IHttpClient {
     });
   }
 
-  // Rendons cette méthode non-privée pour faciliter les tests
-  // Vous pouvez aussi la laisser privée et utiliser des techniques d'accès via l'indexation dans les tests
   protected isRetryableError(error: AxiosError): boolean {
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
@@ -119,7 +144,6 @@ export class HttpClient implements IHttpClient {
     return Promise.reject(new ApiRequestError(error, error.config || {}));
   }
 
-  // Rendons cette méthode non-privée pour faciliter les tests
   protected logError(error: AxiosError): void {
     console.error("API Request Error", {
       url: error.config?.url,
@@ -157,9 +181,22 @@ export class HttpClient implements IHttpClient {
     }
   }
 
-  static resetInstance(): void {
-    if (this.instance) {
-      this.instance = undefined;
+  static resetInstance(instanceName?: string): void {
+    if (instanceName) {
+      this.instances.delete(instanceName);
+
+      // Si l'instance par défaut a été supprimée, réinitialiser
+      if (
+        instanceName === this.defaultInstanceName &&
+        this.instances.size > 0
+      ) {
+        this.defaultInstanceName =
+          this.instances.keys().next().value ?? "default";
+      }
+    } else {
+      // Réinitialiser toutes les instances
+      this.instances.clear();
+      this.defaultInstanceName = "default";
     }
   }
 }
