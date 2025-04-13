@@ -37,6 +37,14 @@ export declare interface AggregationCriteria {
 
 export declare type AggregationFunction = "min" | "max" | "avg" | "sum" | "count" | "exists";
 
+export declare interface ApiErrorSource {
+    [key: string]: unknown;
+    status?: number;
+    statusText?: string;
+    data?: unknown;
+    response?: Response;
+}
+
 export declare interface AttachRelationOperation {
     operation: "attach";
     key: string | number;
@@ -160,7 +168,7 @@ export declare class HttpClient implements IHttpClient {
     /**
      * Initialise une nouvelle instance HTTP avec intercepteurs
      */
-    static init(options: HttpConfigOptionsWithInterceptors, instanceName?: string): HttpClient;
+    static init(options: HttpConfig, instanceName?: string): HttpClient;
     /**
      * Récupère une instance existante
      */
@@ -221,6 +229,16 @@ export declare class HttpClient implements IHttpClient {
     }, options?: Partial<RequestConfig>): Promise<TResponse>;
 }
 
+export declare interface HttpConfig extends HttpConfigOptions {
+    interceptors?: {
+        request?: RequestInterceptor[];
+        response?: {
+            success?: ResponseSuccessInterceptor[];
+            error?: ResponseErrorInterceptor[];
+        };
+    };
+}
+
 export declare interface HttpConfigOptions {
     baseURL: string;
     timeout?: number;
@@ -229,16 +247,6 @@ export declare interface HttpConfigOptions {
     maxRetries?: number;
     apiPrefix?: string;
     apiVersion?: string | number;
-}
-
-declare interface HttpConfigOptionsWithInterceptors extends HttpConfigOptions {
-    interceptors?: {
-        request?: RequestInterceptor[];
-        response?: {
-            success?: ResponseSuccessInterceptor[];
-            error?: ResponseErrorInterceptor[];
-        };
-    };
 }
 
 export declare interface IHttpClient {

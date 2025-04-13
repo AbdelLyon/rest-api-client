@@ -67,5 +67,7 @@ export type {
   RequestConfig,
   RequestInterceptor,
   ResponseErrorInterceptor,
-  ResponseSuccessInterceptor
+  ResponseSuccessInterceptor,
+  ApiErrorSource,
+  HttpConfig
 } from "@/types/common";

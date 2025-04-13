@@ -1,38 +1,6 @@
 import type { IHttpClient } from "@/interfaces";
-import type { HttpConfigOptions, RequestConfig, RequestInterceptor, ResponseErrorInterceptor, ResponseSuccessInterceptor } from "@/types/common";
-
-// Erreur personnalisée pour les requêtes API
-export class ApiRequestError extends Error {
-  status?: number;
-  data?: any;
-  config: RequestInit & { url?: string; };
-
-  constructor (error: unknown, config: RequestInit & { url?: string; }) {
-    const message = error instanceof Error ? error.message : String(error);
-    super(message);
-    this.name = "ApiRequestError";
-    this.config = config;
-
-    if (error && typeof error === "object" && "status" in error) {
-      this.status = (error as any).status;
-    }
-    if (error && typeof error === "object" && "data" in error) {
-      this.data = (error as any).data;
-    }
-  }
-}
-
-
-// Configuration étendue pour initialisation avec intercepteurs
-export interface HttpConfigOptionsWithInterceptors extends HttpConfigOptions {
-  interceptors?: {
-    request?: RequestInterceptor[];
-    response?: {
-      success?: ResponseSuccessInterceptor[];
-      error?: ResponseErrorInterceptor[];
-    };
-  };
-}
+import type { HttpConfig, HttpConfigOptions, RequestConfig, RequestInterceptor, ResponseErrorInterceptor, ResponseSuccessInterceptor } from "@/types/common";
+import { ApiRequestError } from "./ApiRequestError";
 
 export class HttpClient implements IHttpClient {
   private static instances: Map<string, HttpClient> = new Map();
@@ -61,7 +29,7 @@ export class HttpClient implements IHttpClient {
    * Initialise une nouvelle instance HTTP avec intercepteurs
    */
   static init(
-    options: HttpConfigOptionsWithInterceptors,
+    options: HttpConfig,
     instanceName: string = "default",
   ): HttpClient {
     // Ajouter les intercepteurs spécifiés dans les options

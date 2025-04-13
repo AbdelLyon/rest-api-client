@@ -42,3 +42,21 @@ export interface RequestConfig extends RequestInit {
   baseURL?: string;
   headers?: Record<string, string>;
 }
+
+export interface ApiErrorSource {
+  [key: string]: unknown;
+  status?: number;
+  statusText?: string;
+  data?: unknown;
+  response?: Response;
+}
+
+export interface HttpConfig extends HttpConfigOptions {
+  interceptors?: {
+    request?: RequestInterceptor[];
+    response?: {
+      success?: ResponseSuccessInterceptor[];
+      error?: ResponseErrorInterceptor[];
+    };
+  };
+}

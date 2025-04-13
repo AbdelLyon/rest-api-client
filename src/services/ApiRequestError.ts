@@ -1,14 +1,14 @@
-import { RequestConfig } from "@/types/common";
+import { ApiErrorSource, RequestConfig } from "@/types/common";
+
 
 export class ApiRequestError extends Error {
   status?: number;
   statusText?: string;
-  data?: any;
+  data?: unknown;
   originalError: unknown;
   requestConfig: RequestConfig;
 
   constructor (error: unknown, requestConfig: RequestConfig) {
-    // Créer un message d'erreur utile
     const message = error instanceof Error
       ? error.message
       : "API Service Request Failed";
@@ -18,20 +18,21 @@ export class ApiRequestError extends Error {
     this.originalError = error;
     this.requestConfig = requestConfig;
 
-    // Extraire les informations utiles de l'erreur originale si possible
     if (error && typeof error === "object") {
-      if ("status" in error) {
-        this.status = (error as any).status;
+      const errorObj = error as ApiErrorSource;
+
+      if ("status" in errorObj) {
+        this.status = errorObj.status;
       }
-      if ("statusText" in error) {
-        this.statusText = (error as any).statusText;
+      if ("statusText" in errorObj) {
+        this.statusText = errorObj.statusText as string;
       }
-      if ("data" in error) {
-        this.data = (error as any).data;
+      if ("data" in errorObj) {
+        this.data = errorObj.data;
       }
       // Si c'est une erreur de fetch (Response)
-      if ("response" in error && (error as any).response instanceof Response) {
-        const response = (error as any).response;
+      if ("response" in errorObj && errorObj.response instanceof Response) {
+        const response = errorObj.response;
         this.status = response.status;
         this.statusText = response.statusText;
       }
