@@ -1,15 +1,15 @@
 var S = Object.defineProperty;
 var I = (h, t, e) => t in h ? S(h, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : h[t] = e;
-var r = (h, t, e) => I(h, typeof t != "symbol" ? t + "" : t, e);
-class p extends Error {
+var a = (h, t, e) => I(h, typeof t != "symbol" ? t + "" : t, e);
+class l extends Error {
   constructor(e, s) {
-    const a = e instanceof Error ? e.message : "API Service Request Failed";
-    super(a);
-    r(this, "status");
-    r(this, "statusText");
-    r(this, "data");
-    r(this, "originalError");
-    r(this, "requestConfig");
+    const r = e instanceof Error ? e.message : "API Service Request Failed";
+    super(r);
+    a(this, "status");
+    a(this, "statusText");
+    a(this, "data");
+    a(this, "originalError");
+    a(this, "requestConfig");
     if (this.name = "ApiRequestError", this.originalError = e, this.requestConfig = s, e && typeof e == "object") {
       const i = e;
       if ("status" in i && (this.status = i.status), "statusText" in i && (this.statusText = i.statusText), "data" in i && (this.data = i.data), "response" in i && i.response instanceof Response) {
@@ -17,7 +17,7 @@ class p extends Error {
         this.status = o.status, this.statusText = o.statusText;
       }
     }
-    Error.captureStackTrace && Error.captureStackTrace(this, p);
+    Error.captureStackTrace && Error.captureStackTrace(this, l);
   }
   // Méthodes utilitaires pour vérifier le type d'erreur
   isNotFound() {
@@ -38,31 +38,33 @@ class p extends Error {
 }
 const n = class n {
   constructor() {
-    r(this, "baseURL");
-    r(this, "defaultTimeout");
-    r(this, "defaultHeaders");
-    r(this, "withCredentials");
-    r(this, "maxRetries");
+    a(this, "baseURL");
+    a(this, "defaultTimeout");
+    a(this, "defaultHeaders");
+    a(this, "withCredentials");
+    a(this, "maxRetries");
     this.baseURL = "", this.defaultTimeout = 1e4, this.defaultHeaders = {}, this.withCredentials = !0, this.maxRetries = 3;
   }
   /**
    * Initialise une nouvelle instance HTTP avec intercepteurs
    */
-  static init(t, e = "default") {
-    if (t.interceptors && (t.interceptors.request && t.interceptors.request.length > 0 && (n.requestInterceptors = [
+  static init(t) {
+    var r, i;
+    const { httpConfig: e, instanceName: s } = t;
+    if (n.requestInterceptors = [
       ...n.requestInterceptors,
-      ...t.interceptors.request
-    ]), t.interceptors.response && (t.interceptors.response.success && t.interceptors.response.success.length > 0 && (n.responseSuccessInterceptors = [
+      ...((r = e.interceptors) == null ? void 0 : r.request) ?? []
+    ], (i = e.interceptors) != null && i.response && (n.responseSuccessInterceptors = [
       ...n.responseSuccessInterceptors,
-      ...t.interceptors.response.success
-    ]), t.interceptors.response.error && t.interceptors.response.error.length > 0 && (n.responseErrorInterceptors = [
+      ...e.interceptors.response.success ?? []
+    ], n.responseErrorInterceptors = [
       ...n.responseErrorInterceptors,
-      ...t.interceptors.response.error
-    ]))), !this.instances.has(e)) {
-      const s = new n();
-      s.configure(t), this.instances.set(e, s), this.instances.size === 1 && (this.defaultInstanceName = e);
+      ...e.interceptors.response.error ?? []
+    ]), !this.instances.has(s)) {
+      const o = new n();
+      o.configure(e), this.instances.set(s, o), this.instances.size === 1 && (this.defaultInstanceName = s);
     }
-    return this.instances.get(e);
+    return this.instances.get(s);
   }
   /**
    * Récupère une instance existante
@@ -130,10 +132,10 @@ const n = class n {
    * Journalise les erreurs de requête
    */
   logError(t) {
-    var s, a;
+    var s, r;
     const e = {
       url: (s = t.config) == null ? void 0 : s.url,
-      method: (a = t.config) == null ? void 0 : a.method,
+      method: (r = t.config) == null ? void 0 : r.method,
       status: t.status,
       data: t.data,
       message: t.message
@@ -167,8 +169,8 @@ const n = class n {
       try {
         if (e = await Promise.resolve(s(e)), !(e instanceof Error))
           return e;
-      } catch (a) {
-        e = a;
+      } catch (r) {
+        e = r;
       }
     return Promise.reject(e);
   }
@@ -185,36 +187,36 @@ const n = class n {
    */
   async fetchWithRetry(t, e, s = 1) {
     try {
-      const { timeout: a = this.defaultTimeout, params: i, data: o, ...c } = e;
-      let m = t;
+      const { timeout: r = this.defaultTimeout, params: i, data: o, ...c } = e;
+      let f = t;
       if (i && Object.keys(i).length > 0) {
-        const l = new URLSearchParams();
-        for (const [f, E] of Object.entries(i))
-          l.append(f, E);
-        m += `?${l.toString()}`;
+        const p = new URLSearchParams();
+        for (const [m, E] of Object.entries(i))
+          p.append(m, E);
+        f += `?${p.toString()}`;
       }
-      const y = new AbortController(), g = setTimeout(() => y.abort("Request timeout"), a);
+      const y = new AbortController(), g = setTimeout(() => y.abort("Request timeout"), r);
       let w;
       o !== void 0 && (w = typeof o == "string" ? o : JSON.stringify(o));
-      const d = await fetch(m, {
+      const d = await fetch(f, {
         ...c,
         body: w,
         signal: y.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
       if (clearTimeout(g), !d.ok && s < this.maxRetries && this.isRetryableError(d.status, e.method)) {
-        const l = Math.pow(2, s) * 100;
-        return await new Promise((f) => setTimeout(f, l)), this.fetchWithRetry(t, e, s + 1);
+        const p = Math.pow(2, s) * 100;
+        return await new Promise((m) => setTimeout(m, p)), this.fetchWithRetry(t, e, s + 1);
       }
       return d;
-    } catch (a) {
-      if (a instanceof DOMException && a.name === "AbortError")
+    } catch (r) {
+      if (r instanceof DOMException && r.name === "AbortError")
         throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
       if (s < this.maxRetries && this.isRetryableError(0, e.method)) {
         const i = Math.pow(2, s) * 100;
         return await new Promise((o) => setTimeout(o, i)), this.fetchWithRetry(t, e, s + 1);
       }
-      throw a;
+      throw r;
     }
   }
   /**
@@ -223,7 +225,7 @@ const n = class n {
   async request(t, e = {}) {
     var s;
     try {
-      const a = {
+      const r = {
         method: "GET",
         timeout: this.defaultTimeout,
         ...t,
@@ -234,15 +236,15 @@ const n = class n {
           ...e.headers || {}
         }
       }, i = new URL(
-        a.url.startsWith("http") ? a.url : `${this.baseURL}${a.url.startsWith("/") ? "" : "/"}${a.url}`
+        r.url.startsWith("http") ? r.url : `${this.baseURL}${r.url.startsWith("/") ? "" : "/"}${r.url}`
       ).toString(), o = await this.applyRequestInterceptors({
-        ...a,
+        ...r,
         url: i
       });
       let c = await this.fetchWithRetry(i, o);
       return c = await this.applyResponseSuccessInterceptors(c), (s = c.headers.get("content-type")) != null && s.includes("application/json") ? await c.json() : await c.text();
-    } catch (a) {
-      const i = a instanceof p ? a : new p(a, {
+    } catch (r) {
+      const i = r instanceof l ? r : new l(r, {
         ...t,
         ...e,
         url: t.url
@@ -251,14 +253,14 @@ const n = class n {
     }
   }
 };
-r(n, "instances", /* @__PURE__ */ new Map()), r(n, "defaultInstanceName", "default"), // Intercepteurs statiques
-r(n, "requestInterceptors", []), r(n, "responseSuccessInterceptors", []), r(n, "responseErrorInterceptors", []);
+a(n, "instances", /* @__PURE__ */ new Map()), a(n, "defaultInstanceName"), // Intercepteurs statiques
+a(n, "requestInterceptors", []), a(n, "responseSuccessInterceptors", []), a(n, "responseErrorInterceptors", []);
 let u = n;
 class R {
   constructor(t, e) {
-    r(this, "http");
-    r(this, "pathname");
-    r(this, "schema");
+    a(this, "http");
+    a(this, "pathname");
+    a(this, "schema");
     this.http = u.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
@@ -340,9 +342,9 @@ class R {
 }
 class q {
   constructor(t, e) {
-    r(this, "http");
-    r(this, "pathname");
-    r(this, "schema");
+    a(this, "http");
+    a(this, "pathname");
+    a(this, "schema");
     this.http = u.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
@@ -388,12 +390,12 @@ class q {
 }
 class P {
   constructor(t, e) {
-    r(this, "http");
-    r(this, "pathname");
-    r(this, "userSchema");
-    r(this, "credentialsSchema");
-    r(this, "registerDataSchema");
-    r(this, "tokenSchema");
+    a(this, "http");
+    a(this, "pathname");
+    a(this, "userSchema");
+    a(this, "credentialsSchema");
+    a(this, "registerDataSchema");
+    a(this, "tokenSchema");
     this.http = u.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
   }
   /**
@@ -406,8 +408,8 @@ class P {
         method: "POST",
         url: `${this.pathname}/register`,
         data: t
-      }, e), a = this.userSchema.parse(s.user);
-      return this.tokenSchema && this.tokenSchema.parse(s.tokens), a;
+      }, e), r = this.userSchema.parse(s.user);
+      return this.tokenSchema && this.tokenSchema.parse(s.tokens), r;
     } catch (s) {
       throw console.error("Registration error", s), s;
     }
@@ -422,8 +424,8 @@ class P {
         method: "POST",
         url: `${this.pathname}/login`,
         data: t
-      }, e), a = this.userSchema.parse(s.user), i = this.tokenSchema ? this.tokenSchema.parse(s.tokens) : s.tokens;
-      return { user: a, tokens: i };
+      }, e), r = this.userSchema.parse(s.user), i = this.tokenSchema ? this.tokenSchema.parse(s.tokens) : s.tokens;
+      return { user: r, tokens: i };
     } catch (s) {
       throw console.error("Login error", s), s;
     }

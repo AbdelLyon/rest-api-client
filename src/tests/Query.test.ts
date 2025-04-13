@@ -32,7 +32,7 @@ type TestResource = z.infer<typeof TestResourceSchema>;
 
 // Classe concrète pour tester la classe abstraite Query
 class TestQuery extends Query<TestResource> {
-  constructor(pathname: string) {
+  constructor (pathname: string) {
     super(pathname, TestResourceSchema);
   }
 }
@@ -45,7 +45,10 @@ describe("Query avec Zod", () => {
   beforeAll(() => {
     // Initialiser HttpClient avant tous les tests
     HttpClient.init({
-      baseURL: "https://api.test.com",
+      httpConfig: {
+        baseURL: "https://api.test.com",
+      },
+      instanceName: "main"
     });
   });
 
@@ -54,7 +57,7 @@ describe("Query avec Zod", () => {
 
     // Espionner les méthodes que nous voulons tester
     vi.spyOn(HttpClient, "getInstance");
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => { });
 
     // Remplacer la méthode request par un mock
     const httpInstance = HttpClient.getInstance();
@@ -161,7 +164,7 @@ describe("Query avec Zod", () => {
       class ConversionQuery extends Query<
         z.infer<typeof schemaWithConversion>
       > {
-        constructor() {
+        constructor () {
           super("/api/convert", schemaWithConversion);
         }
       }

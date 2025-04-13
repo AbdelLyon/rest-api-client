@@ -50,7 +50,7 @@ interface TestRelations {
 
 // Classe concrète pour tester la classe abstraite Mutation
 class TestMutation extends Mutation<TestResource> {
-  constructor(pathname: string) {
+  constructor (pathname: string) {
     super(pathname, TestResourceSchema);
   }
 }
@@ -61,18 +61,22 @@ describe("Mutation avec Zod", () => {
   const mockRequest = vi.fn();
 
   beforeAll(() => {
-    // Initialiser HttpClient avec des options mock
+    // Initialiser HttpClient avant tous les tests
     HttpClient.init({
-      baseURL: "https://api.test.com",
+      httpConfig: {
+        baseURL: "https://api.test.com",
+      },
+      instanceName: "main"
     });
   });
+
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Espionner les méthodes que nous voulons tester
     vi.spyOn(HttpClient, "getInstance");
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => { });
 
     // Remplacer la méthode request par un mock
     const httpInstance = HttpClient.getInstance();

@@ -206,7 +206,10 @@ export declare class HttpClient implements IHttpClient {
     /**
      * Initialise une nouvelle instance HTTP avec intercepteurs
      */
-    static init(options: HttpConfig, instanceName?: string): HttpClient;
+    static init(config: {
+        httpConfig: HttpConfig;
+        instanceName: string;
+    }): HttpClient;
     /**
      * Récupère une instance existante
      */

@@ -4,7 +4,7 @@ import { ApiRequestError } from "./ApiRequestError";
 
 export class HttpClient implements IHttpClient {
   private static instances: Map<string, HttpClient> = new Map();
-  private static defaultInstanceName: string = "default";
+  private static defaultInstanceName: string;
 
   // Intercepteurs statiques
   private static requestInterceptors: RequestInterceptor[] = [];
@@ -28,44 +28,33 @@ export class HttpClient implements IHttpClient {
   /**
    * Initialise une nouvelle instance HTTP avec intercepteurs
    */
-  static init(
-    options: HttpConfig,
-    instanceName: string = "default",
-  ): HttpClient {
-    // Ajouter les intercepteurs spécifiés dans les options
-    if (options.interceptors) {
-      // Intercepteurs de requête
-      if (options.interceptors.request && options.interceptors.request.length > 0) {
-        HttpClient.requestInterceptors = [
-          ...HttpClient.requestInterceptors,
-          ...options.interceptors.request
-        ];
-      }
+  static init(config: {
+    httpConfig: HttpConfig;
+    instanceName: string;
+  }): HttpClient {
+    const { httpConfig, instanceName } = config;
 
-      // Intercepteurs de réponse
-      if (options.interceptors.response) {
-        // Intercepteurs de succès
-        if (options.interceptors.response.success && options.interceptors.response.success.length > 0) {
-          HttpClient.responseSuccessInterceptors = [
-            ...HttpClient.responseSuccessInterceptors,
-            ...options.interceptors.response.success
-          ];
-        }
+    HttpClient.requestInterceptors = [
+      ...HttpClient.requestInterceptors,
+      ...(httpConfig.interceptors?.request ?? [])
+    ];
 
-        // Intercepteurs d'erreur
-        if (options.interceptors.response.error && options.interceptors.response.error.length > 0) {
-          HttpClient.responseErrorInterceptors = [
-            ...HttpClient.responseErrorInterceptors,
-            ...options.interceptors.response.error
-          ];
-        }
-      }
+    if (httpConfig.interceptors?.response) {
+      HttpClient.responseSuccessInterceptors = [
+        ...HttpClient.responseSuccessInterceptors,
+        ...(httpConfig.interceptors.response.success ?? [])
+      ];
+
+      HttpClient.responseErrorInterceptors = [
+        ...HttpClient.responseErrorInterceptors,
+        ...(httpConfig.interceptors.response.error ?? [])
+      ];
     }
 
     // Créer ou récupérer l'instance
     if (!this.instances.has(instanceName)) {
       const instance = new HttpClient();
-      instance.configure(options);
+      instance.configure(httpConfig);
       this.instances.set(instanceName, instance);
 
       // Si c'est la première instance, la définir comme instance par défaut

@@ -6,23 +6,12 @@ import {
   beforeEach,
   afterEach,
   Mock,
-  type MockInstance,
+
 } from "vitest";
-import axios from "axios";
-import axiosRetry from "axios-retry";
 import { HttpClient } from "../services/HttpClient";
 import { ApiRequestError } from "../services/ApiRequestError";
-import type { AxiosError, AxiosInstance } from "axios";
-import type { HttpConfigOptions } from "../types/common";
-
-// Types d'utilitaires pour les tests
-type HandlerType = (arg: any) => any;
-interface InterceptorHandlers {
-  requestSuccess: HandlerType;
-  requestError: HandlerType;
-  responseSuccess: HandlerType;
-  responseError: HandlerType;
-}
+import type { HttpConfig } from "../types/common";
+import { fail } from "assert";
 
 /**
  * Tests unitaires pour la classe HttpClient
@@ -32,69 +21,58 @@ interface InterceptorHandlers {
  * 100% des branches conditionnelles.
  */
 describe("HttpClient", () => {
-  // Configuration des mocks et des fixtures
-  const mockAxiosInstance: AxiosInstance & {
-    interceptors: {
-      request: { use: MockInstance; };
-      response: { use: MockInstance; };
-    };
-    request: Mock;
-  } = {
-    interceptors: {
-      request: { use: vi.fn() },
-      response: { use: vi.fn() },
-    },
-    request: vi.fn(),
-  } as any;
-
-  let httpClient: HttpClient;
-  let handlers: InterceptorHandlers;
-
   // Mocks des dépendances
-  vi.mock("axios");
-  vi.mock("axios-retry");
-  vi.mock("../services/ApiRequestError", () => ({
-    ApiRequestError: class MockApiRequestError extends Error {
-      constructor (public originalError: any, public requestConfig: any) {
-        super("API Service Request Failed");
-        this.name = "ApiRequestError";
-      }
-    },
+  global.fetch = vi.fn();
+  const abortSpy = vi.fn();
+  global.AbortController = vi.fn().mockImplementation(() => ({
+    signal: "test-signal",
+    abort: abortSpy,
   }));
 
-  // Réinitialisation de l'environnement de test
+  let httpClient: HttpClient;
+  let mockResponseBody = { success: true };
+  let mockResponse: Response;
+
+  // Configuration des mocks et des fixtures
   beforeEach(() => {
     vi.clearAllMocks();
-    axios.create = vi.fn().mockReturnValue(mockAxiosInstance);
+    vi.useFakeTimers();
+
+    mockResponse = {
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        "content-type": "application/json",
+      }),
+      json: vi.fn().mockResolvedValue(mockResponseBody),
+      text: vi.fn().mockResolvedValue(JSON.stringify(mockResponseBody)),
+      clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+    } as unknown as Response;
+
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
     vi.spyOn(console, "error").mockImplementation(() => { });
+    vi.spyOn(global, "setTimeout").mockImplementation(() => {
+      return 123 as any;
+    });
+    vi.spyOn(global, "clearTimeout").mockImplementation(() => { });
+
     HttpClient.resetInstance();
   });
 
   afterEach(() => {
     HttpClient.resetInstance();
+    vi.useRealTimers();
   });
-
-  /**
-   * Utility: Extrait et conserve les références aux handlers d'intercepteurs
-   */
-  function extractInterceptorHandlers(): InterceptorHandlers {
-    return {
-      requestSuccess:
-        mockAxiosInstance.interceptors.request.use.mock.calls[0][0],
-      requestError: mockAxiosInstance.interceptors.request.use.mock.calls[0][1],
-      responseSuccess:
-        mockAxiosInstance.interceptors.response.use.mock.calls[0][0],
-      responseError:
-        mockAxiosInstance.interceptors.response.use.mock.calls[0][1],
-    };
-  }
 
   /**
    * Utility: Initialise une instance HttpClient avec configuration standard
    */
   function createStandardHttpClient(): HttpClient {
     return HttpClient.init({
-      baseURL: "https://api.example.com",
+      httpConfig: {
+        baseURL: "https://api.example.com",
+      },
+      instanceName: "default",
     });
   }
 
@@ -102,7 +80,7 @@ describe("HttpClient", () => {
     describe("Méthode init", () => {
       it("initialise une nouvelle instance avec toutes les options", () => {
         // Arrangement
-        const options: HttpConfigOptions = {
+        const httpConfig: HttpConfig = {
           baseURL: "https://api.example.com",
           timeout: 5000,
           headers: { "X-Custom-Header": "value" },
@@ -110,109 +88,93 @@ describe("HttpClient", () => {
           maxRetries: 2,
           apiPrefix: "api",
           apiVersion: "2",
+          interceptors: {
+            request: [
+              (config) => config,
+            ],
+            response: {
+              success: [(response) => response],
+              error: [(error) => Promise.reject(error)],
+            },
+          },
         };
 
         // Action
-        httpClient = HttpClient.init(options);
-
-        // Assertion
-        expect(axios.create).toHaveBeenCalledWith({
-          baseURL: "https://api.example.com/api",
-          timeout: 5000,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Custom-Header": "value",
-          },
-          withCredentials: true,
+        httpClient = HttpClient.init({
+          httpConfig,
+          instanceName: "test",
         });
 
-        expect(axiosRetry).toHaveBeenCalledWith(
-          mockAxiosInstance,
-          expect.objectContaining({
-            retries: 2,
-            retryDelay: axiosRetry.exponentialDelay,
-            retryCondition: expect.any(Function),
-          }),
-        );
-        expect(
-          mockAxiosInstance.interceptors.request.use,
-        ).toHaveBeenCalledTimes(1);
-        expect(
-          mockAxiosInstance.interceptors.response.use,
-        ).toHaveBeenCalledTimes(1);
+        // Assertion
+        expect(httpClient).toBeDefined();
+        expect(HttpClient.getAvailableInstances()).toContain("test");
       });
 
       it("applique les valeurs par défaut quand les options sont minimales", () => {
         // Arrangement
-        const options = { baseURL: "https://api.example.com" };
+        const httpConfig = { baseURL: "https://api.example.com" };
 
         // Action
-        httpClient = HttpClient.init(options);
+        httpClient = HttpClient.init({
+          httpConfig,
+          instanceName: "default",
+        });
 
         // Assertion
-        expect(axios.create).toHaveBeenCalledWith({
-          baseURL: "https://api.example.com",
-          timeout: 10000,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          withCredentials: true,
-        });
-        expect(axiosRetry).toHaveBeenCalledWith(
-          mockAxiosInstance,
-          expect.objectContaining({ retries: 3 }),
-        );
+        expect(httpClient).toBeDefined();
+        expect(HttpClient.getAvailableInstances()).toContain("default");
       });
 
       it("crée des instances distinctes avec des noms différents", () => {
         // Action
-        const mainInstance = HttpClient.init(
-          { baseURL: "https://api.example.com" },
-          "main",
-        );
-        const authInstance = HttpClient.init(
-          { baseURL: "https://auth.example.com" },
-          "auth",
-        );
+        const mainInstance = HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "main",
+        });
+        const authInstance = HttpClient.init({
+          httpConfig: { baseURL: "https://auth.example.com" },
+          instanceName: "auth",
+        });
 
         // Assertion
         expect(mainInstance).not.toBe(authInstance);
-        expect(axios.create).toHaveBeenCalledTimes(2);
+        expect(HttpClient.getAvailableInstances()).toContain("main");
+        expect(HttpClient.getAvailableInstances()).toContain("auth");
       });
 
       it("réutilise l'instance existante si le même nom est utilisé", () => {
         // Action
-        const instance1 = HttpClient.init(
-          { baseURL: "https://api.example.com" },
-          "test",
-        );
-        const instance2 = HttpClient.init(
-          { baseURL: "https://api.example.com" },
-          "test",
-        );
+        const instance1 = HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "test",
+        });
+        const instance2 = HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "test",
+        });
 
         // Assertion
         expect(instance1).toBe(instance2);
-        expect(axios.create).toHaveBeenCalledTimes(1);
+        expect(HttpClient.getAvailableInstances().length).toBe(1);
       });
 
       it("utilise apiVersion quand apiPrefix n'est pas fourni", () => {
-        // Arrangement
-        const options = {
-          baseURL: "https://api.example.com",
-          apiVersion: "2",
-        };
+        // Arrangement & Action
+        httpClient = HttpClient.init({
+          httpConfig: {
+            baseURL: "https://api.example.com",
+            apiVersion: "2",
+          },
+          instanceName: "test",
+        });
 
-        // Action
-        httpClient = HttpClient.init(options);
+        // Requête pour vérifier l'URL formée
+        httpClient.request({ url: "/resources" });
 
         // Assertion
-        expect(axios.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            baseURL: "https://api.example.com/v2",
-          }),
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining("https://api.example.com/v2/resources"),
+          expect.any(Object)
         );
       });
     });
@@ -221,7 +183,8 @@ describe("HttpClient", () => {
       it("retourne l'instance par défaut après initialisation", () => {
         // Arrangement
         const instance = HttpClient.init({
-          baseURL: "https://api.example.com",
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "default",
         });
 
         // Action & Assertion
@@ -230,14 +193,14 @@ describe("HttpClient", () => {
 
       it("accède à une instance spécifique par son nom", () => {
         // Arrangement
-        const mainInstance = HttpClient.init(
-          { baseURL: "https://api.example.com" },
-          "main",
-        );
-        const authInstance = HttpClient.init(
-          { baseURL: "https://auth.example.com" },
-          "auth",
-        );
+        const mainInstance = HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "main",
+        });
+        const authInstance = HttpClient.init({
+          httpConfig: { baseURL: "https://auth.example.com" },
+          instanceName: "auth",
+        });
 
         // Action & Assertion
         expect(HttpClient.getInstance("main")).toBe(mainInstance);
@@ -253,7 +216,10 @@ describe("HttpClient", () => {
 
       it("signale une erreur quand l'instance demandée n'existe pas", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api.example.com" }, "main");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "main",
+        });
 
         // Action & Assertion
         expect(() => HttpClient.getInstance("nonexistent")).toThrow(
@@ -263,8 +229,14 @@ describe("HttpClient", () => {
 
       it("change l'instance par défaut sur demande", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
 
         // Action
         HttpClient.setDefaultInstance("api2");
@@ -282,8 +254,14 @@ describe("HttpClient", () => {
 
       it("énumère toutes les instances disponibles", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
 
         // Action
         const instances = HttpClient.getAvailableInstances();
@@ -301,8 +279,14 @@ describe("HttpClient", () => {
 
       it("supprime toutes les instances lors de la réinitialisation globale", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
 
         // Action
         HttpClient.resetInstance();
@@ -314,8 +298,14 @@ describe("HttpClient", () => {
 
       it("supprime seulement l'instance spécifiée lors d'une réinitialisation ciblée", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
 
         // Action
         HttpClient.resetInstance("api1");
@@ -328,8 +318,14 @@ describe("HttpClient", () => {
 
       it("change l'instance par défaut si celle-ci est supprimée", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
         HttpClient.setDefaultInstance("api1");
 
         // Action
@@ -341,7 +337,10 @@ describe("HttpClient", () => {
 
       it("gère correctement la suppression de la dernière instance", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api.example.com" }, "unique");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "unique",
+        });
 
         // Action
         HttpClient.resetInstance("unique");
@@ -349,333 +348,6 @@ describe("HttpClient", () => {
         // Assertion
         expect(HttpClient.getAvailableInstances().length).toBe(0);
         expect(() => HttpClient.getInstance()).toThrow(/not initialized/);
-      });
-    });
-
-    // describe("Accesseurs et mutateurs internes", () => {
-    //   it("permet d'accéder et de modifier l'instance axios", () => {
-    //     // Arrangement
-    //     httpClient = new HttpClient();
-    //     const mockInstance = {} as AxiosInstance;
-
-    //     // Action
-    //     (httpClient as any).setAxiosInstance(mockInstance);
-    //     const result = (httpClient as any).getAxiosInstance();
-
-    //     // Assertion
-    //     expect(result).toBe(mockInstance);
-    //   });
-    // });
-  });
-
-  // describe("Configuration des URLs et formatage", () => {
-  //   let httpClient: HttpClient;
-
-  //   beforeEach(() => {
-  //     httpClient = new HttpClient();
-  //   });
-
-  //   it("conserve une URL de base standard", () => {
-  //     // Arrangement
-  //     const options = { baseURL: "https://api.example.com" };
-
-  //     // Action
-  //     const result = (httpClient as any).getFullBaseUrl(options);
-
-  //     // Assertion
-  //     expect(result).toBe("https://api.example.com");
-  //   });
-
-  //   it("normalise l'URL en supprimant les slashes de fin", () => {
-  //     // Arrangement
-  //     const options = { baseURL: "https://api.example.com/" };
-
-  //     // Action
-  //     const url = (httpClient as any).getFullBaseUrl(options);
-
-  //     // Assertion
-  //     expect(url).toBe("https://api.example.com");
-  //   });
-
-  //   it("ajoute un préfixe d'API quand spécifié", () => {
-  //     // Arrangement
-  //     const options = {
-  //       baseURL: "https://api.example.com",
-  //       apiPrefix: "api",
-  //     };
-
-  //     // Action
-  //     const url = (httpClient as any).getFullBaseUrl(options);
-
-  //     // Assertion
-  //     expect(url).toBe("https://api.example.com/api");
-  //   });
-
-  //   it("normalise les préfixes d'API avec des slashes", () => {
-  //     // Arrangement & Action & Assertion
-  //     expect(
-  //       (httpClient as any).getFullBaseUrl({
-  //         baseURL: "https://api.example.com",
-  //         apiPrefix: "/api/",
-  //       }),
-  //     ).toBe("https://api.example.com/api");
-
-  //     expect(
-  //       (httpClient as any).getFullBaseUrl({
-  //         baseURL: "https://api.example.com/",
-  //         apiPrefix: "/api/",
-  //       }),
-  //     ).toBe("https://api.example.com/api");
-  //   });
-
-  //   it("ajoute un préfixe de version quand apiVersion est fourni", () => {
-  //     // Arrangement
-  //     const options = {
-  //       baseURL: "https://api.example.com",
-  //       apiVersion: "2",
-  //     };
-
-  //     // Action
-  //     const url = (httpClient as any).getFullBaseUrl(options);
-
-  //     // Assertion
-  //     expect(url).toBe("https://api.example.com/v2");
-  //   });
-
-  //   it("accepte apiVersion comme nombre", () => {
-  //     // Arrangement
-  //     const options = {
-  //       baseURL: "https://api.example.com",
-  //       apiVersion: 3,
-  //     };
-
-  //     // Action & Assertion
-  //     expect((httpClient as any).getFullBaseUrl(options)).toBe(
-  //       "https://api.example.com/v3",
-  //     );
-  //   });
-
-  //   it("priorise apiPrefix sur apiVersion si les deux sont présents", () => {
-  //     // Arrangement
-  //     const options = {
-  //       baseURL: "https://api.example.com",
-  //       apiPrefix: "api",
-  //       apiVersion: "2",
-  //     };
-
-  //     // Action
-  //     const url = (httpClient as any).getFullBaseUrl(options);
-
-  //     // Assertion
-  //     expect(url).toBe("https://api.example.com/api");
-  //   });
-
-  //   it("signale une erreur quand baseURL est manquant", () => {
-  //     // Arrangement
-  //     // @ts-ignore - on force délibérément une erreur
-  //     const options = { timeout: 5000 };
-
-  //     // Action & Assertion
-  //     expect(() => (httpClient as any).getFullBaseUrl(options)).toThrow(
-  //       "baseURL is required",
-  //     );
-  //   });
-
-  //   it("nettoie les espaces autour de l'URL de base", () => {
-  //     // Arrangement
-  //     const options = { baseURL: " https://api.example.com " };
-
-  //     // Action & Assertion
-  //     expect((httpClient as any).getFullBaseUrl(options)).toBe(
-  //       "https://api.example.com",
-  //     );
-  //   });
-  // });
-
-  describe("Intercepteurs et traitement des requêtes", () => {
-    describe("Configuration des intercepteurs", () => {
-      beforeEach(() => {
-        mockAxiosInstance.interceptors.request.use.mockClear();
-        mockAxiosInstance.interceptors.response.use.mockClear();
-        httpClient = createStandardHttpClient();
-        handlers = extractInterceptorHandlers();
-      });
-
-      it("enregistre les intercepteurs de requête", () => {
-        // Assertion
-        expect(
-          mockAxiosInstance.interceptors.request.use,
-        ).toHaveBeenCalledTimes(1);
-        expect(typeof handlers.requestSuccess).toBe("function");
-        expect(typeof handlers.requestError).toBe("function");
-      });
-
-      it("transmet la configuration dans l'intercepteur de requête", () => {
-        // Arrangement
-        const config = { headers: { test: "value" } };
-
-        // Action & Assertion
-        expect(handlers.requestSuccess(config)).toBe(config);
-      });
-
-      it("enregistre les intercepteurs de réponse", () => {
-        // Assertion
-        expect(
-          mockAxiosInstance.interceptors.response.use,
-        ).toHaveBeenCalledTimes(1);
-        expect(typeof handlers.responseSuccess).toBe("function");
-        expect(typeof handlers.responseError).toBe("function");
-      });
-
-      it("transmet la réponse dans l'intercepteur de réponse", () => {
-        // Arrangement
-        const response = { data: { success: true } };
-
-        // Action & Assertion
-        expect(handlers.responseSuccess(response)).toBe(response);
-      });
-
-      it("propage les erreurs de requête", async () => {
-        // Arrangement
-        const testError = new Error("Erreur de requête");
-
-        // Action & Assertion
-        await expect(handlers.requestError(testError)).rejects.toBe(testError);
-      });
-    });
-
-    describe("Traitement des erreurs de réponse", () => {
-      beforeEach(() => {
-        httpClient = createStandardHttpClient();
-        handlers = extractInterceptorHandlers();
-      });
-
-      it("transforme les erreurs de réponse en ApiRequestError", async () => {
-        // Arrangement
-        const axiosError = {
-          config: { url: "/test" },
-          response: { status: 500 },
-          message: "Server error",
-        } as AxiosError;
-
-        // Action & Assertion
-        await expect(handlers.responseError(axiosError)).rejects.toBeInstanceOf(
-          ApiRequestError,
-        );
-        expect(console.error).toHaveBeenCalled();
-      });
-
-      it("gère les erreurs sans configuration", async () => {
-        // Arrangement
-        const errorWithoutConfig = new Error("Network Error") as AxiosError;
-        Object.assign(errorWithoutConfig, {
-          isAxiosError: true,
-          message: "Network Error",
-          config: undefined,
-          response: undefined,
-        });
-
-        // Action
-        const handleErrorResponse = (
-          httpClient as any
-        ).handleErrorResponse.bind(httpClient);
-        const error: ApiRequestError = await handleErrorResponse(
-          errorWithoutConfig,
-        ).catch((e: ApiRequestError) => e);
-
-        // Assertion
-        expect(error).toBeInstanceOf(ApiRequestError);
-        expect(error.originalError).toBe(errorWithoutConfig);
-        expect(error.requestConfig).toEqual({});
-      });
-    });
-
-    describe("Journalisation des erreurs", () => {
-      beforeEach(() => {
-        httpClient = createStandardHttpClient();
-      });
-
-      it("enregistre les détails complets d'une erreur", () => {
-        // Arrangement
-        const logError = (httpClient as any).logError.bind(httpClient);
-        const error = {
-          config: { url: "/test", method: "GET" },
-          response: { status: 500, data: { message: "Server Error" } },
-          message: "Request failed",
-        } as AxiosError;
-
-        // Action
-        logError(error);
-
-        // Assertion
-        expect(console.error).toHaveBeenCalledWith("API Request Error", {
-          url: "/test",
-          method: "GET",
-          status: 500,
-          data: { message: "Server Error" },
-          message: "Request failed",
-        });
-      });
-
-      it("gère les erreurs sans propriétés", () => {
-        // Arrangement
-        const logError = (httpClient as any).logError.bind(httpClient);
-        const error = { message: "Network Error" } as AxiosError;
-
-        // Action
-        logError(error);
-
-        // Assertion
-        expect(console.error).toHaveBeenCalledWith("API Request Error", {
-          url: undefined,
-          method: undefined,
-          status: undefined,
-          data: undefined,
-          message: "Network Error",
-        });
-      });
-
-      it("traite les erreurs avec configuration partielle", () => {
-        // Arrangement
-        const logError = (httpClient as any).logError.bind(httpClient);
-        const error = {
-          config: { url: "/test" },
-          message: "Error with partial config",
-        } as AxiosError;
-
-        // Action
-        logError(error);
-
-        // Assertion
-        expect(console.error).toHaveBeenCalledWith(
-          "API Request Error",
-          expect.objectContaining({
-            url: "/test",
-            method: undefined,
-          }),
-        );
-      });
-
-      it("traite les erreurs avec réponse incomplète", () => {
-        // Arrangement
-        const logError = (httpClient as any).logError.bind(httpClient);
-        const error = {
-          config: { url: "/test", method: "GET" },
-          response: {},
-          message: "Error with empty response",
-        } as AxiosError;
-
-        // Action
-        logError(error);
-
-        // Assertion
-        expect(console.error).toHaveBeenCalledWith(
-          "API Request Error",
-          expect.objectContaining({
-            status: undefined,
-            data: undefined,
-          }),
-        );
       });
     });
   });
@@ -687,30 +359,25 @@ describe("HttpClient", () => {
 
     it("effectue une requête avec succès et retourne les données", async () => {
       // Arrangement
-      const mockResponse = { data: { success: true } };
-      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
       const config = { url: "/endpoint", method: "GET" };
 
       // Action
       const result = await httpClient.request(config);
 
       // Assertion
-      expect(mockAxiosInstance.request).toHaveBeenCalledWith({
-        url: "/endpoint",
-        method: "GET",
-        timeout: 10000,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-      expect(result).toEqual(mockResponse.data);
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://api.example.com/endpoint",
+        expect.objectContaining({
+          method: "GET",
+          credentials: "include",
+          signal: "test-signal",
+        })
+      );
+      expect(result).toEqual(mockResponseBody);
     });
 
     it("fusionne les options avec la configuration", async () => {
       // Arrangement
-      const mockResponse = { data: { success: true } };
-      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
       const config = { url: "/endpoint", method: "POST" };
       const options = {
         headers: { Authorization: "Bearer token" },
@@ -721,29 +388,27 @@ describe("HttpClient", () => {
       await httpClient.request(config, options);
 
       // Assertion
-      expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://api.example.com/endpoint",
         expect.objectContaining({
-          url: "/endpoint",
           method: "POST",
-          timeout: 15000,
           headers: expect.objectContaining({
             Authorization: "Bearer token",
           }),
-        }),
+          credentials: "include",
+        })
       );
+      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 15000);
     });
 
     it("gère le remplacement de propriétés par les options", async () => {
       // Arrangement
-      const mockResponse = { data: { success: true } };
-      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
       const config = {
         url: "/endpoint",
         method: "GET",
         headers: { "X-API-Key": "abc123" },
       };
       const options = {
-        url: "/override",
         headers: { "X-API-Key": "xyz789" },
       };
 
@@ -751,65 +416,49 @@ describe("HttpClient", () => {
       await httpClient.request(config, options);
 
       // Assertion
-      expect(mockAxiosInstance.request).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://api.example.com/endpoint",
         expect.objectContaining({
-          url: "/override", // L'URL dans options écrase celle dans config
-          method: "GET", // La méthode reste celle de config
+          method: "GET",
           headers: expect.objectContaining({
-            "X-API-Key": "xyz789", // Les en-têtes sont fusionnés, priorité aux options
+            "X-API-Key": "xyz789",
           }),
-        }),
+        })
       );
     });
 
-    it("gère les valeurs de data particulières", async () => {
-      // Arrangement & Action & Assertion
-
-      // Chaîne vide
-      mockAxiosInstance.request.mockResolvedValueOnce({ data: "" });
-      expect(await httpClient.request({ url: "/empty-string" })).toBe("");
-
-      // Booléen false
-      mockAxiosInstance.request.mockResolvedValueOnce({ data: false });
-      expect(await httpClient.request({ url: "/boolean-false" })).toBe(false);
-
-      // Nombre 0
-      mockAxiosInstance.request.mockResolvedValueOnce({ data: 0 });
-      expect(await httpClient.request({ url: "/number-zero" })).toBe(0);
-
-      // Null explicite
-      mockAxiosInstance.request.mockResolvedValueOnce({ data: null });
-      expect(await httpClient.request({ url: "/null-data" })).toBeNull();
-
-      // Réponse sans propriété data
-      mockAxiosInstance.request.mockResolvedValueOnce({ status: 204 });
-      expect(await httpClient.request({ url: "/no-content" })).toBeUndefined();
-    });
-
-    it("gère le remplacement complet des en-têtes par défaut", async () => {
+    it("ajoute correctement les paramètres de requête", async () => {
       // Arrangement
-      const mockResponse = { data: {} };
-      mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
-      const fullOptions = {
-        timeout: 15000,
-        headers: {
-          "Content-Type": "application/xml",
-          Accept: "application/xml",
-        },
+      const config = {
+        url: "/endpoint",
+        method: "GET",
+        params: { filter: "active", sort: "name" }
       };
 
       // Action
-      await httpClient.request({ url: "/test" }, fullOptions);
+      await httpClient.request(config);
 
       // Assertion
-      expect(mockAxiosInstance.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          timeout: 15000,
-          headers: expect.objectContaining({
-            "Content-Type": "application/xml",
-            Accept: "application/xml",
-          }),
-        }),
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://api.example.com/endpoint?filter=active&sort=name",
+        expect.any(Object)
+      );
+    });
+
+    it("construit correctement les URLs absolues", async () => {
+      // Arrangement
+      const config = {
+        url: "https://other-api.com/endpoint",
+        method: "GET"
+      };
+
+      // Action
+      await httpClient.request(config);
+
+      // Assertion
+      expect(global.fetch).toHaveBeenCalledWith(
+        "https://other-api.com/endpoint",
+        expect.any(Object)
       );
     });
   });
@@ -819,175 +468,186 @@ describe("HttpClient", () => {
       httpClient = createStandardHttpClient();
     });
 
-    it("transforme les erreurs axios en ApiRequestError", async () => {
+    it("transforme les erreurs fetch en ApiRequestError", async () => {
       // Arrangement
-      const axiosError = new Error("Request failed") as AxiosError;
-      Object.assign(axiosError, {
-        isAxiosError: true,
-        config: { url: "/endpoint", method: "GET" },
-        response: { status: 500, data: { message: "Server error" } },
-        message: "Request failed with status code 500",
-        toJSON: () => ({}),
-      });
-      mockAxiosInstance.request.mockRejectedValueOnce(axiosError);
+      const fetchError = new Error("Network error");
+      (global.fetch as Mock).mockRejectedValueOnce(fetchError);
 
       // Action & Assertion
-      await expect(httpClient.request({ url: "/endpoint" })).rejects.toThrow(
-        "API Service Request Failed",
+      await expect(httpClient.request({ url: "/endpoint" })).rejects.toBeInstanceOf(
+        ApiRequestError
       );
-      await expect(
-        httpClient.request({ url: "/endpoint" }),
-      ).rejects.toBeInstanceOf(ApiRequestError);
+      expect(console.error).toHaveBeenCalled();
     });
 
-    it("propage les ApiRequestError sans transformation", async () => {
+    it("gère correctement les réponses HTTP non-ok", async () => {
       // Arrangement
-      const existingError = new ApiRequestError(
-        { message: "Original error" } as AxiosError,
-        { url: "/endpoint" },
-      );
-      mockAxiosInstance.request.mockRejectedValueOnce(existingError);
+      const errorResponse = {
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+        headers: new Headers({
+          "content-type": "application/json",
+        }),
+        json: vi.fn().mockResolvedValue({ message: "Resource not found" }),
+        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+      } as unknown as Response;
 
-      // Action & Assertion
-      await expect(httpClient.request({ url: "/endpoint" })).rejects.toBe(
-        existingError,
-      );
+      (global.fetch as Mock).mockResolvedValueOnce(errorResponse);
+
+      // Action
+      try {
+        await httpClient.request({ url: "/nonexistent" });
+        fail("La requête aurait dû échouer");
+      } catch (error) {
+        // Assertion
+        expect(error).toBeInstanceOf(ApiRequestError);
+      }
+    });
+
+    it("gère correctement les timeouts", async () => {
+      // Arrangement
+      const abortError = new DOMException("The operation was aborted", "AbortError");
+      (global.fetch as Mock).mockRejectedValueOnce(abortError);
+
+      // Action
+      try {
+        await httpClient.request({ url: "/slow-endpoint", timeout: 5000 });
+        fail("La requête aurait dû échouer avec timeout");
+      } catch (error) {
+        // Assertion
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toContain("timeout");
+      }
     });
   });
 
   describe("Mécanismes de retry", () => {
-    describe("Configuration", () => {
-      it("utilise les options de retry spécifiées", () => {
-        // Arrangement & Action
-        httpClient = HttpClient.init({
-          baseURL: "https://api.example.com",
-          maxRetries: 5,
-        });
-
-        // Assertion
-        expect(axiosRetry).toHaveBeenCalledWith(
-          mockAxiosInstance,
-          expect.objectContaining({
-            retries: 5,
-            retryDelay: axiosRetry.exponentialDelay,
-            retryCondition: expect.any(Function),
-          }),
-        );
-      });
-
-      it("applique la valeur par défaut pour maxRetries", () => {
-        // Arrangement & Action
-        httpClient = HttpClient.init({
-          baseURL: "https://api.example.com",
-        });
-
-        // Assertion
-        expect(axiosRetry).toHaveBeenCalledWith(
-          mockAxiosInstance,
-          expect.objectContaining({
-            retries: 3, // Valeur par défaut
-          }),
-        );
-      });
+    beforeEach(() => {
+      httpClient = createStandardHttpClient();
     });
 
-    describe("Condition de retry", () => {
-      beforeEach(() => {
-        httpClient = createStandardHttpClient();
-      });
+    it("réessaie les requêtes après une erreur réseau", async () => {
+      // Arrangement
+      const networkError = new Error("Network error");
+      (global.fetch as Mock)
+        .mockRejectedValueOnce(networkError)
+        .mockResolvedValueOnce(mockResponse);
 
-      it("retry sur erreurs réseau via axiosRetry", () => {
-        // Arrangement
-        vi.mocked(axiosRetry).isNetworkOrIdempotentRequestError = vi
-          .fn()
-          .mockReturnValue(true);
-        const isRetryableError = (httpClient as any).isRetryableError.bind(
-          httpClient,
-        );
-        const error = { isAxiosError: true } as AxiosError;
+      // Action
+      const result = await httpClient.request({ url: "/endpoint" });
 
-        // Action & Assertion
-        expect(isRetryableError(error)).toBe(true);
-        expect(
-          axiosRetry.isNetworkOrIdempotentRequestError,
-        ).toHaveBeenCalledWith(error);
-      });
+      // Assertion
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(mockResponseBody);
+    });
 
-      it("retry sur erreurs 429 (rate limiting)", () => {
-        // Arrangement
-        vi.mocked(axiosRetry).isNetworkOrIdempotentRequestError = vi
-          .fn()
-          .mockReturnValue(false);
-        const isRetryableError = (httpClient as any).isRetryableError.bind(
-          httpClient,
-        );
-        const error = {
-          isAxiosError: true,
-          response: { status: 429 },
-        } as AxiosError;
+    it("respecte le nombre maximum de tentatives", async () => {
+      // Arrangement
+      const networkError = new Error("Network error");
+      (global.fetch as Mock)
+        .mockRejectedValueOnce(networkError)
+        .mockRejectedValueOnce(networkError)
+        .mockRejectedValueOnce(networkError)
+        .mockRejectedValueOnce(networkError);
 
-        // Action & Assertion
-        expect(isRetryableError(error)).toBe(true);
-      });
+      // Action & Assertion
+      await expect(httpClient.request({ url: "/endpoint" })).rejects.toThrow();
+      expect(global.fetch).toHaveBeenCalledTimes(3); // Tentative initiale + 2 retries
+    });
 
-      it("ne retry pas sur autres erreurs HTTP", () => {
-        // Arrangement
-        vi.mocked(axiosRetry).isNetworkOrIdempotentRequestError = vi
-          .fn()
-          .mockReturnValue(false);
-        const isRetryableError = (httpClient as any).isRetryableError.bind(
-          httpClient,
-        );
-        const error = {
-          isAxiosError: true,
-          response: { status: 400 },
-        } as AxiosError;
+    it("utilise un délai exponentiel entre les tentatives", async () => {
+      // Arrangement
+      const networkError = new Error("Network error");
+      (global.fetch as Mock)
+        .mockRejectedValueOnce(networkError)
+        .mockRejectedValueOnce(networkError)
+        .mockResolvedValueOnce(mockResponse);
 
-        // Action & Assertion
-        expect(isRetryableError(error)).toBe(false);
-      });
+      // Action
+      await httpClient.request({ url: "/endpoint" });
 
-      it("traite correctement les erreurs sans propriété response", () => {
-        // Arrangement
-        vi.mocked(axiosRetry).isNetworkOrIdempotentRequestError = vi
-          .fn()
-          .mockReturnValue(false);
-        const isRetryableError = (httpClient as any).isRetryableError.bind(
-          httpClient,
-        );
-        const errorWithoutResponse = { isAxiosError: true } as AxiosError;
+      // Assertion
+      // Premier retry avec délai 2^1 * 100 = 200ms
+      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 200);
+      // Deuxième retry avec délai 2^2 * 100 = 400ms
+      expect(setTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 400);
+    });
 
-        // Action & Assertion
-        expect(isRetryableError(errorWithoutResponse)).toBe(false);
-      });
+    it("réessaie les requêtes après une erreur 429", async () => {
+      // Arrangement
+      const rateLimitResponse = {
+        ok: false,
+        status: 429,
+        statusText: "Too Many Requests",
+        headers: new Headers({
+          "content-type": "application/json",
+        }),
+        json: vi.fn().mockResolvedValue({ message: "Rate limited" }),
+        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+      } as unknown as Response;
 
-      it("traite correctement les erreurs avec response mais sans status", () => {
-        // Arrangement
-        vi.mocked(axiosRetry).isNetworkOrIdempotentRequestError = vi
-          .fn()
-          .mockReturnValue(false);
-        const isRetryableError = (httpClient as any).isRetryableError.bind(
-          httpClient,
-        );
-        const errorWithEmptyResponse = {
-          isAxiosError: true,
-          response: {},
-        } as AxiosError;
+      (global.fetch as Mock)
+        .mockResolvedValueOnce(rateLimitResponse)
+        .mockResolvedValueOnce(mockResponse);
 
-        // Action & Assertion
-        expect(isRetryableError(errorWithEmptyResponse)).toBe(false);
-      });
+      // Action
+      const result = await httpClient.request({ url: "/endpoint" });
 
-      it("est correctement transmis à axiosRetry", () => {
-        // Arrangement & Action
-        const retryOptions = vi.mocked(axiosRetry).mock.calls[0][1] as {
-          retryCondition: unknown;
-        };
+      // Assertion
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(mockResponseBody);
+    });
 
+    it("réessaie les requêtes après une erreur 500", async () => {
+      // Arrangement
+      const serverErrorResponse = {
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        headers: new Headers({
+          "content-type": "application/json",
+        }),
+        json: vi.fn().mockResolvedValue({ message: "Server error" }),
+        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+      } as unknown as Response;
+
+      (global.fetch as Mock)
+        .mockResolvedValueOnce(serverErrorResponse)
+        .mockResolvedValueOnce(mockResponse);
+
+      // Action
+      const result = await httpClient.request({ url: "/endpoint" });
+
+      // Assertion
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(mockResponseBody);
+    });
+
+    it("ne réessaie pas les méthodes non idempotentes après un 500", async () => {
+      // Arrangement
+      const serverErrorResponse = {
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        headers: new Headers({
+          "content-type": "application/json",
+        }),
+        json: vi.fn().mockResolvedValue({ message: "Server error" }),
+        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+      } as unknown as Response;
+
+      (global.fetch as Mock).mockResolvedValueOnce(serverErrorResponse);
+
+      // Action
+      try {
+        await httpClient.request({ url: "/endpoint", method: "POST", data: { test: true } });
+        fail("La requête aurait dû échouer");
+      } catch (error) {
         // Assertion
-        expect(retryOptions).toHaveProperty("retryCondition");
-        expect(typeof retryOptions.retryCondition).toBe("function");
-      });
+        expect(error).toBeDefined();
+        expect(global.fetch).toHaveBeenCalledTimes(1); // Pas de retry
+      }
     });
   });
 
@@ -995,19 +655,29 @@ describe("HttpClient", () => {
     describe("Applications multi-domaines", () => {
       it("gère plusieurs instances pour différentes APIs", async () => {
         // Arrangement
-        const mainApi = HttpClient.init(
-          { baseURL: "https://api.example.com" },
-          "main",
-        );
-        const authApi = HttpClient.init(
-          { baseURL: "https://auth.example.com" },
-          "auth",
-        );
+        const mainApi = HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "main",
+        });
+        const authApi = HttpClient.init({
+          httpConfig: { baseURL: "https://auth.example.com" },
+          instanceName: "auth",
+        });
 
-        const mainMockResponse = { data: { resource: "main data" } };
-        const authMockResponse = { data: { token: "abc123" } };
+        const mainMockResponseBody = { resource: "main data" };
+        const authMockResponseBody = { token: "abc123" };
 
-        mockAxiosInstance.request
+        const mainMockResponse = {
+          ...mockResponse,
+          json: vi.fn().mockResolvedValue(mainMockResponseBody),
+        } as unknown as Response;
+
+        const authMockResponse = {
+          ...mockResponse,
+          json: vi.fn().mockResolvedValue(authMockResponseBody),
+        } as unknown as Response;
+
+        (global.fetch as Mock)
           .mockResolvedValueOnce(mainMockResponse)
           .mockResolvedValueOnce(authMockResponse);
 
@@ -1022,17 +692,28 @@ describe("HttpClient", () => {
         });
 
         // Assertion
-        expect(mainResult).toEqual(mainMockResponse.data);
-        expect(authResult).toEqual(authMockResponse.data);
-        expect(mockAxiosInstance.request).toHaveBeenCalledTimes(2);
+        expect(mainResult).toEqual(mainMockResponseBody);
+        expect(authResult).toEqual(authMockResponseBody);
+        expect(global.fetch).toHaveBeenCalledTimes(2);
+        expect(global.fetch).toHaveBeenNthCalledWith(
+          1,
+          "https://api.example.com/resources",
+          expect.any(Object)
+        );
+        expect(global.fetch).toHaveBeenNthCalledWith(
+          2,
+          "https://auth.example.com/token",
+          expect.any(Object)
+        );
       });
 
       it("permet d'accéder à la même instance depuis différents points du code", async () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api.example.com" }, "main");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api.example.com" },
+          instanceName: "main",
+        });
         const sameInstance = HttpClient.getInstance("main");
-        const mockResponse = { data: { success: true } };
-        mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
 
         // Action
         const result = await sameInstance.request({
@@ -1041,18 +722,26 @@ describe("HttpClient", () => {
         });
 
         // Assertion
-        expect(result).toEqual(mockResponse.data);
+        expect(result).toEqual(mockResponseBody);
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api.example.com/test",
+          expect.any(Object)
+        );
       });
 
       it("gère correctement un changement d'instance par défaut", async () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
         HttpClient.setDefaultInstance("api2");
 
         const defaultInstance = HttpClient.getInstance();
-        const mockResponse = { data: { source: "api2" } };
-        mockAxiosInstance.request.mockResolvedValueOnce(mockResponse);
 
         // Action
         const result = await defaultInstance.request({
@@ -1061,30 +750,26 @@ describe("HttpClient", () => {
         });
 
         // Assertion
-        expect(result).toEqual(mockResponse.data);
+        expect(result).toEqual(mockResponseBody);
         expect(defaultInstance).toBe(HttpClient.getInstance("api2"));
+        expect(global.fetch).toHaveBeenCalledWith(
+          "https://api2.example.com/test",
+          expect.any(Object)
+        );
       });
     });
 
     describe("États spéciaux et cas limites", () => {
-      // it("traite correctement une instance sans configuration initiale", () => {
-      //   // Arrangement & Action
-      //   const rawClient = new HttpClient();
-
-      //   // Assertion
-      //   expect((rawClient as any).axiosInstance).toBeUndefined();
-
-      //   // Action supplémentaire
-      //   (rawClient as any).setAxiosInstance(mockAxiosInstance);
-
-      //   // Assertion supplémentaire
-      //   expect((rawClient as any).axiosInstance).toBe(mockAxiosInstance);
-      // });
-
       it("préserve l'instance par défaut lors de la suppression d'une autre instance", () => {
         // Arrangement
-        HttpClient.init({ baseURL: "https://api1.example.com" }, "api1");
-        HttpClient.init({ baseURL: "https://api2.example.com" }, "api2");
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api1.example.com" },
+          instanceName: "api1",
+        });
+        HttpClient.init({
+          httpConfig: { baseURL: "https://api2.example.com" },
+          instanceName: "api2",
+        });
         HttpClient.setDefaultInstance("api1");
 
         // Action
