@@ -50,6 +50,44 @@ export declare interface AttachRelationOperation {
     key: string | number;
 }
 
+export declare abstract class Auth<UserType extends object = {}, CredentialsType extends object = {}, RegisterDataType extends object = {}, TokenType extends object = {}> implements IAuth<UserType, CredentialsType, RegisterDataType, TokenType> {
+    protected http: HttpClient;
+    protected pathname: string;
+    protected userSchema: z.ZodType<UserType>;
+    protected credentialsSchema?: z.ZodType<CredentialsType>;
+    protected registerDataSchema?: z.ZodType<RegisterDataType>;
+    protected tokenSchema?: z.ZodType<TokenType>;
+    constructor(pathname: string, schemas: {
+        user: z.ZodType<UserType>;
+        credentials?: z.ZodType<CredentialsType>;
+        registerData?: z.ZodType<RegisterDataType>;
+        tokens?: z.ZodType<TokenType>;
+    });
+    /**
+     * Inscription
+     */
+    register(userData: RegisterDataType, options?: Partial<RequestConfig>): Promise<UserType>;
+    /**
+     * Connexion
+     */
+    login(credentials: CredentialsType, options?: Partial<RequestConfig>): Promise<{
+        user: UserType;
+        tokens: TokenType;
+    }>;
+    /**
+     * Déconnexion
+     */
+    logout(options?: Partial<RequestConfig>): Promise<void>;
+    /**
+     * Rafraîchissement du token
+     */
+    refreshToken(refreshToken: string, options?: Partial<RequestConfig>): Promise<TokenType>;
+    /**
+     * Récupération de l'utilisateur courant
+     */
+    getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
+}
+
 export declare interface BaseMutationData<TModelAttributes, TRelations> {
     attributes?: TModelAttributes;
     relations?: Partial<Record<keyof TRelations, RelationOperation<TModelAttributes, TRelations> | Array<RelationOperation<TModelAttributes, TRelations>>>>;
@@ -247,6 +285,17 @@ export declare interface HttpConfigOptions {
     maxRetries?: number;
     apiPrefix?: string;
     apiVersion?: string | number;
+}
+
+export declare interface IAuth<UserType extends object, CredentialsType extends object, RegisterDataType extends object, TokenType extends object> {
+    register(userData: RegisterDataType, options?: Partial<RequestConfig>): Promise<UserType>;
+    login(credentials: CredentialsType, options?: Partial<RequestConfig>): Promise<{
+        user: UserType;
+        tokens: TokenType;
+    }>;
+    logout(options?: Partial<RequestConfig>): Promise<void>;
+    refreshToken(refreshToken: string, options?: Partial<RequestConfig>): Promise<TokenType>;
+    getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
 export declare interface IHttpClient {
