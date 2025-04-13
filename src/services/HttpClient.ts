@@ -28,7 +28,7 @@ type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Re
 type ResponseErrorInterceptor = (error: any) => Promise<any>;
 
 // Configuration de requête étendue
-interface RequestConfig extends RequestInit {
+export interface RequestConfig extends RequestInit {
   url: string;
   params?: Record<string, string>;
   data?: any;
@@ -39,15 +39,16 @@ export class HttpClient implements IHttpClient {
   private static instances: Map<string, HttpClient> = new Map();
   private static defaultInstanceName: string = "default";
 
+  // Intercepteurs statiques uniquement
+  private static requestInterceptors: RequestInterceptor[] = [];
+  private static responseSuccessInterceptors: ResponseSuccessInterceptor[] = [];
+  private static responseErrorInterceptors: ResponseErrorInterceptor[] = [];
+
   private baseURL: string;
   private defaultTimeout: number;
   private defaultHeaders: Record<string, string>;
   private withCredentials: boolean;
   private maxRetries: number;
-
-  private requestInterceptors: RequestInterceptor[] = [];
-  private responseSuccessInterceptors: ResponseSuccessInterceptor[] = [];
-  private responseErrorInterceptors: ResponseErrorInterceptor[] = [];
 
   constructor () {
     this.baseURL = "";
@@ -56,6 +57,49 @@ export class HttpClient implements IHttpClient {
     this.withCredentials = true;
     this.maxRetries = 3;
   }
+
+  /**
+   * Interface statique pour gérer les intercepteurs
+   */
+  public static interceptors = {
+    request: {
+      use: (interceptor: RequestInterceptor): number => {
+        return HttpClient.requestInterceptors.push(interceptor) - 1;
+      },
+      eject: (index: number): void => {
+        if (index >= 0 && index < HttpClient.requestInterceptors.length) {
+          HttpClient.requestInterceptors.splice(index, 1);
+        }
+      },
+      clear: (): void => {
+        HttpClient.requestInterceptors = [];
+      }
+    },
+    response: {
+      use: (
+        onSuccess: ResponseSuccessInterceptor,
+        onError?: ResponseErrorInterceptor
+      ): number => {
+        const successIndex = HttpClient.responseSuccessInterceptors.push(onSuccess) - 1;
+        if (onError) {
+          HttpClient.responseErrorInterceptors.push(onError);
+        }
+        return successIndex;
+      },
+      eject: (index: number): void => {
+        if (index >= 0 && index < HttpClient.responseSuccessInterceptors.length) {
+          HttpClient.responseSuccessInterceptors.splice(index, 1);
+          if (index < HttpClient.responseErrorInterceptors.length) {
+            HttpClient.responseErrorInterceptors.splice(index, 1);
+          }
+        }
+      },
+      clear: (): void => {
+        HttpClient.responseSuccessInterceptors = [];
+        HttpClient.responseErrorInterceptors = [];
+      }
+    }
+  };
 
   /**
    * Initialise une nouvelle instance HTTP ou renvoie une instance existante
@@ -189,14 +233,16 @@ export class HttpClient implements IHttpClient {
    * Configure les intercepteurs par défaut
    */
   private setupDefaultInterceptors(): void {
-    // Intercepteur pour la journalisation des erreurs
-    this.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        this.logError(error);
-        return Promise.reject(error);
-      }
-    );
+    // Si aucun intercepteur d'erreur n'est configuré, ajouter un par défaut
+    if (HttpClient.responseErrorInterceptors.length === 0) {
+      HttpClient.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          this.logError(error);
+          return Promise.reject(error);
+        }
+      );
+    }
   }
 
   /**
@@ -215,50 +261,12 @@ export class HttpClient implements IHttpClient {
   }
 
   /**
-   * Interface pour gérer les intercepteurs
-   */
-  public get interceptors() {
-    return {
-      request: {
-        use: (interceptor: RequestInterceptor): number => {
-          return this.requestInterceptors.push(interceptor) - 1;
-        },
-        eject: (index: number): void => {
-          if (index >= 0 && index < this.requestInterceptors.length) {
-            this.requestInterceptors.splice(index, 1);
-          }
-        }
-      },
-      response: {
-        use: (
-          onSuccess: ResponseSuccessInterceptor,
-          onError?: ResponseErrorInterceptor
-        ): number => {
-          this.responseSuccessInterceptors.push(onSuccess);
-          if (onError) {
-            this.responseErrorInterceptors.push(onError);
-          }
-          return this.responseSuccessInterceptors.length - 1;
-        },
-        eject: (index: number): void => {
-          if (index >= 0 && index < this.responseSuccessInterceptors.length) {
-            this.responseSuccessInterceptors.splice(index, 1);
-            if (index < this.responseErrorInterceptors.length) {
-              this.responseErrorInterceptors.splice(index, 1);
-            }
-          }
-        }
-      }
-    };
-  }
-
-  /**
    * Applique les intercepteurs de requête
    */
   private async applyRequestInterceptors(config: RequestConfig): Promise<RequestConfig> {
     let interceptedConfig = { ...config };
 
-    for (const interceptor of this.requestInterceptors) {
+    for (const interceptor of HttpClient.requestInterceptors) {
       interceptedConfig = await Promise.resolve(interceptor(interceptedConfig));
     }
 
@@ -271,7 +279,7 @@ export class HttpClient implements IHttpClient {
   private async applyResponseSuccessInterceptors(response: Response): Promise<Response> {
     let interceptedResponse = response;
 
-    for (const interceptor of this.responseSuccessInterceptors) {
+    for (const interceptor of HttpClient.responseSuccessInterceptors) {
       interceptedResponse = await Promise.resolve(interceptor(interceptedResponse.clone()));
     }
 
@@ -284,7 +292,7 @@ export class HttpClient implements IHttpClient {
   private async applyResponseErrorInterceptors(error: any): Promise<any> {
     let interceptedError = error;
 
-    for (const interceptor of this.responseErrorInterceptors) {
+    for (const interceptor of HttpClient.responseErrorInterceptors) {
       try {
         interceptedError = await Promise.resolve(interceptor(interceptedError));
         // Si un intercepteur résout l'erreur, on arrête la chaîne

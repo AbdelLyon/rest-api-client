@@ -1,26 +1,23 @@
-var g = Object.defineProperty;
-var R = (n, t, e) => t in n ? g(n, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : n[t] = e;
-var a = (n, t, e) => R(n, typeof t != "symbol" ? t + "" : t, e);
-class w extends Error {
+var R = Object.defineProperty;
+var g = (o, t, e) => t in o ? R(o, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : o[t] = e;
+var i = (o, t, e) => g(o, typeof t != "symbol" ? t + "" : t, e);
+class I extends Error {
   constructor(e, s) {
-    const r = e instanceof Error ? e.message : String(e);
-    super(r);
-    a(this, "status");
-    a(this, "data");
-    a(this, "config");
+    const a = e instanceof Error ? e.message : String(e);
+    super(a);
+    i(this, "status");
+    i(this, "data");
+    i(this, "config");
     this.name = "ApiRequestError", this.config = s, e && typeof e == "object" && "status" in e && (this.status = e.status), e && typeof e == "object" && "data" in e && (this.data = e.data);
   }
 }
-const h = class h {
+const r = class r {
   constructor() {
-    a(this, "baseURL");
-    a(this, "defaultTimeout");
-    a(this, "defaultHeaders");
-    a(this, "withCredentials");
-    a(this, "maxRetries");
-    a(this, "requestInterceptors", []);
-    a(this, "responseSuccessInterceptors", []);
-    a(this, "responseErrorInterceptors", []);
+    i(this, "baseURL");
+    i(this, "defaultTimeout");
+    i(this, "defaultHeaders");
+    i(this, "withCredentials");
+    i(this, "maxRetries");
     this.baseURL = "", this.defaultTimeout = 1e4, this.defaultHeaders = {}, this.withCredentials = !0, this.maxRetries = 3;
   }
   /**
@@ -28,7 +25,7 @@ const h = class h {
    */
   static init(t, e = "default") {
     if (!this.instances.has(e)) {
-      const s = new h();
+      const s = new r();
       s.configure(t), this.instances.set(e, s), this.instances.size === 1 && (this.defaultInstanceName = e);
     }
     return this.instances.get(e);
@@ -93,7 +90,7 @@ const h = class h {
    * Configure les intercepteurs par défaut
    */
   setupDefaultInterceptors() {
-    this.interceptors.response.use(
+    r.responseErrorInterceptors.length === 0 && r.interceptors.response.use(
       (t) => t,
       (t) => (this.logError(t), Promise.reject(t))
     );
@@ -102,10 +99,10 @@ const h = class h {
    * Journalise les erreurs de requête
    */
   logError(t) {
-    var s, r;
+    var s, a;
     const e = {
       url: (s = t.config) == null ? void 0 : s.url,
-      method: (r = t.config) == null ? void 0 : r.method,
+      method: (a = t.config) == null ? void 0 : a.method,
       status: t.status,
       data: t.data,
       message: t.message
@@ -113,30 +110,11 @@ const h = class h {
     console.error("API Request Error", e);
   }
   /**
-   * Interface pour gérer les intercepteurs
-   */
-  get interceptors() {
-    return {
-      request: {
-        use: (t) => this.requestInterceptors.push(t) - 1,
-        eject: (t) => {
-          t >= 0 && t < this.requestInterceptors.length && this.requestInterceptors.splice(t, 1);
-        }
-      },
-      response: {
-        use: (t, e) => (this.responseSuccessInterceptors.push(t), e && this.responseErrorInterceptors.push(e), this.responseSuccessInterceptors.length - 1),
-        eject: (t) => {
-          t >= 0 && t < this.responseSuccessInterceptors.length && (this.responseSuccessInterceptors.splice(t, 1), t < this.responseErrorInterceptors.length && this.responseErrorInterceptors.splice(t, 1));
-        }
-      }
-    };
-  }
-  /**
    * Applique les intercepteurs de requête
    */
   async applyRequestInterceptors(t) {
     let e = { ...t };
-    for (const s of this.requestInterceptors)
+    for (const s of r.requestInterceptors)
       e = await Promise.resolve(s(e));
     return e;
   }
@@ -145,7 +123,7 @@ const h = class h {
    */
   async applyResponseSuccessInterceptors(t) {
     let e = t;
-    for (const s of this.responseSuccessInterceptors)
+    for (const s of r.responseSuccessInterceptors)
       e = await Promise.resolve(s(e.clone()));
     return e;
   }
@@ -154,12 +132,12 @@ const h = class h {
    */
   async applyResponseErrorInterceptors(t) {
     let e = t;
-    for (const s of this.responseErrorInterceptors)
+    for (const s of r.responseErrorInterceptors)
       try {
         if (e = await Promise.resolve(s(e)), !(e instanceof Error))
           return e;
-      } catch (r) {
-        e = r;
+      } catch (a) {
+        e = a;
       }
     return Promise.reject(e);
   }
@@ -176,36 +154,36 @@ const h = class h {
    */
   async fetchWithRetry(t, e, s = 1) {
     try {
-      const { timeout: r = this.defaultTimeout, params: i, data: o, ...c } = e;
+      const { timeout: a = this.defaultTimeout, params: n, data: c, ...h } = e;
       let f = t;
-      if (i && Object.keys(i).length > 0) {
+      if (n && Object.keys(n).length > 0) {
         const u = new URLSearchParams();
-        for (const [d, E] of Object.entries(i))
+        for (const [d, E] of Object.entries(n))
           u.append(d, E);
         f += `?${u.toString()}`;
       }
-      const m = new AbortController(), I = setTimeout(() => m.abort("Request timeout"), r);
+      const m = new AbortController(), w = setTimeout(() => m.abort("Request timeout"), a);
       let y;
-      o !== void 0 && (y = typeof o == "string" ? o : JSON.stringify(o));
+      c !== void 0 && (y = typeof c == "string" ? c : JSON.stringify(c));
       const p = await fetch(f, {
-        ...c,
+        ...h,
         body: y,
         signal: m.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(I), !p.ok && s < this.maxRetries && this.isRetryableError(p.status, e.method)) {
+      if (clearTimeout(w), !p.ok && s < this.maxRetries && this.isRetryableError(p.status, e.method)) {
         const u = Math.pow(2, s) * 100;
         return await new Promise((d) => setTimeout(d, u)), this.fetchWithRetry(t, e, s + 1);
       }
       return p;
-    } catch (r) {
-      if (r instanceof DOMException && r.name === "AbortError")
+    } catch (a) {
+      if (a instanceof DOMException && a.name === "AbortError")
         throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
       if (s < this.maxRetries && this.isRetryableError(0, e.method)) {
-        const i = Math.pow(2, s) * 100;
-        return await new Promise((o) => setTimeout(o, i)), this.fetchWithRetry(t, e, s + 1);
+        const n = Math.pow(2, s) * 100;
+        return await new Promise((c) => setTimeout(c, n)), this.fetchWithRetry(t, e, s + 1);
       }
-      throw r;
+      throw a;
     }
   }
   /**
@@ -214,7 +192,7 @@ const h = class h {
   async request(t, e = {}) {
     var s;
     try {
-      const r = {
+      const a = {
         method: "GET",
         timeout: this.defaultTimeout,
         ...t,
@@ -224,31 +202,57 @@ const h = class h {
           ...t.headers || {},
           ...e.headers || {}
         }
-      }, i = new URL(
-        r.url.startsWith("http") ? r.url : `${this.baseURL}${r.url.startsWith("/") ? "" : "/"}${r.url}`
-      ).toString(), o = await this.applyRequestInterceptors({
-        ...r,
-        url: i
+      }, n = new URL(
+        a.url.startsWith("http") ? a.url : `${this.baseURL}${a.url.startsWith("/") ? "" : "/"}${a.url}`
+      ).toString(), c = await this.applyRequestInterceptors({
+        ...a,
+        url: n
       });
-      let c = await this.fetchWithRetry(i, o);
-      return c = await this.applyResponseSuccessInterceptors(c), (s = c.headers.get("content-type")) != null && s.includes("application/json") ? await c.json() : await c.text();
-    } catch (r) {
-      const i = r instanceof w ? r : new w(r, {
+      let h = await this.fetchWithRetry(n, c);
+      return h = await this.applyResponseSuccessInterceptors(h), (s = h.headers.get("content-type")) != null && s.includes("application/json") ? await h.json() : await h.text();
+    } catch (a) {
+      const n = a instanceof I ? a : new I(a, {
         ...t,
         ...e,
         url: t.url
       });
-      return this.applyResponseErrorInterceptors(i);
+      return this.applyResponseErrorInterceptors(n);
     }
   }
 };
-a(h, "instances", /* @__PURE__ */ new Map()), a(h, "defaultInstanceName", "default");
-let l = h;
+i(r, "instances", /* @__PURE__ */ new Map()), i(r, "defaultInstanceName", "default"), // Intercepteurs statiques uniquement
+i(r, "requestInterceptors", []), i(r, "responseSuccessInterceptors", []), i(r, "responseErrorInterceptors", []), /**
+ * Interface statique pour gérer les intercepteurs
+ */
+i(r, "interceptors", {
+  request: {
+    use: (t) => r.requestInterceptors.push(t) - 1,
+    eject: (t) => {
+      t >= 0 && t < r.requestInterceptors.length && r.requestInterceptors.splice(t, 1);
+    },
+    clear: () => {
+      r.requestInterceptors = [];
+    }
+  },
+  response: {
+    use: (t, e) => {
+      const s = r.responseSuccessInterceptors.push(t) - 1;
+      return e && r.responseErrorInterceptors.push(e), s;
+    },
+    eject: (t) => {
+      t >= 0 && t < r.responseSuccessInterceptors.length && (r.responseSuccessInterceptors.splice(t, 1), t < r.responseErrorInterceptors.length && r.responseErrorInterceptors.splice(t, 1));
+    },
+    clear: () => {
+      r.responseSuccessInterceptors = [], r.responseErrorInterceptors = [];
+    }
+  }
+});
+let l = r;
 class q {
   constructor(t, e) {
-    a(this, "http");
-    a(this, "pathname");
-    a(this, "schema");
+    i(this, "http");
+    i(this, "pathname");
+    i(this, "schema");
     this.http = l.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
@@ -330,9 +334,9 @@ class q {
 }
 class v {
   constructor(t, e) {
-    a(this, "http");
-    a(this, "pathname");
-    a(this, "schema");
+    i(this, "http");
+    i(this, "pathname");
+    i(this, "schema");
     this.http = l.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {

@@ -148,15 +148,30 @@ export declare interface FilterCriteria {
 export declare class HttpClient implements IHttpClient {
     private static instances;
     private static defaultInstanceName;
+    private static requestInterceptors;
+    private static responseSuccessInterceptors;
+    private static responseErrorInterceptors;
     private baseURL;
     private defaultTimeout;
     private defaultHeaders;
     private withCredentials;
     private maxRetries;
-    private requestInterceptors;
-    private responseSuccessInterceptors;
-    private responseErrorInterceptors;
     constructor();
+    /**
+     * Interface statique pour gérer les intercepteurs
+     */
+    static interceptors: {
+        request: {
+            use: (interceptor: RequestInterceptor) => number;
+            eject: (index: number) => void;
+            clear: () => void;
+        };
+        response: {
+            use: (onSuccess: ResponseSuccessInterceptor, onError?: ResponseErrorInterceptor) => number;
+            eject: (index: number) => void;
+            clear: () => void;
+        };
+    };
     /**
      * Initialise une nouvelle instance HTTP ou renvoie une instance existante
      */
@@ -193,19 +208,6 @@ export declare class HttpClient implements IHttpClient {
      * Journalise les erreurs de requête
      */
     private logError;
-    /**
-     * Interface pour gérer les intercepteurs
-     */
-    get interceptors(): {
-        request: {
-            use: (interceptor: RequestInterceptor) => number;
-            eject: (index: number) => void;
-        };
-        response: {
-            use: (onSuccess: ResponseSuccessInterceptor, onError?: ResponseErrorInterceptor) => number;
-            eject: (index: number) => void;
-        };
-    };
     /**
      * Applique les intercepteurs de requête
      */
