@@ -348,7 +348,7 @@ export declare type RelationOperation<TModelAttributes, TRelations> = CreateRela
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
-declare interface RequestConfig extends RequestInit {
+export declare interface RequestConfig extends RequestInit {
     url: string;
     params?: Record<string, string>;
     data?: any;
@@ -357,11 +357,11 @@ declare interface RequestConfig extends RequestInit {
     headers?: Record<string, string>;
 }
 
-declare type RequestInterceptor = (config: RequestConfig) => Promise<RequestConfig> | RequestConfig;
+export declare type RequestInterceptor = (config: RequestConfig) => Promise<RequestConfig> | RequestConfig;
 
-declare type ResponseErrorInterceptor = (error: any) => Promise<any>;
+export declare type ResponseErrorInterceptor = (error: any) => Promise<any>;
 
-declare type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
+export declare type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
 
 export declare interface ScopeDefinition {
     name: string;

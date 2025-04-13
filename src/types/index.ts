@@ -64,4 +64,8 @@ export type {
   HttpConfigOptions,
   PaginationParams,
   Permission,
+  RequestConfig,
+  RequestInterceptor,
+  ResponseErrorInterceptor,
+  ResponseSuccessInterceptor
 } from "@/types/common";
