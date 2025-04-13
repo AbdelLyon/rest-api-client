@@ -1,6 +1,3 @@
-import { AxiosError } from 'axios';
-import { AxiosInstance } from 'axios';
-import { AxiosRequestConfig } from 'axios';
 import { z } from 'zod';
 
 export declare interface ActionFieldDefinition {
@@ -151,23 +148,90 @@ export declare interface FilterCriteria {
 export declare class HttpClient implements IHttpClient {
     private static instances;
     private static defaultInstanceName;
-    private axiosInstance;
+    private baseURL;
+    private defaultTimeout;
+    private defaultHeaders;
+    private withCredentials;
     private maxRetries;
+    private requestInterceptors;
+    private responseSuccessInterceptors;
+    private responseErrorInterceptors;
+    constructor();
+    /**
+     * Initialise une nouvelle instance HTTP ou renvoie une instance existante
+     */
     static init(options: HttpConfigOptions, instanceName?: string): HttpClient;
+    /**
+     * Récupère une instance existante
+     */
     static getInstance(instanceName?: string): HttpClient;
+    /**
+     * Définit l'instance par défaut
+     */
     static setDefaultInstance(instanceName: string): void;
+    /**
+     * Récupère la liste des instances disponibles
+     */
     static getAvailableInstances(): string[];
-    protected getAxiosInstance(): AxiosInstance;
-    protected setAxiosInstance(instance: AxiosInstance): void;
-    protected getFullBaseUrl(options: HttpConfigOptions): string;
-    private createAxiosInstance;
-    private setupInterceptors;
-    private configureRetry;
-    protected isRetryableError(error: AxiosError): boolean;
-    private handleErrorResponse;
-    protected logError(error: AxiosError): void;
-    request<TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>): Promise<TResponse>;
+    /**
+     * Réinitialise une instance ou toutes les instances
+     */
     static resetInstance(instanceName?: string): void;
+    /**
+     * Configure l'instance HTTP
+     */
+    private configure;
+    /**
+     * Construit l'URL de base complète
+     */
+    private getFullBaseUrl;
+    /**
+     * Configure les intercepteurs par défaut
+     */
+    private setupDefaultInterceptors;
+    /**
+     * Journalise les erreurs de requête
+     */
+    private logError;
+    /**
+     * Interface pour gérer les intercepteurs
+     */
+    get interceptors(): {
+        request: {
+            use: (interceptor: RequestInterceptor) => number;
+            eject: (index: number) => void;
+        };
+        response: {
+            use: (onSuccess: ResponseSuccessInterceptor, onError?: ResponseErrorInterceptor) => number;
+            eject: (index: number) => void;
+        };
+    };
+    /**
+     * Applique les intercepteurs de requête
+     */
+    private applyRequestInterceptors;
+    /**
+     * Applique les intercepteurs de réponse réussie
+     */
+    private applyResponseSuccessInterceptors;
+    /**
+     * Applique les intercepteurs d'erreur de réponse
+     */
+    private applyResponseErrorInterceptors;
+    /**
+     * Détermine si une erreur est susceptible d'être réessayée
+     */
+    private isRetryableError;
+    /**
+     * Effectue une requête avec gestion des tentatives
+     */
+    private fetchWithRetry;
+    /**
+     * Méthode principale pour effectuer une requête
+     */
+    request<TResponse = any>(config: Partial<RequestConfig_2> & {
+        url: string;
+    }, options?: Partial<RequestConfig_2>): Promise<TResponse>;
 }
 
 export declare interface HttpConfigOptions {
@@ -181,15 +245,15 @@ export declare interface HttpConfigOptions {
 }
 
 export declare interface IHttpClient {
-    request: <TResponse>(config: AxiosRequestConfig, options?: Partial<AxiosRequestConfig>) => Promise<TResponse>;
+    request: <TResponse>(config: RequestConfig, options?: Partial<RequestConfig>) => Promise<TResponse>;
 }
 
 export declare interface IMutation<T> {
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<AxiosRequestConfig>): Promise<MutationResponse<T>>;
-    executeAction(actionRequest: ActionRequest, options?: Partial<AxiosRequestConfig>): Promise<ActionResponse>;
-    delete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
-    forceDelete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
-    restore(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
+    delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
+    forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
+    restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
 export declare interface Instruction {
@@ -203,9 +267,9 @@ export declare interface InstructionField {
 }
 
 export declare interface IQuery<T> {
-    search: (searchRequest: SearchRequest, options?: Partial<AxiosRequestConfig>) => Promise<Array<T>>;
-    searchPaginate: (searchRequest: SearchRequest, options?: Partial<AxiosRequestConfig>) => Promise<SearchResponse<T>>;
-    getdetails: (options?: Partial<AxiosRequestConfig>) => Promise<DetailsResponse>;
+    search: (searchRequest: SearchRequest, options?: Partial<RequestConfig>) => Promise<Array<T>>;
+    searchPaginate: (searchRequest: SearchRequest, options?: Partial<RequestConfig>) => Promise<SearchResponse<T>>;
+    getdetails: (options?: Partial<RequestConfig>) => Promise<DetailsResponse>;
 }
 
 export declare type LogicalOperator = "and" | "or";
@@ -216,11 +280,11 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<AxiosRequestConfig>): Promise<MutationResponse<T>>;
-    executeAction(actionRequest: ActionRequest, options?: Partial<AxiosRequestConfig>): Promise<ActionResponse>;
-    delete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
-    forceDelete(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
-    restore(request: DeleteRequest, options?: Partial<AxiosRequestConfig>): Promise<DeleteResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
+    delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
+    forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
+    restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
 export declare type MutationOperation<TModelAttributes, TRelations> = CreateMutationOperation<TModelAttributes, TRelations> | UpdateMutationOperation<TModelAttributes, TRelations>;
@@ -263,9 +327,9 @@ export declare abstract class Query<T> implements IQuery<T> {
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
     private searchRequest;
-    search(search: SearchRequest, options?: Partial<AxiosRequestConfig>): Promise<Array<T>>;
-    searchPaginate(search: PaginatedSearchRequest, options?: Partial<AxiosRequestConfig>): Promise<SearchResponse<T>>;
-    getdetails(options?: Partial<AxiosRequestConfig>): Promise<DetailsResponse>;
+    search(search: SearchRequest, options?: Partial<RequestConfig>): Promise<Array<T>>;
+    searchPaginate(search: PaginatedSearchRequest, options?: Partial<RequestConfig>): Promise<SearchResponse<T>>;
+    getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
 export declare type RelationAttributes<T> = {
@@ -286,6 +350,28 @@ export declare interface RelationInclude {
 export declare type RelationOperation<TModelAttributes, TRelations> = CreateRelationOperation<TModelAttributes, TRelations> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TRelations, keyof TRelations> | ToggleRelationOperation<TRelations, keyof TRelations>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
+
+declare interface RequestConfig extends RequestInit {
+    url: string;
+    params?: Record<string, string>;
+    data?: any;
+    timeout?: number;
+    baseURL?: string;
+    headers?: Record<string, string>;
+}
+
+declare interface RequestConfig_2 extends RequestInit {
+    url: string;
+    params?: Record<string, string>;
+    data?: any;
+    timeout?: number;
+}
+
+declare type RequestInterceptor = (config: RequestConfig_2) => Promise<RequestConfig_2> | RequestConfig_2;
+
+declare type ResponseErrorInterceptor = (error: any) => Promise<any>;
+
+declare type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
 
 export declare interface ScopeDefinition {
     name: string;

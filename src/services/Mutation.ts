@@ -1,17 +1,17 @@
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
-import type { AxiosRequestConfig } from "axios";
 import type { DeleteRequest, DeleteResponse } from "../types/delete";
 import type { ActionRequest, ActionResponse } from "../types/action";
 import type { MutationRequest, MutationResponse } from "../types/mutate";
 import type { IMutation } from "@/interfaces";
+import { RequestConfig } from "@/types/common";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
-  constructor(pathname: string, schema: z.ZodType<T>) {
+  constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
     this.pathname = pathname;
     this.schema = schema;
@@ -32,7 +32,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public async mutate<TAttributes, TRelations>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<MutationResponse<T>> {
     const response = await this.http.request<MutationResponse<T>>(
       {
@@ -51,7 +51,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public executeAction(
     actionRequest: ActionRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<ActionResponse> {
     return this.http.request<ActionResponse>(
       {
@@ -65,7 +65,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public async delete(
     request: DeleteRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
     const response = await this.http.request<DeleteResponse<T>>(
       {
@@ -84,7 +84,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public async forceDelete(
     request: DeleteRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
     const response = await this.http.request<DeleteResponse<T>>(
       {
@@ -103,7 +103,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public async restore(
     request: DeleteRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<DeleteResponse<T>> {
     const response = await this.http.request<DeleteResponse<T>>(
       {

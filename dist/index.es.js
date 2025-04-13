@@ -1,25 +1,41 @@
-var l = Object.defineProperty;
-var d = (r, t, e) => t in r ? l(r, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : r[t] = e;
-var a = (r, t, e) => d(r, typeof t != "symbol" ? t + "" : t, e);
-import h from "axios-retry";
-import p from "axios";
-class c extends Error {
-  constructor(t, e) {
-    super("API Service Request Failed"), this.originalError = t, this.requestConfig = e, this.name = "ApiRequestError";
+var g = Object.defineProperty;
+var R = (n, t, e) => t in n ? g(n, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : n[t] = e;
+var a = (n, t, e) => R(n, typeof t != "symbol" ? t + "" : t, e);
+class w extends Error {
+  constructor(e, s) {
+    const r = e instanceof Error ? e.message : String(e);
+    super(r);
+    a(this, "status");
+    a(this, "data");
+    a(this, "config");
+    this.name = "ApiRequestError", this.config = s, e && typeof e == "object" && "status" in e && (this.status = e.status), e && typeof e == "object" && "data" in e && (this.data = e.data);
   }
 }
-const i = class i {
+const h = class h {
   constructor() {
-    a(this, "axiosInstance");
+    a(this, "baseURL");
+    a(this, "defaultTimeout");
+    a(this, "defaultHeaders");
+    a(this, "withCredentials");
     a(this, "maxRetries");
+    a(this, "requestInterceptors", []);
+    a(this, "responseSuccessInterceptors", []);
+    a(this, "responseErrorInterceptors", []);
+    this.baseURL = "", this.defaultTimeout = 1e4, this.defaultHeaders = {}, this.withCredentials = !0, this.maxRetries = 3;
   }
+  /**
+   * Initialise une nouvelle instance HTTP ou renvoie une instance existante
+   */
   static init(t, e = "default") {
     if (!this.instances.has(e)) {
-      const s = new i();
-      s.maxRetries = t.maxRetries ?? 3, s.axiosInstance = s.createAxiosInstance(t), s.setupInterceptors(), s.configureRetry(), this.instances.set(e, s), this.instances.size === 1 && (this.defaultInstanceName = e);
+      const s = new h();
+      s.configure(t), this.instances.set(e, s), this.instances.size === 1 && (this.defaultInstanceName = e);
     }
     return this.instances.get(e);
   }
+  /**
+   * Récupère une instance existante
+   */
   static getInstance(t) {
     const e = t || this.defaultInstanceName;
     if (!this.instances.has(e))
@@ -28,6 +44,9 @@ const i = class i {
       );
     return this.instances.get(e);
   }
+  /**
+   * Définit l'instance par défaut
+   */
   static setDefaultInstance(t) {
     if (!this.instances.has(t))
       throw new Error(
@@ -35,15 +54,31 @@ const i = class i {
       );
     this.defaultInstanceName = t;
   }
+  /**
+   * Récupère la liste des instances disponibles
+   */
   static getAvailableInstances() {
     return Array.from(this.instances.keys());
   }
-  getAxiosInstance() {
-    return this.axiosInstance;
+  /**
+   * Réinitialise une instance ou toutes les instances
+   */
+  static resetInstance(t) {
+    t ? (this.instances.delete(t), t === this.defaultInstanceName && this.instances.size > 0 && (this.defaultInstanceName = this.instances.keys().next().value ?? "default")) : (this.instances.clear(), this.defaultInstanceName = "default");
   }
-  setAxiosInstance(t) {
-    this.axiosInstance = t;
+  /**
+   * Configure l'instance HTTP
+   */
+  configure(t) {
+    this.baseURL = this.getFullBaseUrl(t), this.defaultTimeout = t.timeout ?? 1e4, this.maxRetries = t.maxRetries ?? 3, this.withCredentials = t.withCredentials ?? !0, this.defaultHeaders = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...t.headers
+    }, this.setupDefaultInterceptors();
   }
+  /**
+   * Construit l'URL de base complète
+   */
   getFullBaseUrl(t) {
     if (!t.baseURL)
       throw new Error("baseURL is required in HttpConfigOptions");
@@ -54,82 +89,167 @@ const i = class i {
     }
     return t.apiVersion ? `${e}/v${t.apiVersion}` : e;
   }
-  createAxiosInstance(t) {
-    const e = {
-      baseURL: this.getFullBaseUrl(t),
-      timeout: t.timeout ?? 1e4,
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        ...t.headers
-      },
-      withCredentials: t.withCredentials ?? !0
-    };
-    return p.create(e);
-  }
-  setupInterceptors() {
-    this.axiosInstance.interceptors.request.use(
+  /**
+   * Configure les intercepteurs par défaut
+   */
+  setupDefaultInterceptors() {
+    this.interceptors.response.use(
       (t) => t,
-      (t) => Promise.reject(t)
-    ), this.axiosInstance.interceptors.response.use(
-      (t) => t,
-      this.handleErrorResponse.bind(this)
+      (t) => (this.logError(t), Promise.reject(t))
     );
   }
-  configureRetry() {
-    h(this.axiosInstance, {
-      retries: this.maxRetries,
-      retryDelay: h.exponentialDelay,
-      retryCondition: this.isRetryableError.bind(this)
-    });
-  }
-  isRetryableError(t) {
-    var e;
-    return h.isNetworkOrIdempotentRequestError(t) || ((e = t.response) == null ? void 0 : e.status) === 429;
-  }
-  handleErrorResponse(t) {
-    return this.logError(t), Promise.reject(new c(t, t.config || {}));
-  }
+  /**
+   * Journalise les erreurs de requête
+   */
   logError(t) {
-    var e, s, o, u;
-    console.error("API Request Error", {
-      url: (e = t.config) == null ? void 0 : e.url,
-      method: (s = t.config) == null ? void 0 : s.method,
-      status: (o = t.response) == null ? void 0 : o.status,
-      data: (u = t.response) == null ? void 0 : u.data,
+    var s, r;
+    const e = {
+      url: (s = t.config) == null ? void 0 : s.url,
+      method: (r = t.config) == null ? void 0 : r.method,
+      status: t.status,
+      data: t.data,
       message: t.message
-    });
+    };
+    console.error("API Request Error", e);
   }
-  async request(t, e = {}) {
+  /**
+   * Interface pour gérer les intercepteurs
+   */
+  get interceptors() {
+    return {
+      request: {
+        use: (t) => this.requestInterceptors.push(t) - 1,
+        eject: (t) => {
+          t >= 0 && t < this.requestInterceptors.length && this.requestInterceptors.splice(t, 1);
+        }
+      },
+      response: {
+        use: (t, e) => (this.responseSuccessInterceptors.push(t), e && this.responseErrorInterceptors.push(e), this.responseSuccessInterceptors.length - 1),
+        eject: (t) => {
+          t >= 0 && t < this.responseSuccessInterceptors.length && (this.responseSuccessInterceptors.splice(t, 1), t < this.responseErrorInterceptors.length && this.responseErrorInterceptors.splice(t, 1));
+        }
+      }
+    };
+  }
+  /**
+   * Applique les intercepteurs de requête
+   */
+  async applyRequestInterceptors(t) {
+    let e = { ...t };
+    for (const s of this.requestInterceptors)
+      e = await Promise.resolve(s(e));
+    return e;
+  }
+  /**
+   * Applique les intercepteurs de réponse réussie
+   */
+  async applyResponseSuccessInterceptors(t) {
+    let e = t;
+    for (const s of this.responseSuccessInterceptors)
+      e = await Promise.resolve(s(e.clone()));
+    return e;
+  }
+  /**
+   * Applique les intercepteurs d'erreur de réponse
+   */
+  async applyResponseErrorInterceptors(t) {
+    let e = t;
+    for (const s of this.responseErrorInterceptors)
+      try {
+        if (e = await Promise.resolve(s(e)), !(e instanceof Error))
+          return e;
+      } catch (r) {
+        e = r;
+      }
+    return Promise.reject(e);
+  }
+  /**
+   * Détermine si une erreur est susceptible d'être réessayée
+   */
+  isRetryableError(t, e) {
+    return (!e || ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"].includes(e.toUpperCase())) && (t === 0 || // Erreur réseau
+    t === 429 || // Trop de requêtes
+    t >= 500 && t < 600);
+  }
+  /**
+   * Effectue une requête avec gestion des tentatives
+   */
+  async fetchWithRetry(t, e, s = 1) {
     try {
-      const s = {
-        timeout: 1e4,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-        ...t,
-        ...e
-      };
-      return (await this.axiosInstance.request(
-        s
-      )).data;
-    } catch (s) {
-      throw s instanceof c ? s : new c(s, t);
+      const { timeout: r = this.defaultTimeout, params: i, data: o, ...c } = e;
+      let f = t;
+      if (i && Object.keys(i).length > 0) {
+        const u = new URLSearchParams();
+        for (const [d, E] of Object.entries(i))
+          u.append(d, E);
+        f += `?${u.toString()}`;
+      }
+      const m = new AbortController(), I = setTimeout(() => m.abort("Request timeout"), r);
+      let y;
+      o !== void 0 && (y = typeof o == "string" ? o : JSON.stringify(o));
+      const p = await fetch(f, {
+        ...c,
+        body: y,
+        signal: m.signal,
+        credentials: this.withCredentials ? "include" : "same-origin"
+      });
+      if (clearTimeout(I), !p.ok && s < this.maxRetries && this.isRetryableError(p.status, e.method)) {
+        const u = Math.pow(2, s) * 100;
+        return await new Promise((d) => setTimeout(d, u)), this.fetchWithRetry(t, e, s + 1);
+      }
+      return p;
+    } catch (r) {
+      if (r instanceof DOMException && r.name === "AbortError")
+        throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
+      if (s < this.maxRetries && this.isRetryableError(0, e.method)) {
+        const i = Math.pow(2, s) * 100;
+        return await new Promise((o) => setTimeout(o, i)), this.fetchWithRetry(t, e, s + 1);
+      }
+      throw r;
     }
   }
-  static resetInstance(t) {
-    t ? (this.instances.delete(t), t === this.defaultInstanceName && this.instances.size > 0 && (this.defaultInstanceName = this.instances.keys().next().value ?? "default")) : (this.instances.clear(), this.defaultInstanceName = "default");
+  /**
+   * Méthode principale pour effectuer une requête
+   */
+  async request(t, e = {}) {
+    var s;
+    try {
+      const r = {
+        method: "GET",
+        timeout: this.defaultTimeout,
+        ...t,
+        ...e,
+        headers: {
+          ...this.defaultHeaders,
+          ...t.headers || {},
+          ...e.headers || {}
+        }
+      }, i = new URL(
+        r.url.startsWith("http") ? r.url : `${this.baseURL}${r.url.startsWith("/") ? "" : "/"}${r.url}`
+      ).toString(), o = await this.applyRequestInterceptors({
+        ...r,
+        url: i
+      });
+      let c = await this.fetchWithRetry(i, o);
+      return c = await this.applyResponseSuccessInterceptors(c), (s = c.headers.get("content-type")) != null && s.includes("application/json") ? await c.json() : await c.text();
+    } catch (r) {
+      const i = r instanceof w ? r : new w(r, {
+        ...t,
+        ...e,
+        url: t.url
+      });
+      return this.applyResponseErrorInterceptors(i);
+    }
   }
 };
-a(i, "instances", /* @__PURE__ */ new Map()), a(i, "defaultInstanceName", "default");
-let n = i;
-class I {
+a(h, "instances", /* @__PURE__ */ new Map()), a(h, "defaultInstanceName", "default");
+let l = h;
+class q {
   constructor(t, e) {
     a(this, "http");
     a(this, "pathname");
     a(this, "schema");
-    this.http = n.getInstance(), this.pathname = t, this.schema = e;
+    this.http = l.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -208,12 +328,12 @@ class I {
     };
   }
 }
-class g {
+class v {
   constructor(t, e) {
     a(this, "http");
     a(this, "pathname");
     a(this, "schema");
-    this.http = n.getInstance(), this.pathname = t, this.schema = e;
+    this.http = l.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -257,8 +377,8 @@ class g {
   }
 }
 export {
-  n as HttpClient,
-  I as Mutation,
-  g as Query
+  l as HttpClient,
+  q as Mutation,
+  v as Query
 };
 //# sourceMappingURL=index.es.js.map

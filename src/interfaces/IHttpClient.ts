@@ -1,8 +1,10 @@
-import type { AxiosRequestConfig } from "axios";
+import { RequestConfig } from "@/types/common";
+
 
 export interface IHttpClient {
   request: <TResponse>(
-    config: AxiosRequestConfig,
-    options?: Partial<AxiosRequestConfig>,
+    config: RequestConfig,
+    options?: Partial<RequestConfig>,
   ) => Promise<TResponse>;
+
 }

@@ -1,16 +1,16 @@
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
-import type { AxiosRequestConfig } from "axios";
 import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
 import type { IQuery } from "@/interfaces";
 import { PaginatedSearchRequest } from "@/types/search";
+import { RequestConfig } from "@/types/common";
 
 export abstract class Query<T> implements IQuery<T> {
   protected http: HttpClient;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
-  constructor(pathname: string, schema: z.ZodType<T>) {
+  constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
     this.pathname = pathname;
     this.schema = schema;
@@ -31,7 +31,7 @@ export abstract class Query<T> implements IQuery<T> {
 
   private searchRequest(
     search: SearchRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<SearchResponse<T>> {
     return this.http.request<SearchResponse<T>>(
       {
@@ -45,7 +45,7 @@ export abstract class Query<T> implements IQuery<T> {
 
   public async search(
     search: SearchRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<Array<T>> {
     const response = await this.searchRequest(search, options);
     return this.validateData(response.data);
@@ -53,7 +53,7 @@ export abstract class Query<T> implements IQuery<T> {
 
   public async searchPaginate(
     search: PaginatedSearchRequest,
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<SearchResponse<T>> {
     const response = await this.searchRequest(search, options);
 
@@ -64,7 +64,7 @@ export abstract class Query<T> implements IQuery<T> {
   }
 
   public getdetails(
-    options: Partial<AxiosRequestConfig> = {},
+    options: Partial<RequestConfig> = {},
   ): Promise<DetailsResponse> {
     return this.http.request<DetailsResponse>(
       {

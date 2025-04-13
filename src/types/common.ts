@@ -21,3 +21,12 @@ export interface Permission {
   authorized_to_restore: boolean;
   authorized_to_force_delete: boolean;
 }
+
+export interface RequestConfig extends RequestInit {
+  url: string;
+  params?: Record<string, string>;
+  data?: any;
+  timeout?: number;
+  baseURL?: string;
+  headers?: Record<string, string>;
+}

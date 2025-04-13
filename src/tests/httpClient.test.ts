@@ -35,8 +35,8 @@ describe("HttpClient", () => {
   // Configuration des mocks et des fixtures
   const mockAxiosInstance: AxiosInstance & {
     interceptors: {
-      request: { use: MockInstance };
-      response: { use: MockInstance };
+      request: { use: MockInstance; };
+      response: { use: MockInstance; };
     };
     request: Mock;
   } = {
@@ -55,7 +55,7 @@ describe("HttpClient", () => {
   vi.mock("axios-retry");
   vi.mock("../services/ApiRequestError", () => ({
     ApiRequestError: class MockApiRequestError extends Error {
-      constructor(public originalError: any, public requestConfig: any) {
+      constructor (public originalError: any, public requestConfig: any) {
         super("API Service Request Failed");
         this.name = "ApiRequestError";
       }
@@ -66,7 +66,7 @@ describe("HttpClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     axios.create = vi.fn().mockReturnValue(mockAxiosInstance);
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => { });
     HttpClient.resetInstance();
   });
 

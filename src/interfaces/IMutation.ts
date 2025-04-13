@@ -6,31 +6,32 @@ import {
   MutationRequest,
   MutationResponse,
 } from "@/types";
-import { AxiosRequestConfig } from "axios";
+import { RequestConfig } from "@/types/common";
+
 
 export interface IMutation<T> {
   mutate<TAttributes, TRelations>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
-    options?: Partial<AxiosRequestConfig>,
+    options?: Partial<RequestConfig>,
   ): Promise<MutationResponse<T>>;
 
   executeAction(
     actionRequest: ActionRequest,
-    options?: Partial<AxiosRequestConfig>,
+    options?: Partial<RequestConfig>,
   ): Promise<ActionResponse>;
 
   delete(
     request: DeleteRequest,
-    options?: Partial<AxiosRequestConfig>,
+    options?: Partial<RequestConfig>,
   ): Promise<DeleteResponse<T>>;
 
   forceDelete(
     request: DeleteRequest,
-    options?: Partial<AxiosRequestConfig>,
+    options?: Partial<RequestConfig>,
   ): Promise<DeleteResponse<T>>;
 
   restore(
     request: DeleteRequest,
-    options?: Partial<AxiosRequestConfig>,
+    options?: Partial<RequestConfig>,
   ): Promise<DeleteResponse<T>>;
 }

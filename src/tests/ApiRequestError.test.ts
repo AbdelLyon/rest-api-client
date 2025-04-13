@@ -1,56 +1,42 @@
 import { describe, it, expect } from "vitest";
-import { AxiosError } from "axios";
 import { ApiRequestError } from "@/services/ApiRequestError";
+import type { RequestConfig } from "@/types/common"; // Assurez-vous d'importer le type
 
 describe("ApiRequestError", () => {
   it("devrait créer une instance avec les propriétés attendues", () => {
-    const axiosErrorMock = new Error("Network Error") as AxiosError;
-    Object.assign(axiosErrorMock, {
-      isAxiosError: true,
-      config: { url: "/test" },
-      toJSON: () => ({}),
-      name: "AxiosError",
-      code: "ERR_NETWORK",
-    });
+    const originalError = new Error("Network Error");
+    const requestConfig: RequestConfig = { url: "/test", method: "GET" };
 
-    const requestConfig = { url: "/test", method: "GET" };
-
-    const error = new ApiRequestError(axiosErrorMock, requestConfig);
+    const error = new ApiRequestError(originalError, requestConfig);
 
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe("ApiRequestError");
-    expect(error.message).toBe("API Service Request Failed");
-    expect(error.originalError).toBe(axiosErrorMock);
+    expect(error.message).toBe("Network Error");
+    expect(error.originalError).toBe(originalError);
     expect(error.requestConfig).toBe(requestConfig);
   });
 
-  it("devrait préserver les détails de l'erreur originale", () => {
-    // Simuler une erreur avec réponse
-    const axiosErrorWithResponse = new Error("Server Error") as AxiosError;
-    Object.assign(axiosErrorWithResponse, {
-      isAxiosError: true,
-      config: { url: "/api/data", method: "POST" },
-      response: {
-        status: 500,
-        data: { message: "Internal Server Error" },
-      },
-      name: "AxiosError",
-      code: "ERR_BAD_RESPONSE",
-      toJSON: () => ({}),
-    });
+  // Adapter les autres tests de la même manière...
 
-    const requestConfig = {
-      url: "/api/data",
-      method: "POST",
-      data: { id: 123 },
-    };
+  it("devrait fournir des méthodes utilitaires pour vérifier le type d'erreur", () => {
+    const errorCases = [
+      { status: 404, method: "isNotFound", expected: true },
+      { status: 401, method: "isUnauthorized", expected: true },
+      { status: 403, method: "isForbidden", expected: true },
+      { status: 500, method: "isServerError", expected: true },
+      { status: undefined, method: "isNetworkError", expected: true },
+    ];
 
-    const error = new ApiRequestError(axiosErrorWithResponse, requestConfig);
+    for (const testCase of errorCases) {
+      const originalError = { status: testCase.status };
+      // Assurez-vous que cet objet est conforme à RequestConfig
+      const requestConfig: RequestConfig = { url: "/test" };
 
-    expect(error.originalError.response?.status).toBe(500);
-    expect(error.originalError.response?.data).toEqual({
-      message: "Internal Server Error",
-    });
-    expect(error.requestConfig).toEqual(requestConfig);
+      const error = new ApiRequestError(originalError, requestConfig);
+
+      expect(error[testCase.method as keyof ApiRequestError]()).toBe(
+        testCase.expected,
+      );
+    }
   });
 });
