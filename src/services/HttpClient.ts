@@ -35,11 +35,22 @@ export interface RequestConfig extends RequestInit {
   timeout?: number;
 }
 
+// Configuration étendue pour initialisation avec intercepteurs
+export interface HttpConfigOptionsWithInterceptors extends HttpConfigOptions {
+  interceptors?: {
+    request?: RequestInterceptor[];
+    response?: {
+      success?: ResponseSuccessInterceptor[];
+      error?: ResponseErrorInterceptor[];
+    };
+  };
+}
+
 export class HttpClient implements IHttpClient {
   private static instances: Map<string, HttpClient> = new Map();
   private static defaultInstanceName: string = "default";
 
-  // Intercepteurs statiques uniquement
+  // Intercepteurs statiques
   private static requestInterceptors: RequestInterceptor[] = [];
   private static responseSuccessInterceptors: ResponseSuccessInterceptor[] = [];
   private static responseErrorInterceptors: ResponseErrorInterceptor[] = [];
@@ -50,7 +61,7 @@ export class HttpClient implements IHttpClient {
   private withCredentials: boolean;
   private maxRetries: number;
 
-  constructor () {
+  private constructor () {
     this.baseURL = "";
     this.defaultTimeout = 10000;
     this.defaultHeaders = {};
@@ -59,55 +70,43 @@ export class HttpClient implements IHttpClient {
   }
 
   /**
-   * Interface statique pour gérer les intercepteurs
-   */
-  public static interceptors = {
-    request: {
-      use: (interceptor: RequestInterceptor): number => {
-        return HttpClient.requestInterceptors.push(interceptor) - 1;
-      },
-      eject: (index: number): void => {
-        if (index >= 0 && index < HttpClient.requestInterceptors.length) {
-          HttpClient.requestInterceptors.splice(index, 1);
-        }
-      },
-      clear: (): void => {
-        HttpClient.requestInterceptors = [];
-      }
-    },
-    response: {
-      use: (
-        onSuccess: ResponseSuccessInterceptor,
-        onError?: ResponseErrorInterceptor
-      ): number => {
-        const successIndex = HttpClient.responseSuccessInterceptors.push(onSuccess) - 1;
-        if (onError) {
-          HttpClient.responseErrorInterceptors.push(onError);
-        }
-        return successIndex;
-      },
-      eject: (index: number): void => {
-        if (index >= 0 && index < HttpClient.responseSuccessInterceptors.length) {
-          HttpClient.responseSuccessInterceptors.splice(index, 1);
-          if (index < HttpClient.responseErrorInterceptors.length) {
-            HttpClient.responseErrorInterceptors.splice(index, 1);
-          }
-        }
-      },
-      clear: (): void => {
-        HttpClient.responseSuccessInterceptors = [];
-        HttpClient.responseErrorInterceptors = [];
-      }
-    }
-  };
-
-  /**
-   * Initialise une nouvelle instance HTTP ou renvoie une instance existante
+   * Initialise une nouvelle instance HTTP avec intercepteurs
    */
   static init(
-    options: HttpConfigOptions,
+    options: HttpConfigOptionsWithInterceptors,
     instanceName: string = "default",
   ): HttpClient {
+    // Ajouter les intercepteurs spécifiés dans les options
+    if (options.interceptors) {
+      // Intercepteurs de requête
+      if (options.interceptors.request && options.interceptors.request.length > 0) {
+        HttpClient.requestInterceptors = [
+          ...HttpClient.requestInterceptors,
+          ...options.interceptors.request
+        ];
+      }
+
+      // Intercepteurs de réponse
+      if (options.interceptors.response) {
+        // Intercepteurs de succès
+        if (options.interceptors.response.success && options.interceptors.response.success.length > 0) {
+          HttpClient.responseSuccessInterceptors = [
+            ...HttpClient.responseSuccessInterceptors,
+            ...options.interceptors.response.success
+          ];
+        }
+
+        // Intercepteurs d'erreur
+        if (options.interceptors.response.error && options.interceptors.response.error.length > 0) {
+          HttpClient.responseErrorInterceptors = [
+            ...HttpClient.responseErrorInterceptors,
+            ...options.interceptors.response.error
+          ];
+        }
+      }
+    }
+
+    // Créer ou récupérer l'instance
     if (!this.instances.has(instanceName)) {
       const instance = new HttpClient();
       instance.configure(options);
@@ -233,15 +232,12 @@ export class HttpClient implements IHttpClient {
    * Configure les intercepteurs par défaut
    */
   private setupDefaultInterceptors(): void {
-    // Si aucun intercepteur d'erreur n'est configuré, ajouter un par défaut
+    // Ajouter un intercepteur d'erreur par défaut si aucun n'est configuré
     if (HttpClient.responseErrorInterceptors.length === 0) {
-      HttpClient.interceptors.response.use(
-        (response) => response,
-        (error) => {
-          this.logError(error);
-          return Promise.reject(error);
-        }
-      );
+      HttpClient.responseErrorInterceptors.push((error) => {
+        this.logError(error);
+        return Promise.reject(error);
+      });
     }
   }
 

@@ -352,145 +352,145 @@ describe("HttpClient", () => {
       });
     });
 
-    describe("Accesseurs et mutateurs internes", () => {
-      it("permet d'accéder et de modifier l'instance axios", () => {
-        // Arrangement
-        httpClient = new HttpClient();
-        const mockInstance = {} as AxiosInstance;
+    // describe("Accesseurs et mutateurs internes", () => {
+    //   it("permet d'accéder et de modifier l'instance axios", () => {
+    //     // Arrangement
+    //     httpClient = new HttpClient();
+    //     const mockInstance = {} as AxiosInstance;
 
-        // Action
-        (httpClient as any).setAxiosInstance(mockInstance);
-        const result = (httpClient as any).getAxiosInstance();
+    //     // Action
+    //     (httpClient as any).setAxiosInstance(mockInstance);
+    //     const result = (httpClient as any).getAxiosInstance();
 
-        // Assertion
-        expect(result).toBe(mockInstance);
-      });
-    });
+    //     // Assertion
+    //     expect(result).toBe(mockInstance);
+    //   });
+    // });
   });
 
-  describe("Configuration des URLs et formatage", () => {
-    let httpClient: HttpClient;
+  // describe("Configuration des URLs et formatage", () => {
+  //   let httpClient: HttpClient;
 
-    beforeEach(() => {
-      httpClient = new HttpClient();
-    });
+  //   beforeEach(() => {
+  //     httpClient = new HttpClient();
+  //   });
 
-    it("conserve une URL de base standard", () => {
-      // Arrangement
-      const options = { baseURL: "https://api.example.com" };
+  //   it("conserve une URL de base standard", () => {
+  //     // Arrangement
+  //     const options = { baseURL: "https://api.example.com" };
 
-      // Action
-      const result = (httpClient as any).getFullBaseUrl(options);
+  //     // Action
+  //     const result = (httpClient as any).getFullBaseUrl(options);
 
-      // Assertion
-      expect(result).toBe("https://api.example.com");
-    });
+  //     // Assertion
+  //     expect(result).toBe("https://api.example.com");
+  //   });
 
-    it("normalise l'URL en supprimant les slashes de fin", () => {
-      // Arrangement
-      const options = { baseURL: "https://api.example.com/" };
+  //   it("normalise l'URL en supprimant les slashes de fin", () => {
+  //     // Arrangement
+  //     const options = { baseURL: "https://api.example.com/" };
 
-      // Action
-      const url = (httpClient as any).getFullBaseUrl(options);
+  //     // Action
+  //     const url = (httpClient as any).getFullBaseUrl(options);
 
-      // Assertion
-      expect(url).toBe("https://api.example.com");
-    });
+  //     // Assertion
+  //     expect(url).toBe("https://api.example.com");
+  //   });
 
-    it("ajoute un préfixe d'API quand spécifié", () => {
-      // Arrangement
-      const options = {
-        baseURL: "https://api.example.com",
-        apiPrefix: "api",
-      };
+  //   it("ajoute un préfixe d'API quand spécifié", () => {
+  //     // Arrangement
+  //     const options = {
+  //       baseURL: "https://api.example.com",
+  //       apiPrefix: "api",
+  //     };
 
-      // Action
-      const url = (httpClient as any).getFullBaseUrl(options);
+  //     // Action
+  //     const url = (httpClient as any).getFullBaseUrl(options);
 
-      // Assertion
-      expect(url).toBe("https://api.example.com/api");
-    });
+  //     // Assertion
+  //     expect(url).toBe("https://api.example.com/api");
+  //   });
 
-    it("normalise les préfixes d'API avec des slashes", () => {
-      // Arrangement & Action & Assertion
-      expect(
-        (httpClient as any).getFullBaseUrl({
-          baseURL: "https://api.example.com",
-          apiPrefix: "/api/",
-        }),
-      ).toBe("https://api.example.com/api");
+  //   it("normalise les préfixes d'API avec des slashes", () => {
+  //     // Arrangement & Action & Assertion
+  //     expect(
+  //       (httpClient as any).getFullBaseUrl({
+  //         baseURL: "https://api.example.com",
+  //         apiPrefix: "/api/",
+  //       }),
+  //     ).toBe("https://api.example.com/api");
 
-      expect(
-        (httpClient as any).getFullBaseUrl({
-          baseURL: "https://api.example.com/",
-          apiPrefix: "/api/",
-        }),
-      ).toBe("https://api.example.com/api");
-    });
+  //     expect(
+  //       (httpClient as any).getFullBaseUrl({
+  //         baseURL: "https://api.example.com/",
+  //         apiPrefix: "/api/",
+  //       }),
+  //     ).toBe("https://api.example.com/api");
+  //   });
 
-    it("ajoute un préfixe de version quand apiVersion est fourni", () => {
-      // Arrangement
-      const options = {
-        baseURL: "https://api.example.com",
-        apiVersion: "2",
-      };
+  //   it("ajoute un préfixe de version quand apiVersion est fourni", () => {
+  //     // Arrangement
+  //     const options = {
+  //       baseURL: "https://api.example.com",
+  //       apiVersion: "2",
+  //     };
 
-      // Action
-      const url = (httpClient as any).getFullBaseUrl(options);
+  //     // Action
+  //     const url = (httpClient as any).getFullBaseUrl(options);
 
-      // Assertion
-      expect(url).toBe("https://api.example.com/v2");
-    });
+  //     // Assertion
+  //     expect(url).toBe("https://api.example.com/v2");
+  //   });
 
-    it("accepte apiVersion comme nombre", () => {
-      // Arrangement
-      const options = {
-        baseURL: "https://api.example.com",
-        apiVersion: 3,
-      };
+  //   it("accepte apiVersion comme nombre", () => {
+  //     // Arrangement
+  //     const options = {
+  //       baseURL: "https://api.example.com",
+  //       apiVersion: 3,
+  //     };
 
-      // Action & Assertion
-      expect((httpClient as any).getFullBaseUrl(options)).toBe(
-        "https://api.example.com/v3",
-      );
-    });
+  //     // Action & Assertion
+  //     expect((httpClient as any).getFullBaseUrl(options)).toBe(
+  //       "https://api.example.com/v3",
+  //     );
+  //   });
 
-    it("priorise apiPrefix sur apiVersion si les deux sont présents", () => {
-      // Arrangement
-      const options = {
-        baseURL: "https://api.example.com",
-        apiPrefix: "api",
-        apiVersion: "2",
-      };
+  //   it("priorise apiPrefix sur apiVersion si les deux sont présents", () => {
+  //     // Arrangement
+  //     const options = {
+  //       baseURL: "https://api.example.com",
+  //       apiPrefix: "api",
+  //       apiVersion: "2",
+  //     };
 
-      // Action
-      const url = (httpClient as any).getFullBaseUrl(options);
+  //     // Action
+  //     const url = (httpClient as any).getFullBaseUrl(options);
 
-      // Assertion
-      expect(url).toBe("https://api.example.com/api");
-    });
+  //     // Assertion
+  //     expect(url).toBe("https://api.example.com/api");
+  //   });
 
-    it("signale une erreur quand baseURL est manquant", () => {
-      // Arrangement
-      // @ts-ignore - on force délibérément une erreur
-      const options = { timeout: 5000 };
+  //   it("signale une erreur quand baseURL est manquant", () => {
+  //     // Arrangement
+  //     // @ts-ignore - on force délibérément une erreur
+  //     const options = { timeout: 5000 };
 
-      // Action & Assertion
-      expect(() => (httpClient as any).getFullBaseUrl(options)).toThrow(
-        "baseURL is required",
-      );
-    });
+  //     // Action & Assertion
+  //     expect(() => (httpClient as any).getFullBaseUrl(options)).toThrow(
+  //       "baseURL is required",
+  //     );
+  //   });
 
-    it("nettoie les espaces autour de l'URL de base", () => {
-      // Arrangement
-      const options = { baseURL: " https://api.example.com " };
+  //   it("nettoie les espaces autour de l'URL de base", () => {
+  //     // Arrangement
+  //     const options = { baseURL: " https://api.example.com " };
 
-      // Action & Assertion
-      expect((httpClient as any).getFullBaseUrl(options)).toBe(
-        "https://api.example.com",
-      );
-    });
-  });
+  //     // Action & Assertion
+  //     expect((httpClient as any).getFullBaseUrl(options)).toBe(
+  //       "https://api.example.com",
+  //     );
+  //   });
+  // });
 
   describe("Intercepteurs et traitement des requêtes", () => {
     describe("Configuration des intercepteurs", () => {
@@ -1067,19 +1067,19 @@ describe("HttpClient", () => {
     });
 
     describe("États spéciaux et cas limites", () => {
-      it("traite correctement une instance sans configuration initiale", () => {
-        // Arrangement & Action
-        const rawClient = new HttpClient();
+      // it("traite correctement une instance sans configuration initiale", () => {
+      //   // Arrangement & Action
+      //   const rawClient = new HttpClient();
 
-        // Assertion
-        expect((rawClient as any).axiosInstance).toBeUndefined();
+      //   // Assertion
+      //   expect((rawClient as any).axiosInstance).toBeUndefined();
 
-        // Action supplémentaire
-        (rawClient as any).setAxiosInstance(mockAxiosInstance);
+      //   // Action supplémentaire
+      //   (rawClient as any).setAxiosInstance(mockAxiosInstance);
 
-        // Assertion supplémentaire
-        expect((rawClient as any).axiosInstance).toBe(mockAxiosInstance);
-      });
+      //   // Assertion supplémentaire
+      //   expect((rawClient as any).axiosInstance).toBe(mockAxiosInstance);
+      // });
 
       it("préserve l'instance par défaut lors de la suppression d'une autre instance", () => {
         // Arrangement

@@ -156,26 +156,11 @@ export declare class HttpClient implements IHttpClient {
     private defaultHeaders;
     private withCredentials;
     private maxRetries;
-    constructor();
+    private constructor();
     /**
-     * Interface statique pour gérer les intercepteurs
+     * Initialise une nouvelle instance HTTP avec intercepteurs
      */
-    static interceptors: {
-        request: {
-            use: (interceptor: RequestInterceptor) => number;
-            eject: (index: number) => void;
-            clear: () => void;
-        };
-        response: {
-            use: (onSuccess: ResponseSuccessInterceptor, onError?: ResponseErrorInterceptor) => number;
-            eject: (index: number) => void;
-            clear: () => void;
-        };
-    };
-    /**
-     * Initialise une nouvelle instance HTTP ou renvoie une instance existante
-     */
-    static init(options: HttpConfigOptions, instanceName?: string): HttpClient;
+    static init(options: HttpConfigOptionsWithInterceptors, instanceName?: string): HttpClient;
     /**
      * Récupère une instance existante
      */
@@ -244,6 +229,16 @@ export declare interface HttpConfigOptions {
     maxRetries?: number;
     apiPrefix?: string;
     apiVersion?: string | number;
+}
+
+declare interface HttpConfigOptionsWithInterceptors extends HttpConfigOptions {
+    interceptors?: {
+        request?: RequestInterceptor[];
+        response?: {
+            success?: ResponseSuccessInterceptor[];
+            error?: ResponseErrorInterceptor[];
+        };
+    };
 }
 
 export declare interface IHttpClient {
