@@ -1,5 +1,5 @@
 import type { IHttpClient } from "@/interfaces";
-import type { HttpConfigOptions } from "@/types/common";
+import type { HttpConfigOptions, RequestConfig, RequestInterceptor, ResponseErrorInterceptor, ResponseSuccessInterceptor } from "@/types/common";
 
 // Erreur personnalisée pour les requêtes API
 export class ApiRequestError extends Error {
@@ -22,18 +22,6 @@ export class ApiRequestError extends Error {
   }
 }
 
-// Types pour les intercepteurs
-type RequestInterceptor = (config: RequestConfig) => Promise<RequestConfig> | RequestConfig;
-type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
-type ResponseErrorInterceptor = (error: any) => Promise<any>;
-
-// Configuration de requête étendue
-export interface RequestConfig extends RequestInit {
-  url: string;
-  params?: Record<string, string>;
-  data?: any;
-  timeout?: number;
-}
 
 // Configuration étendue pour initialisation avec intercepteurs
 export interface HttpConfigOptionsWithInterceptors extends HttpConfigOptions {

@@ -216,9 +216,9 @@ export declare class HttpClient implements IHttpClient {
     /**
      * Méthode principale pour effectuer une requête
      */
-    request<TResponse = any>(config: Partial<RequestConfig_2> & {
+    request<TResponse = any>(config: Partial<RequestConfig> & {
         url: string;
-    }, options?: Partial<RequestConfig_2>): Promise<TResponse>;
+    }, options?: Partial<RequestConfig>): Promise<TResponse>;
 }
 
 export declare interface HttpConfigOptions {
@@ -357,14 +357,7 @@ declare interface RequestConfig extends RequestInit {
     headers?: Record<string, string>;
 }
 
-declare interface RequestConfig_2 extends RequestInit {
-    url: string;
-    params?: Record<string, string>;
-    data?: any;
-    timeout?: number;
-}
-
-declare type RequestInterceptor = (config: RequestConfig_2) => Promise<RequestConfig_2> | RequestConfig_2;
+declare type RequestInterceptor = (config: RequestConfig) => Promise<RequestConfig> | RequestConfig;
 
 declare type ResponseErrorInterceptor = (error: any) => Promise<any>;
 

@@ -1,8 +1,18 @@
+export type RequestInterceptor = (config: RequestConfig) => Promise<RequestConfig> | RequestConfig;
+
+// Type pour les intercepteurs de réponse réussie
+export type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
+
+// Type pour les intercepteurs d'erreur
+export type ResponseErrorInterceptor = (error: any) => Promise<any>;
+
+// Paramètres de pagination
 export interface PaginationParams {
   page?: number;
   limit?: number;
 }
 
+// Configuration de base pour le client HTTP
 export interface HttpConfigOptions {
   baseURL: string;
   timeout?: number;
@@ -13,6 +23,7 @@ export interface HttpConfigOptions {
   apiVersion?: string | number;
 }
 
+// Structure de permissions
 export interface Permission {
   authorized_to_view: boolean;
   authorized_to_create: boolean;
@@ -22,6 +33,7 @@ export interface Permission {
   authorized_to_force_delete: boolean;
 }
 
+// Configuration de requête étendue
 export interface RequestConfig extends RequestInit {
   url: string;
   params?: Record<string, string>;
