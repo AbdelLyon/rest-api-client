@@ -53,18 +53,9 @@ export interface CreateRelationOperation<
   operation: "create";
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?:
-    | RelationOperation<
-      TRelations[K] extends RelationDefinition<infer A1, any> ? A1 : never,
-      TRelations[K] extends RelationDefinition<any, infer R1> ? R1 : never
-    >
-    | Array<RelationOperation<
-      TRelations[K] extends RelationDefinition<infer A2, any> ? A2 : never,
-      TRelations[K] extends RelationDefinition<any, infer R2> ? R2 : never
-    >>
+    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
   };
 }
-
 
 // Union de toutes les opérations possibles avec typage générique
 export type RelationOperation<
@@ -84,15 +75,7 @@ export interface BaseMutationData<
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?:
-    | RelationOperation<
-      TRelations[K] extends RelationDefinition<infer A3, any> ? A3 : never,
-      TRelations[K] extends RelationDefinition<any, infer R3> ? R3 : never
-    >
-    | Array<RelationOperation<
-      TRelations[K] extends RelationDefinition<infer A4, any> ? A4 : never,
-      TRelations[K] extends RelationDefinition<any, infer R4> ? R4 : never
-    >>
+    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
   };
 }
 
