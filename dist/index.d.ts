@@ -91,7 +91,7 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 export declare interface BaseMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperation<TRelations[K] extends RelationDefinition<infer A3, any> ? A3 : never, TRelations[K] extends RelationDefinition<any, infer R3> ? R3 : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A4, any> ? A4 : never, TRelations[K] extends RelationDefinition<any, infer R4> ? R4 : never>>;
+        [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
     };
 }
 
@@ -105,7 +105,7 @@ export declare interface CreateRelationOperation<TAttributes extends ModelAttrib
     operation: "create";
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperation<TRelations[K] extends RelationDefinition<infer A1, any> ? A1 : never, TRelations[K] extends RelationDefinition<any, infer R1> ? R1 : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A2, any> ? A2 : never, TRelations[K] extends RelationDefinition<any, infer R2> ? R2 : never>>;
+        [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
     };
 }
 
@@ -181,6 +181,10 @@ export declare interface DetailsValidationRules {
     create?: Record<string, Array<string>>;
     update?: Record<string, Array<string>>;
 }
+
+declare type ExtractAttributes<T> = T extends RelationDefinition<infer A, any> ? A : never;
+
+declare type ExtractRelations<T> = T extends RelationDefinition<any, infer R> ? R : never;
 
 export declare interface FieldSelection {
     field: string;
@@ -410,6 +414,8 @@ export declare interface RelationInclude {
 }
 
 export declare type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends Record<string, unknown> = Record<string, unknown>> = CreateRelationOperation<TAttributes, TRelations> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TAttributes> | ToggleRelationOperation<TAttributes>;
+
+declare type RelationOperationOrArray<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> = RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 

@@ -45,6 +45,12 @@ export interface ToggleRelationOperation<TAttributes extends ModelAttributes> {
   pivot?: Record<string, string | number>;
 }
 
+// Type utilitaire pour extraire les types d'attributs d'une définition de relation
+export type ExtractAttributes<T> = T extends RelationDefinition<infer A, any> ? A : never;
+
+// Type utilitaire pour extraire les types de relations d'une définition de relation
+export type ExtractRelations<T> = T extends RelationDefinition<any, infer R> ? R : never;
+
 // Opération de création avec relations récursives et typage générique
 export interface CreateRelationOperation<
   TAttributes extends ModelAttributes,
@@ -53,9 +59,15 @@ export interface CreateRelationOperation<
   operation: "create";
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+    [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
   };
 }
+
+// Type utilitaire pour une opération ou un tableau d'opérations
+export type RelationOperationOrArray<
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
+> = RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>;
 
 // Union de toutes les opérations possibles avec typage générique
 export type RelationOperation<
@@ -75,7 +87,7 @@ export interface BaseMutationData<
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+    [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
   };
 }
 
