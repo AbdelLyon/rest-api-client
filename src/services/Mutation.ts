@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
-import type { DeleteRequest, DeleteResponse } from "../types/delete";
-import type { ActionRequest, ActionResponse } from "../types/action";
-import type { MutationRequest, MutationResponse } from "../types/mutate";
+import type { DeleteRequest, DeleteResponse } from "@/types/delete";
+import type { ActionRequest, ActionResponse } from "@/types/action";
+import type { ModelAttributes, MutationRequest, MutationResponse, RecursiveRelations } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
-import { RequestConfig } from "@/types/common";
+import type { RequestConfig } from "@/types/common";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
@@ -30,7 +30,7 @@ export abstract class Mutation<T> implements IMutation<T> {
     });
   }
 
-  public async mutate<TAttributes, TRelations>(
+  public async mutate<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
     options: Partial<RequestConfig> = {},
   ): Promise<MutationResponse<T>> {
@@ -48,7 +48,6 @@ export abstract class Mutation<T> implements IMutation<T> {
       data: this.validateData(response.data),
     };
   }
-
   public executeAction(
     actionRequest: ActionRequest,
     options: Partial<RequestConfig> = {},

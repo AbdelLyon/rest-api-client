@@ -1,5 +1,6 @@
-import { RequestConfig } from "@/types/common";
-import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
+import type { SearchRequest, SearchResponse } from "@/types/search";
+import type { RequestConfig } from "@/types/common";
+import type { DetailsResponse } from "@/types/details";
 
 export interface IQuery<T> {
   search: (

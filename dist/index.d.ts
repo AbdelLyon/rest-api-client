@@ -88,21 +88,25 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
-export declare interface BaseMutationData<TModelAttributes, TRelations> {
-    attributes?: TModelAttributes;
-    relations?: Partial<Record<keyof TRelations, RelationOperation<TModelAttributes, TRelations> | Array<RelationOperation<TModelAttributes, TRelations>>>>;
+export declare interface BaseMutationData<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> {
+    attributes?: TAttributes;
+    relations?: {
+        [K in keyof TRelations]?: RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>;
+    };
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-export declare interface CreateMutationOperation<TModelAttributes, TRelations> extends BaseMutationData<TModelAttributes, TRelations> {
+export declare interface CreateMutationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> extends BaseMutationData<TAttributes, TRelations> {
     operation: "create";
 }
 
-export declare interface CreateRelationOperation<TModelAttributes, TRelations> {
+export declare interface CreateRelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> {
     operation: "create";
-    attributes?: TRelations[keyof TRelations];
-    relations?: Partial<Record<keyof TRelations, RelationOperation<TModelAttributes, TRelations> | Array<RelationOperation<TModelAttributes, TRelations>>>>;
+    attributes?: Record<string, unknown>;
+    relations?: {
+        [K in keyof TRelations]?: RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>;
+    };
 }
 
 export declare interface DeleteRequest {
@@ -306,7 +310,7 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -331,23 +335,25 @@ export declare interface IQuery<T> {
 
 export declare type LogicalOperator = "and" | "or";
 
+export declare type ModelAttributes = Record<string, unknown>;
+
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
     protected pathname: string;
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-export declare type MutationOperation<TModelAttributes, TRelations> = CreateMutationOperation<TModelAttributes, TRelations> | UpdateMutationOperation<TModelAttributes, TRelations>;
+export declare type MutationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
-export declare interface MutationRequest<TModelAttributes, TRelations> {
-    mutate: Array<MutationOperation<TModelAttributes, TRelations>>;
+export declare interface MutationRequest<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> {
+    mutate: Array<MutationOperation<TAttributes, TRelations>>;
 }
 
 export declare interface MutationResponse<TModel> {
@@ -389,11 +395,16 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
+export declare type RecursiveRelations<TAttributes extends ModelAttributes = ModelAttributes> = Record<string, RelationDefinition<TAttributes, Record<string, RelationDefinition<TAttributes, unknown>>>>;
+
 export declare type RelationAttributes<T> = {
     [K in keyof T]: T[K];
 };
 
-export declare type RelationDefinitions = Record<string, unknown>;
+export declare interface RelationDefinition<TAttributes extends ModelAttributes = ModelAttributes, TRelations = unknown> {
+    attributes?: TAttributes;
+    relations?: TRelations;
+}
 
 export declare interface RelationInclude {
     relation: string;
@@ -404,7 +415,7 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation<TModelAttributes, TRelations> = CreateRelationOperation<TModelAttributes, TRelations> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TRelations, keyof TRelations> | ToggleRelationOperation<TRelations, keyof TRelations>;
+export declare type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> = CreateRelationOperation<TAttributes, TRelations> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TAttributes, TRelations> | ToggleRelationOperation<TAttributes, TRelations>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
@@ -460,11 +471,11 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelationOperation<T, K extends keyof T> {
+export declare interface SyncRelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>, K extends keyof TRelations = keyof TRelations> {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
-    attributes?: T[K];
+    attributes?: TRelations[K]['attributes'];
     pivot?: Record<string, string | number>;
 }
 
@@ -472,14 +483,14 @@ export declare interface TextSearch {
     value: string;
 }
 
-export declare interface ToggleRelationOperation<T, K extends keyof T> {
+export declare interface ToggleRelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>, K extends keyof TRelations = keyof TRelations> {
     operation: "toggle";
     key: string | number;
-    attributes?: T[K];
+    attributes?: TRelations[K]['attributes'];
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateMutationOperation<TModelAttributes, TRelations> extends BaseMutationData<TModelAttributes, TRelations> {
+export declare interface UpdateMutationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>> extends BaseMutationData<TAttributes, TRelations> {
     operation: "update";
     key: string | number;
 }

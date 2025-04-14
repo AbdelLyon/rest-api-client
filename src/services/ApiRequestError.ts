@@ -1,4 +1,4 @@
-import { ApiErrorSource, RequestConfig } from "@/types/common";
+import type { ApiErrorSource, RequestConfig } from "@/types/common";
 
 
 export class ApiRequestError extends Error {

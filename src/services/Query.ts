@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
-import type { DetailsResponse, SearchRequest, SearchResponse } from "../types";
+import type { DetailsResponse, SearchRequest, SearchResponse } from "@/types";
 import type { IQuery } from "@/interfaces";
-import { PaginatedSearchRequest } from "@/types/search";
-import { RequestConfig } from "@/types/common";
+import type { PaginatedSearchRequest } from "@/types/search";
+import type { RequestConfig } from "@/types/common";
 
 export abstract class Query<T> implements IQuery<T> {
   protected http: HttpClient;

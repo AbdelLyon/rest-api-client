@@ -26,6 +26,7 @@ export type {
   TextSearch,
   SearchRequest,
   SearchResponse,
+
 } from "@/types/search";
 
 export type {
@@ -40,10 +41,13 @@ export type {
   MutationRequest,
   MutationResponse,
   RelationAttributes,
-  RelationDefinitions,
+  ModelAttributes,
+  RecursiveRelations,
+  RelationDefinition,
   RelationOperationType,
   ToggleRelationOperation,
   UpdateMutationOperation,
+
 } from "@/types/mutate";
 
 export type {
@@ -56,6 +60,7 @@ export type {
   DetailsResource,
   DetailsResponse,
   DetailsValidationRules,
+
 } from "@/types/details";
 
 export type { DeleteRequest, DeleteResponse } from "@/types/delete";

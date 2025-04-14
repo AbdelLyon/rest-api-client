@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { RequestConfig } from "@/types/common";
-import { IAuth } from "@/interfaces/IAuth";
+import type { IAuth } from "@/interfaces/IAuth";
 
 
 export abstract class Auth<
