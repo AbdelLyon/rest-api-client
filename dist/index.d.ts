@@ -396,7 +396,7 @@ export declare abstract class Query<T> implements IQuery<T> {
 }
 
 export declare interface RelationDefinition<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
-    attributes?: TAttributes;
+    attributes: TAttributes;
     relations?: TRelations;
 }
 
