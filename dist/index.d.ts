@@ -91,7 +91,7 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 export declare interface BaseMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
+        [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
     };
 }
 
@@ -105,7 +105,7 @@ export declare interface CreateRelationOperation<TAttributes extends ModelAttrib
     operation: "create";
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperationOrArray<ExtractAttributes<TRelations[K]>, ExtractRelations<TRelations[K]>>;
+        [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
     };
 }
 
@@ -181,10 +181,6 @@ export declare interface DetailsValidationRules {
     create?: Record<string, Array<string>>;
     update?: Record<string, Array<string>>;
 }
-
-declare type ExtractAttributes<T> = T extends RelationDefinition<infer A, any> ? A : never;
-
-declare type ExtractRelations<T> = T extends RelationDefinition<any, infer R> ? R : never;
 
 export declare interface FieldSelection {
     field: string;
@@ -414,8 +410,6 @@ export declare interface RelationInclude {
 }
 
 export declare type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes, TRelations extends Record<string, unknown> = Record<string, unknown>> = CreateRelationOperation<TAttributes, TRelations> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TAttributes> | ToggleRelationOperation<TAttributes>;
-
-declare type RelationOperationOrArray<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> = RelationOperation<TAttributes, TRelations> | Array<RelationOperation<TAttributes, TRelations>>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
