@@ -51,7 +51,7 @@ export interface CreateRelationOperation<
   TRelations extends Record<string, unknown>
 > {
   operation: "create";
-  attributes?: TAttributes;
+  attributes: TAttributes;
   relations?: {
     [K in keyof TRelations]?:
     | RelationOperation<

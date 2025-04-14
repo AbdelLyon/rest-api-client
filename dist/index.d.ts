@@ -103,7 +103,7 @@ export declare interface CreateMutationOperation<TAttributes extends ModelAttrib
 
 export declare interface CreateRelationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     operation: "create";
-    attributes?: TAttributes;
+    attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]?: RelationOperation<TRelations[K] extends RelationDefinition<infer A1, any> ? A1 : never, TRelations[K] extends RelationDefinition<any, infer R1> ? R1 : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A2, any> ? A2 : never, TRelations[K] extends RelationDefinition<any, infer R2> ? R2 : never>>;
     };
