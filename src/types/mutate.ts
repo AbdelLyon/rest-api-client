@@ -3,7 +3,7 @@ export type ModelAttributes = Record<string, unknown>;
 
 // Définition d'une relation avec typage générique
 export interface RelationDefinition<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
-  attributes?: TAttributes;
+  attributes: TAttributes;
   relations?: TRelations;
 }
 
