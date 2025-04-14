@@ -88,23 +88,27 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
-export declare interface BaseMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare type ComparisonOperator = "=" | ">" | "<" | "in";
+
+declare interface CreateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: RelationOperation | Array<RelationOperation>;
+        [K in keyof TRelations]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
     };
 }
 
-export declare type ComparisonOperator = "=" | ">" | "<" | "in";
-
-export declare interface CreateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends BaseMutationData<TAttributes, TRelations> {
+export declare interface CreateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends CreateMutationData<TAttributes, TRelations> {
     operation: "create";
 }
 
 export declare interface CreateRelationOperation<TAttributes extends ModelAttributes = ModelAttributes> {
     operation: "create";
     attributes: TAttributes;
-    relations?: RelationsMap;
+    relations?: CreateRelationsMap;
+}
+
+declare interface CreateRelationsMap {
+    [key: string]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
 }
 
 export declare interface DeleteRequest {
@@ -407,13 +411,9 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation = CreateRelationOperation | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<ModelAttributes> | ToggleRelationOperation<ModelAttributes>;
+export declare type RelationOperation = CreateRelationOperation | UpdateRelationOperation | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<ModelAttributes> | ToggleRelationOperation<ModelAttributes>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
-
-declare interface RelationsMap {
-    [key: string]: RelationOperation | Array<RelationOperation>;
-}
 
 export declare interface RequestConfig extends RequestInit {
     url: string;
@@ -486,9 +486,27 @@ export declare interface ToggleRelationOperation<TAttributes extends ModelAttrib
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends BaseMutationData<TAttributes, TRelations> {
+declare interface UpdateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+    attributes: TAttributes;
+    relations?: {
+        [K in keyof TRelations]: RelationOperation | Array<RelationOperation>;
+    };
+}
+
+export declare interface UpdateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends UpdateMutationData<TAttributes, TRelations> {
     operation: "update";
     key: string | number;
+}
+
+declare interface UpdateRelationOperation<TAttributes extends ModelAttributes = ModelAttributes> {
+    operation: "update";
+    key: string | number;
+    attributes: TAttributes;
+    relations?: UpdateRelationsMap;
+}
+
+declare interface UpdateRelationsMap {
+    [key: string]: RelationOperation | Array<RelationOperation>;
 }
 
 export { }

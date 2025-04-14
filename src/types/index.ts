@@ -32,7 +32,6 @@ export type {
 
 export type {
   AttachRelationOperation,
-  BaseMutationData,
   CreateRelationOperation,
   RelationOperation,
   CreateMutationOperation,

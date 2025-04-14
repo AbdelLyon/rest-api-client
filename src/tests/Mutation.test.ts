@@ -282,12 +282,12 @@ describe("Mutation avec Zod", () => {
             //   tags: [
             //     {
             //       operation: "sync",
-            //       key: 10,
+            //       key: "10",
             //       without_detaching: true,
             //     },
             //     {
             //       operation: "detach",
-            //       key: 12,
+            //       key: "12",
             //     },
             //   ],
             // },
