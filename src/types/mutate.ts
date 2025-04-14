@@ -82,7 +82,7 @@ export interface BaseMutationData<
   TAttributes extends ModelAttributes,
   TRelations extends Record<string, unknown>
 > {
-  attributes?: TAttributes;
+  attributes: TAttributes;
   relations?: {
     [K in keyof TRelations]?:
     | RelationOperation<

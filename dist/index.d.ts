@@ -89,7 +89,7 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 }
 
 export declare interface BaseMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
-    attributes?: TAttributes;
+    attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]?: RelationOperation<TRelations[K] extends RelationDefinition<infer A3, any> ? A3 : never, TRelations[K] extends RelationDefinition<any, infer R3> ? R3 : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A4, any> ? A4 : never, TRelations[K] extends RelationDefinition<any, infer R4> ? R4 : never>>;
     };
