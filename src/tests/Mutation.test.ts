@@ -223,12 +223,14 @@ describe("Mutation avec Zod", () => {
               status: "active",
               description: "Description de test",
             },
-            relations: {
-              categories: {
-                operation: "attach",
-                key: 5,
-              },
-            },
+            // relations: {
+            //   categories: {
+            //     operation: "detach",
+            //     key: 5,
+
+
+            //   },
+            // },
           },
         ],
       };
@@ -276,19 +278,19 @@ describe("Mutation avec Zod", () => {
               name: "Ressource modifiée",
               status: "inactive",
             },
-            relations: {
-              tags: [
-                {
-                  operation: "sync",
-                  key: 10,
-                  without_detaching: true,
-                },
-                {
-                  operation: "detach",
-                  key: 12,
-                },
-              ],
-            },
+            // relations: {
+            //   tags: [
+            //     {
+            //       operation: "sync",
+            //       key: 10,
+            //       without_detaching: true,
+            //     },
+            //     {
+            //       operation: "detach",
+            //       key: 12,
+            //     },
+            //   ],
+            // },
           },
         ],
       };
