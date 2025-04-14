@@ -45,19 +45,22 @@ export interface ToggleRelationOperation<TAttributes extends ModelAttributes> {
   pivot?: Record<string, string | number>;
 }
 
-// Opération de création avec typage plus simple
+// Opération de création avec approche de typage différente
 export interface CreateRelationOperation<
   TAttributes extends ModelAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations extends Record<string, unknown> = Record<string, unknown>
 > {
   operation: "create";
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+    [K in keyof TRelations]?: K extends keyof TRelations
+    ? RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>
+    | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>>
+    : never;
   };
-}
+};
 
-// Union de toutes les opérations possibles avec typage générique
+// Union de toutes les opérations possibles avec typage générique simplifiée
 export type RelationOperation<
   TAttributes extends ModelAttributes = ModelAttributes,
   TRelations extends Record<string, unknown> = Record<string, unknown>
@@ -68,16 +71,19 @@ export type RelationOperation<
   | SyncRelationOperation<TAttributes>
   | ToggleRelationOperation<TAttributes>;
 
-// Données pour une opération de mutation avec typage simplifié
+// Données pour une opération de mutation avec approche similaire
 export interface BaseMutationData<
   TAttributes extends ModelAttributes,
   TRelations extends Record<string, unknown>
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+    [K in keyof TRelations]?: K extends keyof TRelations
+    ? RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>
+    | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>>
+    : never;
   };
-}
+};
 
 // Opération de création avec typage générique
 export interface CreateMutationOperation<

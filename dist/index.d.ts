@@ -91,7 +91,7 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 export declare interface BaseMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+        [K in keyof TRelations]?: K extends keyof TRelations ? RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>> : never;
     };
 }
 
@@ -101,11 +101,11 @@ export declare interface CreateMutationOperation<TAttributes extends ModelAttrib
     operation: "create";
 }
 
-export declare interface CreateRelationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface CreateRelationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown> = Record<string, unknown>> {
     operation: "create";
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]?: RelationOperation<any, any> | Array<RelationOperation<any, any>>;
+        [K in keyof TRelations]?: K extends keyof TRelations ? RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never> | Array<RelationOperation<TRelations[K] extends RelationDefinition<infer A, any> ? A : never>> : never;
     };
 }
 
