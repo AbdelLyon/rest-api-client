@@ -273,7 +273,7 @@ class R {
       return s.data;
     });
   }
-  async mutate(t, e = {}) {
+  async mutate(t, e) {
     const s = await this.http.request(
       {
         method: "POST",

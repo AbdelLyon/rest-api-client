@@ -1,22 +1,13 @@
-// Type de base pour les attributs d'un modèle
+// Type de base pour les attributs
 export type ModelAttributes = Record<string, unknown>;
 
-// Type de définition de relations récursives
-export interface RelationDefinition<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations = unknown
-> {
+// Définition d'une relation avec typage générique
+export interface RelationDefinition<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
   attributes?: TAttributes;
   relations?: TRelations;
-};
+}
 
-// Type récursif pour les relations
-export type RecursiveRelations<TAttributes extends ModelAttributes = ModelAttributes> = Record<string, RelationDefinition<
-  TAttributes,
-  Record<string, RelationDefinition<TAttributes, unknown>>
->>;
-
-// Types d'opérations de relation
+// Types d'opérations possibles
 export type RelationOperationType =
   | "create"
   | "update"
@@ -25,120 +16,117 @@ export type RelationOperationType =
   | "sync"
   | "toggle";
 
-// Opération d'attachement d'une relation
+// Opération d'attachement
 export interface AttachRelationOperation {
   operation: "attach";
   key: string | number;
 }
 
-// Opération de détachement d'une relation
+// Opération de détachement
 export interface DetachRelationOperation {
   operation: "detach";
   key: string | number;
 }
 
-// Opération de synchronisation d'une relation
-export interface SyncRelationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>,
-  K extends keyof TRelations = keyof TRelations
-> {
+// Opération de synchronisation avec typage générique
+export interface SyncRelationOperation<TAttributes extends ModelAttributes> {
   operation: "sync";
   without_detaching?: boolean;
   key: string | number;
-  attributes?: TRelations[K]['attributes'];
+  attributes?: TAttributes;
   pivot?: Record<string, string | number>;
-};
+}
 
-// Opération de basculement d'une relation
-export interface ToggleRelationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>,
-  K extends keyof TRelations = keyof TRelations
-> {
+// Opération de basculement avec typage générique
+export interface ToggleRelationOperation<TAttributes extends ModelAttributes> {
   operation: "toggle";
   key: string | number;
-  attributes?: TRelations[K]['attributes'];
+  attributes?: TAttributes;
   pivot?: Record<string, string | number>;
-};
+}
 
-// Déclaration préliminaire pour la récursivité
+// Opération de création avec relations récursives et typage générique
 export interface CreateRelationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
 > {
   operation: "create";
-  attributes?: Record<string, unknown>;
+  attributes?: TAttributes;
   relations?: {
     [K in keyof TRelations]?:
-    | RelationOperation<TAttributes, TRelations>
-    | Array<RelationOperation<TAttributes, TRelations>>
+    | RelationOperation<
+      TRelations[K] extends RelationDefinition<infer A1, any> ? A1 : never,
+      TRelations[K] extends RelationDefinition<any, infer R1> ? R1 : never
+    >
+    | Array<RelationOperation<
+      TRelations[K] extends RelationDefinition<infer A2, any> ? A2 : never,
+      TRelations[K] extends RelationDefinition<any, infer R2> ? R2 : never
+    >>
   };
 }
 
-// Type d'union pour toutes les opérations de relation possibles
+
+// Union de toutes les opérations possibles avec typage générique
 export type RelationOperation<
   TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TRelations extends Record<string, unknown> = Record<string, unknown>
 > =
   | CreateRelationOperation<TAttributes, TRelations>
   | AttachRelationOperation
   | DetachRelationOperation
-  | SyncRelationOperation<TAttributes, TRelations>
-  | ToggleRelationOperation<TAttributes, TRelations>;
+  | SyncRelationOperation<TAttributes>
+  | ToggleRelationOperation<TAttributes>;
 
-// Données de base pour une mutation
+// Données pour une opération de mutation avec typage générique
 export interface BaseMutationData<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
 > {
   attributes?: TAttributes;
   relations?: {
     [K in keyof TRelations]?:
-    | RelationOperation<TAttributes, TRelations>
-    | Array<RelationOperation<TAttributes, TRelations>>
+    | RelationOperation<
+      TRelations[K] extends RelationDefinition<infer A3, any> ? A3 : never,
+      TRelations[K] extends RelationDefinition<any, infer R3> ? R3 : never
+    >
+    | Array<RelationOperation<
+      TRelations[K] extends RelationDefinition<infer A4, any> ? A4 : never,
+      TRelations[K] extends RelationDefinition<any, infer R4> ? R4 : never
+    >>
   };
 }
 
-// Opération de création pour une mutation
+// Opération de création avec typage générique
 export interface CreateMutationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
 > extends BaseMutationData<TAttributes, TRelations> {
   operation: "create";
 };
 
-// Opération de mise à jour pour une mutation
+// Opération de mise à jour avec typage générique
 export interface UpdateMutationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
 > extends BaseMutationData<TAttributes, TRelations> {
   operation: "update";
   key: string | number;
 };
 
-// Type d'union pour toutes les opérations de mutation
+// Union des opérations de mutation avec typage générique
 export type MutationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
-> =
-  | CreateMutationOperation<TAttributes, TRelations>
-  | UpdateMutationOperation<TAttributes, TRelations>;
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
+> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
-// Interface pour une requête de mutation
+// La requête de mutation avec typage générique
 export interface MutationRequest<
-  TAttributes extends ModelAttributes = ModelAttributes,
-  TRelations extends RecursiveRelations<TAttributes> = RecursiveRelations<TAttributes>
+  TAttributes extends ModelAttributes,
+  TRelations extends Record<string, unknown>
 > {
   mutate: Array<MutationOperation<TAttributes, TRelations>>;
 };
 
-// Interface pour une réponse de mutation
 export interface MutationResponse<TModel> {
   data: Array<TModel>;
 }
-
-// Type auxiliaire pour les attributs de relation
-export type RelationAttributes<T> = {
-  [K in keyof T]: T[K];
-};

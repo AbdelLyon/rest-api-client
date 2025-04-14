@@ -17,8 +17,6 @@ import type {
   ActionRequest,
   ActionResponse,
   ModelAttributes,
-  RecursiveRelations,
-  RelationOperation,
   RelationDefinition,
 } from "../types";
 import { HttpClient, Mutation } from "@/services";
@@ -34,7 +32,7 @@ const TestResourceSchema = z.object({
 // Type dérivé du schéma
 type TestResource = z.infer<typeof TestResourceSchema>;
 
-// Interfaces de test pour les attributs et relations
+// Interfaces d'attributs compatibles avec ModelAttributes
 interface TestAttributes extends ModelAttributes {
   name?: string;
   status?: string;
@@ -42,24 +40,26 @@ interface TestAttributes extends ModelAttributes {
   [key: string]: unknown;
 }
 
-// Interface de test pour les définitions de relations
-type CategoryAttributes = {
+interface CategoryAttributes extends ModelAttributes {
   id: number;
   name: string;
   [key: string]: unknown;
-};
+}
 
-type TagAttributes = {
+interface TagAttributes extends ModelAttributes {
   id: number;
   name: string;
   [key: string]: unknown;
-};
+}
 
-interface TestRelationsDefinition extends RecursiveRelations<TestAttributes> {
-  [key: string]: {
-    attributes?: CategoryAttributes | TagAttributes;
-    relations?: Record<string, RelationDefinition<TestAttributes, Record<string, unknown>>>;
-  };
+// Relations imbriquées compatibles avec la structure récursive
+type CategoryRelations = Record<string, unknown>;
+type TagRelations = Record<string, unknown>;
+
+// Définition des relations pour le test
+interface TestRelations extends Record<string, unknown> {
+  categories: RelationDefinition<CategoryAttributes, CategoryRelations>;
+  tags: RelationDefinition<TagAttributes, TagRelations>;
 }
 
 // Classe concrète pour tester la classe abstraite Mutation
@@ -213,14 +213,8 @@ describe("Mutation avec Zod", () => {
       // Espionner la méthode validateData
       const validateDataSpy = vi.spyOn(mutation as any, "validateData");
 
-      // Opération de relation pour attacher une catégorie
-      const attachOperation: RelationOperation<TestAttributes, TestRelationsDefinition> = {
-        operation: "attach",
-        key: 5,
-      };
-
-      // Requête de mutation pour création
-      const mutateRequest: MutationRequest<TestAttributes, TestRelationsDefinition> = {
+      // Requête de mutation pour création avec la nouvelle structure de types
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [
           {
             operation: "create",
@@ -230,7 +224,10 @@ describe("Mutation avec Zod", () => {
               description: "Description de test",
             },
             relations: {
-              categories: attachOperation,
+              categories: {
+                operation: "attach",
+                key: 5,
+              },
             },
           },
         ],
@@ -269,20 +266,8 @@ describe("Mutation avec Zod", () => {
       // Espionner la méthode validateData
       const validateDataSpy = vi.spyOn(mutation as any, "validateData");
 
-      // Opérations de relation pour synchroniser et détacher des tags
-      const syncOperation: RelationOperation<TestAttributes, TestRelationsDefinition> = {
-        operation: "sync",
-        key: 10,
-        without_detaching: true,
-      };
-
-      const detachOperation: RelationOperation<TestAttributes, TestRelationsDefinition> = {
-        operation: "detach",
-        key: 12,
-      };
-
-      // Requête de mutation pour mise à jour
-      const mutateRequest: MutationRequest<TestAttributes, TestRelationsDefinition> = {
+      // Requête de mutation pour mise à jour avec la nouvelle structure de types
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [
           {
             operation: "update",
@@ -292,7 +277,17 @@ describe("Mutation avec Zod", () => {
               status: "inactive",
             },
             relations: {
-              tags: [syncOperation, detachOperation],
+              tags: [
+                {
+                  operation: "sync",
+                  key: 10,
+                  without_detaching: true,
+                },
+                {
+                  operation: "detach",
+                  key: 12,
+                },
+              ],
             },
           },
         ],
@@ -322,11 +317,8 @@ describe("Mutation avec Zod", () => {
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      const mutateRequest: MutationRequest<TestAttributes, TestRelationsDefinition> = {
-        mutate: [{
-          operation: "create",
-          attributes: { name: "Test" }
-        }],
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
+        mutate: [{ operation: "create", attributes: { name: "Test" } }],
       };
 
       const options = { headers: { Authorization: "Bearer token" } };
@@ -357,7 +349,7 @@ describe("Mutation avec Zod", () => {
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      const mutateRequest: MutationRequest<TestAttributes, TestRelationsDefinition> = {
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [{ operation: "create", attributes: { name: "Test" } }],
       };
 
@@ -697,7 +689,7 @@ describe("Mutation avec Zod", () => {
       const error = new Error("Mutation failed");
       mockRequest.mockRejectedValueOnce(error);
 
-      const mutateRequest: MutationRequest<TestAttributes, TestRelationsDefinition> = {
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [{ operation: "create", attributes: { name: "Test" } }],
       };
 
@@ -775,8 +767,8 @@ describe("Mutation avec Zod", () => {
         .mockResolvedValueOnce(actionResponse) // Pour executeAction
         .mockResolvedValueOnce({ data: [deletedResource], meta: {} }); // Pour delete
 
-      // Exécuter une séquence d'opérations
-      const mutateResult = await mutation.mutate<TestAttributes, TestRelationsDefinition>(
+      // Exécuter une séquence d'opérations avec la nouvelle structure de types
+      const mutateResult = await mutation.mutate<TestAttributes, TestRelations>(
         {
           mutate: [
             { operation: "create", attributes: { name: "Nouvelle ressource" } },
