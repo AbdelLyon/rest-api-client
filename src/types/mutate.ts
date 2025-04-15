@@ -1,4 +1,3 @@
-
 // Types d'opérations possibles
 export type RelationOperationType =
   | "create"
@@ -8,30 +7,35 @@ export type RelationOperationType =
   | "sync"
   | "toggle";
 
-// Opérations simples sans attributs typés
-export interface AttachRelationOperation {
+// Opérations communes pour toutes les relations
+interface BaseRelationOperation {
+  operation: RelationOperationType;
+}
+
+// Opérations simples sans attributs
+export interface AttachRelationOperation extends BaseRelationOperation {
   operation: "attach";
   key: string | number;
 }
 
-export interface DetachRelationOperation {
+export interface DetachRelationOperation extends BaseRelationOperation {
   operation: "detach";
   key: string | number;
 }
 
-// Opérations avec attributs typés mais sans relations
-export interface CreateRelationOperationBase<T> {
+// Opérations avec attributs typés
+export interface CreateRelationOperationBase<T> extends BaseRelationOperation {
   operation: "create";
   attributes: T;
 }
 
-export interface UpdateRelationOperationBase<T> {
+export interface UpdateRelationOperationBase<T> extends BaseRelationOperation {
   operation: "update";
   key: string | number;
   attributes: T;
 }
 
-export interface SyncRelationOperation<T> {
+export interface SyncRelationOperation<T> extends BaseRelationOperation {
   operation: "sync";
   without_detaching?: boolean;
   key: string | number;
@@ -39,45 +43,36 @@ export interface SyncRelationOperation<T> {
   pivot?: Record<string, string | number>;
 }
 
-export interface ToggleRelationOperation<T> {
+export interface ToggleRelationOperation<T> extends BaseRelationOperation {
   operation: "toggle";
   key: string | number;
   attributes?: T;
   pivot?: Record<string, string | number>;
 }
 
-// Union des opérations de base sans les relations
-export type RelationOperationBase<T> =
-  | CreateRelationOperationBase<T>
-  | UpdateRelationOperationBase<T>
-  | AttachRelationOperation
-  | DetachRelationOperation
-  | SyncRelationOperation<T>
-  | ToggleRelationOperation<T>;
-
-// Type générique pour les opérations de relation
-// Peut être étendu avec des relations typées spécifiques
-export type RelationOperation<T> =
-  RelationOperationBase<T>;
+// Type générique conditionnel basé sur le contexte
+export type RelationOperation<T, InCreateContext extends boolean = false> =
+  InCreateContext extends true
+  ? (CreateRelationOperationBase<T> & {
+    relations?: { [key: string]: RelationOperation<any, true>; };
+  }) | AttachRelationOperation
+  : (CreateRelationOperationBase<T> & {
+    relations?: { [key: string]: RelationOperation<any, false>; };
+  }) | (UpdateRelationOperationBase<T> & {
+    relations?: { [key: string]: RelationOperation<any, false>; };
+  }) | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
 
 // Interface pour les données de mutation
-export interface CreateMutationData<
+export interface MutationData<
   TAttributes,
-  TRelations
+  TRelations,
+  InCreateContext extends boolean
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]: TRelations[K];
-  };
-};
-
-export interface UpdateMutationData<
-  TAttributes,
-  TRelations
-> {
-  attributes: TAttributes;
-  relations?: {
-    [K in keyof TRelations]: TRelations[K];
+    [K in keyof TRelations]: TRelations[K] extends RelationOperation<infer T, any>
+    ? RelationOperation<T, InCreateContext>
+    : never
   };
 };
 
@@ -85,14 +80,14 @@ export interface UpdateMutationData<
 export interface CreateMutationOperation<
   TAttributes,
   TRelations
-> extends CreateMutationData<TAttributes, TRelations> {
+> extends MutationData<TAttributes, TRelations, true> {
   operation: "create";
 };
 
 export interface UpdateMutationOperation<
   TAttributes,
   TRelations
-> extends UpdateMutationData<TAttributes, TRelations> {
+> extends MutationData<TAttributes, TRelations, false> {
   operation: "update";
   key: string | number;
 };

@@ -45,7 +45,7 @@ export declare interface ApiErrorSource {
     response?: Response;
 }
 
-export declare interface AttachRelationOperation {
+export declare interface AttachRelationOperation extends BaseRelationOperation {
     operation: "attach";
     key: string | number;
 }
@@ -88,20 +88,17 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
-export declare type ComparisonOperator = "=" | ">" | "<" | "in";
-
-export declare interface CreateMutationData<TAttributes, TRelations> {
-    attributes: TAttributes;
-    relations?: {
-        [K in keyof TRelations]: TRelations[K];
-    };
+declare interface BaseRelationOperation {
+    operation: RelationOperationType;
 }
 
-export declare interface CreateMutationOperation<TAttributes, TRelations> extends CreateMutationData<TAttributes, TRelations> {
+export declare type ComparisonOperator = "=" | ">" | "<" | "in";
+
+export declare interface CreateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, true> {
     operation: "create";
 }
 
-declare interface CreateRelationOperationBase<T> {
+declare interface CreateRelationOperationBase<T> extends BaseRelationOperation {
     operation: "create";
     attributes: T;
 }
@@ -117,7 +114,7 @@ export declare interface DeleteResponse<T> {
     };
 }
 
-export declare interface DetachRelationOperation {
+export declare interface DetachRelationOperation extends BaseRelationOperation {
     operation: "detach";
     key: string | number;
 }
@@ -345,6 +342,13 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
+declare interface MutationData<TAttributes, TRelations, InCreateContext extends boolean> {
+    attributes: TAttributes;
+    relations?: {
+        [K in keyof TRelations]: TRelations[K] extends RelationOperation<infer T, any> ? RelationOperation<T, InCreateContext> : never;
+    };
+}
+
 export declare type MutationOperation<TAttributes, TRelations> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
 export declare interface MutationRequest<TAttributes, TRelations> {
@@ -399,9 +403,19 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation<T> = RelationOperationBase<T>;
-
-declare type RelationOperationBase<T> = CreateRelationOperationBase<T> | UpdateRelationOperationBase<T> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
+export declare type RelationOperation<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationOperationBase<T> & {
+    relations?: {
+        [key: string]: RelationOperation<any, true>;
+    };
+}) | AttachRelationOperation : (CreateRelationOperationBase<T> & {
+    relations?: {
+        [key: string]: RelationOperation<any, false>;
+    };
+}) | (UpdateRelationOperationBase<T> & {
+    relations?: {
+        [key: string]: RelationOperation<any, false>;
+    };
+}) | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
@@ -457,7 +471,7 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelationOperation<T> {
+export declare interface SyncRelationOperation<T> extends BaseRelationOperation {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
@@ -469,26 +483,19 @@ export declare interface TextSearch {
     value: string;
 }
 
-export declare interface ToggleRelationOperation<T> {
+export declare interface ToggleRelationOperation<T> extends BaseRelationOperation {
     operation: "toggle";
     key: string | number;
     attributes?: T;
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateMutationData<TAttributes, TRelations> {
-    attributes: TAttributes;
-    relations?: {
-        [K in keyof TRelations]: TRelations[K];
-    };
-}
-
-export declare interface UpdateMutationOperation<TAttributes, TRelations> extends UpdateMutationData<TAttributes, TRelations> {
+export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
     operation: "update";
     key: string | number;
 }
 
-declare interface UpdateRelationOperationBase<T> {
+declare interface UpdateRelationOperationBase<T> extends BaseRelationOperation {
     operation: "update";
     key: string | number;
     attributes: T;

@@ -39,8 +39,6 @@ export type {
   MutationOperation,
   MutationRequest,
   MutationResponse,
-  CreateMutationData,
-  UpdateMutationData,
   RelationOperationType,
   ToggleRelationOperation,
   UpdateMutationOperation,
