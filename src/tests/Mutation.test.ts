@@ -38,32 +38,22 @@ interface TestAttributes {
   [key: string]: unknown;
 }
 
-// interface CategoryAttributes extends ModelAttributes {
-//   id: number;
-//   name: string;
-//   [key: string]: unknown;
-// }
-
-// interface TagAttributes extends ModelAttributes {
-//   id: number;
-//   name: string;
-//   [key: string]: unknown;
-// }
-
-// // Relations imbriquées compatibles avec la structure récursive
-// type CategoryRelations = Record<string, unknown>;
-// type TagRelations = Record<string, unknown>;
-
 // Définition des relations pour le test
 interface TestRelations extends Record<string, unknown> {
-  // categories: RelationDefinition<CategoryAttributes, CategoryRelations>;
-  // tags: RelationDefinition<TagAttributes, TagRelations>;
+  // Aucune relation définie pour ce test
 }
 
 // Classe concrète pour tester la classe abstraite Mutation
 class TestMutation extends Mutation<TestResource> {
   constructor (pathname: string) {
     super(pathname, TestResourceSchema);
+  }
+
+  // Méthode fictive pour simuler la récupération des ressources par ID
+  async getResourcesByIds(): Promise<TestResource[]> {
+    // Cette méthode serait implémentée pour aller chercher les ressources
+    // Mais dans le test, elle sera mockée
+    return [];
   }
 }
 
@@ -193,7 +183,7 @@ describe("Mutation avec Zod", () => {
   });
 
   describe("mutate", () => {
-    it("devrait effectuer une requête de création et valider les données", async () => {
+    it("devrait effectuer une requête de création et traiter les IDs retournés", async () => {
       // Données de test
       const createdResource: TestResource = {
         id: 1,
@@ -202,16 +192,19 @@ describe("Mutation avec Zod", () => {
         createdAt: "2023-01-01",
       };
 
-      const mockResponse: MutationResponse<TestResource> = {
-        data: [createdResource],
+      // Nouvelle structure de réponse avec created/updated
+      const mockResponse: MutationResponse = {
+        created: [1],
+        updated: [],
       };
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      // Espionner la méthode validateData
-      const validateDataSpy = vi.spyOn(mutation as any, "validateData");
+      // Mock pour la méthode getResourcesByIds
+      const mockGetResources = vi.fn().mockResolvedValue([createdResource]);
+      mutation.getResourcesByIds = mockGetResources;
 
-      // Requête de mutation pour création avec la nouvelle structure de types
+      // Requête de mutation pour création
       const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [
           {
@@ -221,14 +214,6 @@ describe("Mutation avec Zod", () => {
               status: "active",
               description: "Description de test",
             },
-            // relations: {
-            //   categories: {
-            //     operation: "detach",
-            //     key: 5,
-
-
-            //   },
-            // },
           },
         ],
       };
@@ -243,12 +228,11 @@ describe("Mutation avec Zod", () => {
         },
         {},
       );
-      expect(validateDataSpy).toHaveBeenCalledWith(mockResponse.data);
-      expect(result.data[0].id).toBe(1);
-      expect(result.data[0].name).toBe("Nouvelle ressource");
+      expect(mockGetResources).toHaveBeenCalledWith([1]);
+      expect(result.created[0]).toEqual(createdResource);
     });
 
-    it("devrait effectuer une requête de mise à jour et valider les données", async () => {
+    it("devrait effectuer une requête de mise à jour et traiter les IDs retournés", async () => {
       // Données de test
       const updatedResource: TestResource = {
         id: 2,
@@ -257,16 +241,19 @@ describe("Mutation avec Zod", () => {
         createdAt: "2023-01-02",
       };
 
-      const mockResponse: MutationResponse<TestResource> = {
-        data: [updatedResource],
+      // Nouvelle structure de réponse
+      const mockResponse: MutationResponse = {
+        created: [],
+        updated: [2],
       };
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      // Espionner la méthode validateData
-      const validateDataSpy = vi.spyOn(mutation as any, "validateData");
+      // Mock pour la méthode getResourcesByIds
+      const mockGetResources = vi.fn().mockResolvedValue([updatedResource]);
+      mutation.getResourcesByIds = mockGetResources;
 
-      // Requête de mutation pour mise à jour avec la nouvelle structure de types
+      // Requête de mutation pour mise à jour
       const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [
           {
@@ -276,19 +263,6 @@ describe("Mutation avec Zod", () => {
               name: "Ressource modifiée",
               status: "inactive",
             },
-            // relations: {
-            //   tags: [
-            //     {
-            //       operation: "sync",
-            //       key: "10",
-            //       without_detaching: true,
-            //     },
-            //     {
-            //       operation: "detach",
-            //       key: "12",
-            //     },
-            //   ],
-            // },
           },
         ],
       };
@@ -303,19 +277,89 @@ describe("Mutation avec Zod", () => {
         },
         {},
       );
-      expect(validateDataSpy).toHaveBeenCalledWith(mockResponse.data);
-      expect(result.data[0].id).toBe(2);
-      expect(result.data[0].status).toBe("inactive");
+      expect(mockGetResources).toHaveBeenCalledWith([2]);
+      expect(result.created[0]).toEqual(updatedResource);
     });
 
-    it("devrait transmettre les options à la requête", async () => {
-      const mockResponse: MutationResponse<TestResource> = {
-        data: [
-          { id: 3, name: "Test", status: "active", createdAt: "2023-01-03" },
-        ],
+    it("devrait gérer à la fois les créations et les mises à jour", async () => {
+      // Données de test
+      const resources: TestResource[] = [
+        {
+          id: 3,
+          name: "Ressource créée",
+          status: "active",
+          createdAt: "2023-01-03",
+        },
+        {
+          id: 4,
+          name: "Ressource mise à jour",
+          status: "updated",
+          createdAt: "2023-01-04",
+        },
+      ];
+
+      // Nouvelle structure de réponse
+      const mockResponse: MutationResponse = {
+        created: [3],
+        updated: [4],
       };
 
       mockRequest.mockResolvedValueOnce(mockResponse);
+
+      // Mock pour la méthode getResourcesByIds
+      const mockGetResources = vi.fn().mockResolvedValue(resources);
+      mutation.getResourcesByIds = mockGetResources;
+
+      // Requête de mutation mixte
+      const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
+        mutate: [
+          {
+            operation: "create",
+            attributes: {
+              name: "Ressource créée",
+            },
+          },
+          {
+            operation: "update",
+            key: 4,
+            attributes: {
+              name: "Ressource mise à jour",
+            },
+          },
+        ],
+      };
+
+      const result = await mutation.mutate(mutateRequest);
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        {
+          method: "POST",
+          url: `${pathname}/mutate`,
+          data: mutateRequest,
+        },
+        {},
+      );
+      expect(mockGetResources).toHaveBeenCalledWith([3, 4]);
+      expect(result).toHaveLength(2);
+      expect(result).toEqual(resources);
+    });
+
+    it("devrait transmettre les options à la requête", async () => {
+      const mockResponse: MutationResponse = {
+        created: [5],
+        updated: [],
+      };
+
+      mockRequest.mockResolvedValueOnce(mockResponse);
+
+      // Mock pour la méthode getResourcesByIds
+      const mockGetResources = vi.fn().mockResolvedValue([{
+        id: 5,
+        name: "Test",
+        status: "active",
+        createdAt: "2023-01-05",
+      }]);
+      mutation.getResourcesByIds = mockGetResources;
 
       const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [{ operation: "create", attributes: { name: "Test" } }],
@@ -332,31 +376,26 @@ describe("Mutation avec Zod", () => {
       );
     });
 
-    it("devrait propager les erreurs de validation", async () => {
-      const invalidData = [
-        {
-          id: 1,
-          name: "Valid Resource",
-          status: "active",
-          createdAt: "2023-01-01",
-        },
-        { id: "invalid", name: 123, status: true }, // Données invalides
-      ];
-
-      const mockResponse: MutationResponse<any> = {
-        data: invalidData,
+    it("devrait gérer le cas où aucun élément n'est créé ou mis à jour", async () => {
+      const mockResponse: MutationResponse = {
+        created: [],
+        updated: [],
       };
 
       mockRequest.mockResolvedValueOnce(mockResponse);
+
+      // Mock pour la méthode getResourcesByIds
+      const mockGetResources = vi.fn().mockResolvedValue([]);
+      mutation.getResourcesByIds = mockGetResources;
 
       const mutateRequest: MutationRequest<TestAttributes, TestRelations> = {
         mutate: [{ operation: "create", attributes: { name: "Test" } }],
       };
 
-      await expect(mutation.mutate(mutateRequest)).rejects.toThrow(
-        "Type validation failed",
-      );
-      expect(console.error).toHaveBeenCalled();
+      const result = await mutation.mutate(mutateRequest);
+
+      expect(mockGetResources).toHaveBeenCalledWith([]);
+      expect(result).toEqual([]);
     });
   });
 
@@ -763,9 +802,12 @@ describe("Mutation avec Zod", () => {
 
       // Configurer les mocks pour simuler plusieurs appels
       mockRequest
-        .mockResolvedValueOnce({ data: [createdResource] }) // Pour mutate
+        .mockResolvedValueOnce({ created: [1], updated: [] }) // Pour mutate
         .mockResolvedValueOnce(actionResponse) // Pour executeAction
         .mockResolvedValueOnce({ data: [deletedResource], meta: {} }); // Pour delete
+
+      // Mock pour getResourcesByIds
+      mutation.getResourcesByIds = vi.fn().mockResolvedValue([createdResource]);
 
       // Exécuter une séquence d'opérations avec la nouvelle structure de types
       const mutateResult = await mutation.mutate<TestAttributes, TestRelations>(
@@ -786,7 +828,7 @@ describe("Mutation avec Zod", () => {
       });
 
       // Vérifier les résultats
-      expect(mutateResult.data[0].id).toBe(1);
+      expect(mutateResult.created).toBe(1);
       expect(actionResult.data.impacted).toBe(1);
       expect(deleteResult.data[0].status).toBe("deleted");
       expect(mockRequest).toHaveBeenCalledTimes(3);

@@ -304,7 +304,7 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -335,7 +335,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -355,8 +355,9 @@ export declare interface MutationRequest<TAttributes, TRelations> {
     mutate: Array<MutationOperation<TAttributes, TRelations>>;
 }
 
-export declare interface MutationResponse<TModel> {
-    data: Array<TModel>;
+export declare interface MutationResponse {
+    created: Array<string | number>;
+    updated: Array<string | number>;
 }
 
 export declare interface NestedFilterCriteria {

@@ -11,7 +11,7 @@ export interface IMutation<T> {
   mutate<TAttributes, TRelations>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
     options?: Partial<RequestConfig>
-  ): Promise<MutationResponse<T>>;
+  ): Promise<MutationResponse>;
 
   executeAction(
     actionRequest: ActionRequest,

@@ -274,7 +274,7 @@ class R {
     });
   }
   async mutate(t, e) {
-    const s = await this.http.request(
+    return await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
@@ -282,10 +282,6 @@ class R {
       },
       e
     );
-    return {
-      ...s,
-      data: this.validateData(s.data)
-    };
   }
   executeAction(t, e = {}) {
     return this.http.request(

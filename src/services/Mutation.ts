@@ -34,8 +34,8 @@ export abstract class Mutation<T> implements IMutation<T> {
     (
       mutateRequest: MutationRequest<TAttributes, TRelations>,
       options?: Partial<RequestConfig>
-    ): Promise<MutationResponse<T>> {
-    const response = await this.http.request<MutationResponse<T>>(
+    ): Promise<MutationResponse> {
+    const response = await this.http.request<MutationResponse>(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
@@ -44,10 +44,7 @@ export abstract class Mutation<T> implements IMutation<T> {
       options,
     );
 
-    return {
-      ...response,
-      data: this.validateData(response.data),
-    };
+    return response;
   }
 
   public executeAction(
