@@ -42,7 +42,6 @@ export type {
   MutationResponse,
   ModelAttributes,
   CreateMutationData,
-  RecursiveRelationsMap,
   UpdateMutationData,
   UpdateRelationOperation,
   RelationOperationType,
