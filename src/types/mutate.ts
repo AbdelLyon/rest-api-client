@@ -63,7 +63,7 @@ export type RelationOperation<T> =
 // Interface pour les données de mutation
 export interface CreateMutationData<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > {
   attributes: TAttributes;
   relations?: {
@@ -73,7 +73,7 @@ export interface CreateMutationData<
 
 export interface UpdateMutationData<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > {
   attributes: TAttributes;
   relations?: {
@@ -84,14 +84,14 @@ export interface UpdateMutationData<
 // Opérations de mutation
 export interface CreateMutationOperation<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > extends CreateMutationData<TAttributes, TRelations> {
   operation: "create";
 };
 
 export interface UpdateMutationOperation<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > extends UpdateMutationData<TAttributes, TRelations> {
   operation: "update";
   key: string | number;
@@ -99,13 +99,13 @@ export interface UpdateMutationOperation<
 
 export type MutationOperation<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
 // La requête de mutation
 export interface MutationRequest<
   TAttributes,
-  TRelations extends Record<string, unknown>
+  TRelations
 > {
   mutate: Array<MutationOperation<TAttributes, TRelations>>;
 };

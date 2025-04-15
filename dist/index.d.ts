@@ -90,14 +90,14 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-export declare interface CreateMutationData<TAttributes, TRelations extends Record<string, unknown>> {
+export declare interface CreateMutationData<TAttributes, TRelations> {
     attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]: TRelations[K];
     };
 }
 
-export declare interface CreateMutationOperation<TAttributes, TRelations extends Record<string, unknown>> extends CreateMutationData<TAttributes, TRelations> {
+export declare interface CreateMutationOperation<TAttributes, TRelations> extends CreateMutationData<TAttributes, TRelations> {
     operation: "create";
 }
 
@@ -307,7 +307,7 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate<TAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -338,16 +338,16 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate<TAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-export declare type MutationOperation<TAttributes, TRelations extends Record<string, unknown>> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
+export declare type MutationOperation<TAttributes, TRelations> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
-export declare interface MutationRequest<TAttributes, TRelations extends Record<string, unknown>> {
+export declare interface MutationRequest<TAttributes, TRelations> {
     mutate: Array<MutationOperation<TAttributes, TRelations>>;
 }
 
@@ -476,14 +476,14 @@ export declare interface ToggleRelationOperation<T> {
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateMutationData<TAttributes, TRelations extends Record<string, unknown>> {
+export declare interface UpdateMutationData<TAttributes, TRelations> {
     attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]: TRelations[K];
     };
 }
 
-export declare interface UpdateMutationOperation<TAttributes, TRelations extends Record<string, unknown>> extends UpdateMutationData<TAttributes, TRelations> {
+export declare interface UpdateMutationOperation<TAttributes, TRelations> extends UpdateMutationData<TAttributes, TRelations> {
     operation: "update";
     key: string | number;
 }

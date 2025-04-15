@@ -30,10 +30,7 @@ export abstract class Mutation<T> implements IMutation<T> {
     });
   }
 
-  public async mutate<
-    TAttributes,
-    TRelations extends Record<string, unknown>
-  >
+  public async mutate<TAttributes, TRelations>
     (
       mutateRequest: MutationRequest<TAttributes, TRelations>,
       options?: Partial<RequestConfig>

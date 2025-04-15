@@ -8,9 +8,7 @@ import type { DeleteRequest, DeleteResponse } from '@/types/delete';
 
 export interface IMutation<T> {
 
-  mutate<TAttributes,
-    TRelations extends Record<string, unknown>
-  >(
+  mutate<TAttributes, TRelations>(
     mutateRequest: MutationRequest<TAttributes, TRelations>,
     options?: Partial<RequestConfig>
   ): Promise<MutationResponse<T>>;
