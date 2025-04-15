@@ -32,7 +32,6 @@ export type {
 
 export type {
   AttachRelationOperation,
-  CreateRelationOperation,
   RelationOperation,
   CreateMutationOperation,
   DetachRelationOperation,
@@ -43,7 +42,6 @@ export type {
   ModelAttributes,
   CreateMutationData,
   UpdateMutationData,
-  UpdateRelationOperation,
   RelationOperationType,
   ToggleRelationOperation,
   UpdateMutationOperation,
