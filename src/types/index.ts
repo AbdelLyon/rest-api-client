@@ -31,16 +31,16 @@ export type {
 } from "@/types/search";
 
 export type {
-  AttachRelationOperation,
-  RelationOperation,
+  AttachRelationDefinition,
+  RelationDefinition,
   CreateMutationOperation,
-  DetachRelationOperation,
-  SyncRelationOperation,
+  DetachRelationDefinition,
+  SyncRelationDefinition,
   MutationOperation,
   MutationRequest,
   MutationResponse,
-  RelationOperationType,
-  ToggleRelationOperation,
+  RelationDefinitionType,
+  ToggleRelationDefinition,
   UpdateMutationOperation,
 
 } from "@/types/mutate";

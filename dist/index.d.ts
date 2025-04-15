@@ -45,7 +45,7 @@ export declare interface ApiErrorSource {
     response?: Response;
 }
 
-export declare interface AttachRelationOperation extends BaseRelationOperation {
+export declare interface AttachRelationDefinition extends BaseRelationDefinition {
     operation: "attach";
     key: string | number;
 }
@@ -88,8 +88,8 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
-declare interface BaseRelationOperation {
-    operation: RelationOperationType;
+declare interface BaseRelationDefinition {
+    operation: RelationDefinitionType;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
@@ -98,7 +98,7 @@ export declare interface CreateMutationOperation<TAttributes, TRelations> extend
     operation: "create";
 }
 
-declare interface CreateRelationOperationBase<T> extends BaseRelationOperation {
+declare interface CreateRelationDefinitionBase<T> extends BaseRelationDefinition {
     operation: "create";
     attributes: T;
 }
@@ -114,7 +114,7 @@ export declare interface DeleteResponse<T> {
     };
 }
 
-export declare interface DetachRelationOperation extends BaseRelationOperation {
+export declare interface DetachRelationDefinition extends BaseRelationDefinition {
     operation: "detach";
     key: string | number;
 }
@@ -345,7 +345,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
 declare interface MutationData<TAttributes, TRelations, InCreateContext extends boolean> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: TRelations[K] extends RelationOperation<infer T, any> ? RelationOperation<T, InCreateContext> : never;
+        [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any> ? RelationDefinition<T, InCreateContext> : never;
     };
 }
 
@@ -394,6 +394,22 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
+export declare type RelationDefinition<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition<any, true>;
+    };
+}) | AttachRelationDefinition : (CreateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition<any, false>;
+    };
+}) | (UpdateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition<any, false>;
+    };
+}) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
+
+export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
+
 export declare interface RelationInclude {
     relation: string;
     filters?: Array<Filter>;
@@ -402,22 +418,6 @@ export declare interface RelationInclude {
     scopes?: Array<ScopeDefinition>;
     limit?: number;
 }
-
-export declare type RelationOperation<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationOperationBase<T> & {
-    relations?: {
-        [key: string]: RelationOperation<any, true>;
-    };
-}) | AttachRelationOperation : (CreateRelationOperationBase<T> & {
-    relations?: {
-        [key: string]: RelationOperation<any, false>;
-    };
-}) | (UpdateRelationOperationBase<T> & {
-    relations?: {
-        [key: string]: RelationOperation<any, false>;
-    };
-}) | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
-
-export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
 export declare interface RequestConfig extends RequestInit {
     url: string;
@@ -471,7 +471,7 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelationOperation<T> extends BaseRelationOperation {
+export declare interface SyncRelationDefinition<T> extends BaseRelationDefinition {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
@@ -483,7 +483,7 @@ export declare interface TextSearch {
     value: string;
 }
 
-export declare interface ToggleRelationOperation<T> extends BaseRelationOperation {
+export declare interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
     operation: "toggle";
     key: string | number;
     attributes?: T;
@@ -495,7 +495,7 @@ export declare interface UpdateMutationOperation<TAttributes, TRelations> extend
     key: string | number;
 }
 
-declare interface UpdateRelationOperationBase<T> extends BaseRelationOperation {
+declare interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition {
     operation: "update";
     key: string | number;
     attributes: T;
