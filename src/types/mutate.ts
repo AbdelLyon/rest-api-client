@@ -1,5 +1,3 @@
-// Type de base pour les attributs
-export type ModelAttributes = Record<string, unknown>;
 
 // Types d'opérations possibles
 export type RelationOperationType =
@@ -22,18 +20,18 @@ export interface DetachRelationOperation {
 }
 
 // Opérations avec attributs typés mais sans relations
-export interface CreateRelationOperationBase<T extends ModelAttributes> {
+export interface CreateRelationOperationBase<T> {
   operation: "create";
   attributes: T;
 }
 
-export interface UpdateRelationOperationBase<T extends ModelAttributes> {
+export interface UpdateRelationOperationBase<T> {
   operation: "update";
   key: string | number;
   attributes: T;
 }
 
-export interface SyncRelationOperation<T extends ModelAttributes> {
+export interface SyncRelationOperation<T> {
   operation: "sync";
   without_detaching?: boolean;
   key: string | number;
@@ -41,7 +39,7 @@ export interface SyncRelationOperation<T extends ModelAttributes> {
   pivot?: Record<string, string | number>;
 }
 
-export interface ToggleRelationOperation<T extends ModelAttributes> {
+export interface ToggleRelationOperation<T> {
   operation: "toggle";
   key: string | number;
   attributes?: T;
@@ -49,7 +47,7 @@ export interface ToggleRelationOperation<T extends ModelAttributes> {
 }
 
 // Union des opérations de base sans les relations
-export type RelationOperationBase<T extends ModelAttributes = ModelAttributes> =
+export type RelationOperationBase<T> =
   | CreateRelationOperationBase<T>
   | UpdateRelationOperationBase<T>
   | AttachRelationOperation
@@ -59,12 +57,12 @@ export type RelationOperationBase<T extends ModelAttributes = ModelAttributes> =
 
 // Type générique pour les opérations de relation
 // Peut être étendu avec des relations typées spécifiques
-export type RelationOperation<T extends ModelAttributes = ModelAttributes> =
+export type RelationOperation<T> =
   RelationOperationBase<T>;
 
 // Interface pour les données de mutation
 export interface CreateMutationData<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > {
   attributes: TAttributes;
@@ -74,7 +72,7 @@ export interface CreateMutationData<
 };
 
 export interface UpdateMutationData<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > {
   attributes: TAttributes;
@@ -85,14 +83,14 @@ export interface UpdateMutationData<
 
 // Opérations de mutation
 export interface CreateMutationOperation<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > extends CreateMutationData<TAttributes, TRelations> {
   operation: "create";
 };
 
 export interface UpdateMutationOperation<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > extends UpdateMutationData<TAttributes, TRelations> {
   operation: "update";
@@ -100,13 +98,13 @@ export interface UpdateMutationOperation<
 };
 
 export type MutationOperation<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
 // La requête de mutation
 export interface MutationRequest<
-  TAttributes extends ModelAttributes,
+  TAttributes,
   TRelations extends Record<string, unknown>
 > {
   mutate: Array<MutationOperation<TAttributes, TRelations>>;

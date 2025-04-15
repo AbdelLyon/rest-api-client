@@ -90,18 +90,18 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-export declare interface CreateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface CreateMutationData<TAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]: TRelations[K];
     };
 }
 
-export declare interface CreateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends CreateMutationData<TAttributes, TRelations> {
+export declare interface CreateMutationOperation<TAttributes, TRelations extends Record<string, unknown>> extends CreateMutationData<TAttributes, TRelations> {
     operation: "create";
 }
 
-declare interface CreateRelationOperationBase<T extends ModelAttributes> {
+declare interface CreateRelationOperationBase<T> {
     operation: "create";
     attributes: T;
 }
@@ -307,7 +307,7 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -332,24 +332,22 @@ export declare interface IQuery<T> {
 
 export declare type LogicalOperator = "and" | "or";
 
-export declare type ModelAttributes = Record<string, unknown>;
-
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
     protected pathname: string;
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
+    mutate<TAttributes, TRelations extends Record<string, unknown>>(mutateRequest: MutationRequest<TAttributes, TRelations>, options?: Partial<RequestConfig>): Promise<MutationResponse<T>>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-export declare type MutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
+export declare type MutationOperation<TAttributes, TRelations extends Record<string, unknown>> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
-export declare interface MutationRequest<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface MutationRequest<TAttributes, TRelations extends Record<string, unknown>> {
     mutate: Array<MutationOperation<TAttributes, TRelations>>;
 }
 
@@ -401,9 +399,9 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation<T extends ModelAttributes = ModelAttributes> = RelationOperationBase<T>;
+export declare type RelationOperation<T> = RelationOperationBase<T>;
 
-declare type RelationOperationBase<T extends ModelAttributes = ModelAttributes> = CreateRelationOperationBase<T> | UpdateRelationOperationBase<T> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
+declare type RelationOperationBase<T> = CreateRelationOperationBase<T> | UpdateRelationOperationBase<T> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
@@ -459,7 +457,7 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelationOperation<T extends ModelAttributes> {
+export declare interface SyncRelationOperation<T> {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
@@ -471,26 +469,26 @@ export declare interface TextSearch {
     value: string;
 }
 
-export declare interface ToggleRelationOperation<T extends ModelAttributes> {
+export declare interface ToggleRelationOperation<T> {
     operation: "toggle";
     key: string | number;
     attributes?: T;
     pivot?: Record<string, string | number>;
 }
 
-export declare interface UpdateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface UpdateMutationData<TAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]: TRelations[K];
     };
 }
 
-export declare interface UpdateMutationOperation<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> extends UpdateMutationData<TAttributes, TRelations> {
+export declare interface UpdateMutationOperation<TAttributes, TRelations extends Record<string, unknown>> extends UpdateMutationData<TAttributes, TRelations> {
     operation: "update";
     key: string | number;
 }
 
-declare interface UpdateRelationOperationBase<T extends ModelAttributes> {
+declare interface UpdateRelationOperationBase<T> {
     operation: "update";
     key: string | number;
     attributes: T;

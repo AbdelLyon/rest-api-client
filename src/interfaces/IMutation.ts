@@ -1,14 +1,14 @@
 import {
 } from "@/types";
 import { RequestConfig } from "@/types/common";
-import type { ModelAttributes, MutationRequest, MutationResponse } from '@/types/mutate';
+import type { MutationRequest, MutationResponse } from '@/types/mutate';
 import type { ActionRequest, ActionResponse } from '@/types/action';
 import type { DeleteRequest, DeleteResponse } from '@/types/delete';
 
 
 export interface IMutation<T> {
 
-  mutate<TAttributes extends ModelAttributes,
+  mutate<TAttributes,
     TRelations extends Record<string, unknown>
   >(
     mutateRequest: MutationRequest<TAttributes, TRelations>,

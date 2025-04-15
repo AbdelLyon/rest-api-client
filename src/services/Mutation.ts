@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { DeleteRequest, DeleteResponse } from "@/types/delete";
 import type { ActionRequest, ActionResponse } from "@/types/action";
-import type { ModelAttributes, MutationRequest, MutationResponse } from "@/types/mutate";
+import type { MutationRequest, MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
 
@@ -31,7 +31,7 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate<
-    TAttributes extends ModelAttributes,
+    TAttributes,
     TRelations extends Record<string, unknown>
   >
     (

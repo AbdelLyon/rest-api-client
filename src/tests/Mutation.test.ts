@@ -16,7 +16,6 @@ import type {
   DeleteResponse,
   ActionRequest,
   ActionResponse,
-  ModelAttributes,
 } from "../types";
 import { HttpClient, Mutation } from "@/services";
 
@@ -32,7 +31,7 @@ const TestResourceSchema = z.object({
 type TestResource = z.infer<typeof TestResourceSchema>;
 
 // Interfaces d'attributs compatibles avec ModelAttributes
-interface TestAttributes extends ModelAttributes {
+interface TestAttributes {
   name?: string;
   status?: string;
   description?: string;
