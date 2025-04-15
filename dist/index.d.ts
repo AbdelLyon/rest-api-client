@@ -93,7 +93,7 @@ export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 export declare interface CreateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: RelationOperation<any> | Array<RelationOperation<any>>;
+        [K in keyof TRelations]: RelationOperation<ModelAttributes> | RelationOperation<ModelAttributes>[];
     };
 }
 
@@ -101,16 +101,10 @@ export declare interface CreateMutationOperation<TAttributes extends ModelAttrib
     operation: "create";
 }
 
-export declare interface CreateRelationOperation<TAttributes extends ModelAttributes> extends CreateRelationOperationBase<TAttributes> {
-    relations?: {
-        [key: string]: RelationOperation<any> | Array<RelationOperation<any>>;
-    };
-}
-
-declare interface CreateRelationOperationBase<TAttributes extends ModelAttributes> {
+export declare interface CreateRelationOperation<T extends ModelAttributes = ModelAttributes> {
     operation: "create";
-    attributes: TAttributes;
-    relations?: Record<string, unknown>;
+    attributes: T;
+    relations?: RelationsMap;
 }
 
 export declare interface DeleteRequest {
@@ -408,9 +402,13 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes> = CreateRelationOperation<TAttributes> | UpdateRelationOperation<TAttributes> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TAttributes> | ToggleRelationOperation<TAttributes>;
+export declare type RelationOperation<T extends ModelAttributes = ModelAttributes> = CreateRelationOperation<T> | UpdateRelationOperation<T> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<T> | ToggleRelationOperation<T>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
+
+declare type RelationsMap<T extends ModelAttributes = ModelAttributes> = {
+    [key: string]: RelationOperation<T> | RelationOperation<T>[];
+};
 
 export declare interface RequestConfig extends RequestInit {
     url: string;
@@ -464,11 +462,11 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-export declare interface SyncRelationOperation<TAttributes extends ModelAttributes> {
+export declare interface SyncRelationOperation<T extends ModelAttributes = ModelAttributes> {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number;
-    attributes?: TAttributes;
+    attributes?: T;
     pivot?: Record<string, string | number>;
 }
 
@@ -476,17 +474,17 @@ export declare interface TextSearch {
     value: string;
 }
 
-export declare interface ToggleRelationOperation<TAttributes extends ModelAttributes> {
+export declare interface ToggleRelationOperation<T extends ModelAttributes = ModelAttributes> {
     operation: "toggle";
     key: string | number;
-    attributes?: TAttributes;
+    attributes?: T;
     pivot?: Record<string, string | number>;
 }
 
 export declare interface UpdateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: RelationOperation<any> | Array<RelationOperation<any>>;
+        [K in keyof TRelations]: RelationOperation<ModelAttributes> | RelationOperation<ModelAttributes>[];
     };
 }
 
@@ -495,17 +493,11 @@ export declare interface UpdateMutationOperation<TAttributes extends ModelAttrib
     key: string | number;
 }
 
-export declare interface UpdateRelationOperation<TAttributes extends ModelAttributes> extends UpdateRelationOperationBase<TAttributes> {
-    relations?: {
-        [key: string]: RelationOperation<any> | Array<RelationOperation<any>>;
-    };
-}
-
-declare interface UpdateRelationOperationBase<TAttributes extends ModelAttributes> {
+export declare interface UpdateRelationOperation<T extends ModelAttributes = ModelAttributes> {
     operation: "update";
     key: string | number;
-    attributes: TAttributes;
-    relations?: Record<string, unknown>;
+    attributes: T;
+    relations?: RelationsMap;
 }
 
 export { }
