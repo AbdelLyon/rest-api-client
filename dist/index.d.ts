@@ -90,10 +90,10 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-declare interface CreateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface CreateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
+        [K in keyof TRelations]: RelationOperation<ModelAttributes> | Array<RelationOperation<ModelAttributes>>;
     };
 }
 
@@ -101,14 +101,10 @@ export declare interface CreateMutationOperation<TAttributes extends ModelAttrib
     operation: "create";
 }
 
-export declare interface CreateRelationOperation<TAttributes extends ModelAttributes = ModelAttributes> {
+export declare interface CreateRelationOperation<TAttributes extends ModelAttributes> {
     operation: "create";
     attributes: TAttributes;
-    relations?: CreateRelationsMap;
-}
-
-declare interface CreateRelationsMap {
-    [key: string]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
+    relations?: RecursiveRelationsMap<ModelAttributes>;
 }
 
 export declare interface DeleteRequest {
@@ -397,10 +393,9 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
-export declare interface RelationDefinition<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
-    attributes: TAttributes;
-    relations?: TRelations;
-}
+export declare type RecursiveRelationsMap<T extends ModelAttributes> = {
+    [key: string]: RelationOperation<T> | Array<RelationOperation<T>>;
+};
 
 export declare interface RelationInclude {
     relation: string;
@@ -411,7 +406,7 @@ export declare interface RelationInclude {
     limit?: number;
 }
 
-export declare type RelationOperation = CreateRelationOperation | UpdateRelationOperation | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<ModelAttributes> | ToggleRelationOperation<ModelAttributes>;
+export declare type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes> = CreateRelationOperation<TAttributes> | UpdateRelationOperation<TAttributes> | AttachRelationOperation | DetachRelationOperation | SyncRelationOperation<TAttributes> | ToggleRelationOperation<TAttributes>;
 
 export declare type RelationOperationType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
@@ -486,10 +481,10 @@ export declare interface ToggleRelationOperation<TAttributes extends ModelAttrib
     pivot?: Record<string, string | number>;
 }
 
-declare interface UpdateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
+export declare interface UpdateMutationData<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
     attributes: TAttributes;
     relations?: {
-        [K in keyof TRelations]: RelationOperation | Array<RelationOperation>;
+        [K in keyof TRelations]: RelationOperation<ModelAttributes> | Array<RelationOperation<ModelAttributes>>;
     };
 }
 
@@ -498,15 +493,11 @@ export declare interface UpdateMutationOperation<TAttributes extends ModelAttrib
     key: string | number;
 }
 
-declare interface UpdateRelationOperation<TAttributes extends ModelAttributes = ModelAttributes> {
+export declare interface UpdateRelationOperation<TAttributes extends ModelAttributes> {
     operation: "update";
     key: string | number;
     attributes: TAttributes;
-    relations?: UpdateRelationsMap;
-}
-
-declare interface UpdateRelationsMap {
-    [key: string]: RelationOperation | Array<RelationOperation>;
+    relations?: RecursiveRelationsMap<ModelAttributes>;
 }
 
 export { }

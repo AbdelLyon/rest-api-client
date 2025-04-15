@@ -17,7 +17,6 @@ import type {
   ActionRequest,
   ActionResponse,
   ModelAttributes,
-  RelationDefinition,
 } from "../types";
 import { HttpClient, Mutation } from "@/services";
 
@@ -40,26 +39,26 @@ interface TestAttributes extends ModelAttributes {
   [key: string]: unknown;
 }
 
-interface CategoryAttributes extends ModelAttributes {
-  id: number;
-  name: string;
-  [key: string]: unknown;
-}
+// interface CategoryAttributes extends ModelAttributes {
+//   id: number;
+//   name: string;
+//   [key: string]: unknown;
+// }
 
-interface TagAttributes extends ModelAttributes {
-  id: number;
-  name: string;
-  [key: string]: unknown;
-}
+// interface TagAttributes extends ModelAttributes {
+//   id: number;
+//   name: string;
+//   [key: string]: unknown;
+// }
 
-// Relations imbriquées compatibles avec la structure récursive
-type CategoryRelations = Record<string, unknown>;
-type TagRelations = Record<string, unknown>;
+// // Relations imbriquées compatibles avec la structure récursive
+// type CategoryRelations = Record<string, unknown>;
+// type TagRelations = Record<string, unknown>;
 
 // Définition des relations pour le test
 interface TestRelations extends Record<string, unknown> {
-  categories: RelationDefinition<CategoryAttributes, CategoryRelations>;
-  tags: RelationDefinition<TagAttributes, TagRelations>;
+  // categories: RelationDefinition<CategoryAttributes, CategoryRelations>;
+  // tags: RelationDefinition<TagAttributes, TagRelations>;
 }
 
 // Classe concrète pour tester la classe abstraite Mutation

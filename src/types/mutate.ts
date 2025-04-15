@@ -1,12 +1,6 @@
 // Type de base pour les attributs
 export type ModelAttributes = Record<string, unknown>;
 
-// Définition de relation simplifiée
-export interface RelationDefinition<TAttributes extends ModelAttributes, TRelations extends Record<string, unknown>> {
-  attributes: TAttributes;
-  relations?: TRelations;
-}
-
 // Types d'opérations possibles
 export type RelationOperationType =
   | "create"
@@ -42,63 +36,54 @@ export interface ToggleRelationOperation<TAttributes extends ModelAttributes> {
   pivot?: Record<string, string | number>;
 }
 
-// Relations pour opérations de création
-export interface CreateRelationsMap {
-  [key: string]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
-}
-
-// Relations pour opérations de mise à jour
-export interface UpdateRelationsMap {
-  [key: string]: RelationOperation | Array<RelationOperation>;
-}
-
-// Opération de création avec contraintes sur les relations
-export interface CreateRelationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes
-> {
-  operation: "create";
-  attributes: TAttributes;
-  relations?: CreateRelationsMap; // Limité aux opérations de création/attachement
+// Définir un type récursif pour les maps de relations
+// Utilisation de Partial rend toutes les propriétés optionnelles
+export type RecursiveRelationsMap<T extends ModelAttributes> = {
+  [key: string]: RelationOperation<T> | Array<RelationOperation<T>>;
 };
 
-// Opération de mise à jour avec toutes les opérations possibles
-export interface UpdateRelationOperation<
-  TAttributes extends ModelAttributes = ModelAttributes
-> {
+// Opération générique avec générique pour les attributs
+export interface CreateRelationOperation<TAttributes extends ModelAttributes> {
+  operation: "create";
+  attributes: TAttributes;
+  relations?: RecursiveRelationsMap<ModelAttributes>;
+}
+
+export interface UpdateRelationOperation<TAttributes extends ModelAttributes> {
   operation: "update";
   key: string | number;
   attributes: TAttributes;
-  relations?: UpdateRelationsMap; // Permet toutes les opérations
-};
+  relations?: RecursiveRelationsMap<ModelAttributes>;
+}
 
-// Union de toutes les opérations
-export type RelationOperation =
-  | CreateRelationOperation
-  | UpdateRelationOperation
+// Union de toutes les opérations avec préservation du type générique
+export type RelationOperation<TAttributes extends ModelAttributes = ModelAttributes> =
+  | CreateRelationOperation<TAttributes>
+  | UpdateRelationOperation<TAttributes>
   | AttachRelationOperation
   | DetachRelationOperation
-  | SyncRelationOperation<ModelAttributes>
-  | ToggleRelationOperation<ModelAttributes>;
+  | SyncRelationOperation<TAttributes>
+  | ToggleRelationOperation<TAttributes>;
 
-// Données pour une opération de mutation de création
+
+// Données pour une opération de mutation
 export interface CreateMutationData<
   TAttributes extends ModelAttributes,
   TRelations extends Record<string, unknown>
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]: CreateRelationOperation | AttachRelationOperation | Array<CreateRelationOperation | AttachRelationOperation>;
+    [K in keyof TRelations]: RelationOperation<ModelAttributes> | Array<RelationOperation<ModelAttributes>>;
   };
 }
 
-// Données pour une opération de mutation de mise à jour
 export interface UpdateMutationData<
   TAttributes extends ModelAttributes,
   TRelations extends Record<string, unknown>
 > {
   attributes: TAttributes;
   relations?: {
-    [K in keyof TRelations]: RelationOperation | Array<RelationOperation>;
+    [K in keyof TRelations]: RelationOperation<ModelAttributes> | Array<RelationOperation<ModelAttributes>>;
   };
 }
 
@@ -130,6 +115,7 @@ export interface MutationRequest<
 > {
   mutate: Array<MutationOperation<TAttributes, TRelations>>;
 };
+
 
 export interface MutationResponse<TModel> {
   data: Array<TModel>;
