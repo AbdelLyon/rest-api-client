@@ -94,8 +94,13 @@ declare interface BaseRelationDefinition {
 
 declare class Builder<TModel> {
     private static instance;
-    private mutate;
-    static createBuilder<T>(): Builder<T>;
+    private operations;
+    private parent;
+    static createBuilder<T>(parent?: MutationService<T>): Builder<T>;
+    /**
+     * Exécute la mutation en délégant au service parent
+     */
+    mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
     createEntity<T extends Record<string, any>>(attributes: T): this;
     updateEntity<T extends Record<string, any>>(key: string | number, attributes: T): this;
     /**
@@ -105,14 +110,14 @@ declare class Builder<TModel> {
     createRelation<T>(attributes: T): T & {
         operation: "create";
         attributes: T;
-        relations?: Record<string, any>;
+        relations?: Record<string, RelationDefinition_2>;
         __relationDefinition?: true;
     };
     updateRelation<T>(key: string | number, attributes: T): T & {
         operation: "update";
         key: string | number;
         attributes: T;
-        relations?: Record<string, any>;
+        relations?: Record<string, RelationDefinition_2>;
         __relationDefinition?: true;
     };
     attach(key: string | number): AttachRelationDefinition;
@@ -394,6 +399,10 @@ export declare interface MutationResponse {
     updated: Array<string | number>;
 }
 
+declare interface MutationService<T> {
+    mutate(operations: Array<MutationOperation<ExtractModelAttributes<T>>>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+}
+
 export declare interface NestedFilterCriteria {
     nested: Array<FilterCriteria>;
 }
@@ -442,6 +451,17 @@ export declare type RelationDefinition<T, InCreateContext extends boolean = fals
         [key: string]: RelationDefinition<any, false>;
     };
 }) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
+
+declare type RelationDefinition_2<T = unknown> = {
+    operation: "create";
+    attributes: T;
+    relations?: Record<string, RelationDefinition_2>;
+} | {
+    operation: "update";
+    key: string | number;
+    attributes: T;
+    relations?: Record<string, RelationDefinition_2>;
+} | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
