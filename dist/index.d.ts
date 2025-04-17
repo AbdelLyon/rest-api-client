@@ -120,13 +120,13 @@ declare class Builder<TModel> {
     /**
      * Crée une nouvelle instance du Builder
      */
-    static createBuilder<T>(): Builder<T>;
+    createBuilder<T>(): Builder<T>;
     /**
      * Ajoute une opération de création à la requête
      * @param attributes Attributs de l'objet à créer
      * @param relations Relations à associer à l'objet créé
      */
-    create(attributes: ExtractModelAttributes<TModel>, relations?: Record<string, any>): this;
+    createEntity(attributes: ExtractModelAttributes<TModel>, relations?: Record<string, any>): this;
     /**
      * Ajoute une opération de mise à jour à la requête
      * @param key ID de l'objet à mettre à jour

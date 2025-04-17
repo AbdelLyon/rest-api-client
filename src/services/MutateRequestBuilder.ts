@@ -116,7 +116,7 @@ export class Builder<TModel> {
    /**
     * Crée une nouvelle instance du Builder
     */
-   public static createBuilder<T>(): Builder<T> {
+   public createBuilder<T>(): Builder<T> {
       return new Builder<T>();
    }
 
@@ -125,7 +125,7 @@ export class Builder<TModel> {
     * @param attributes Attributs de l'objet à créer
     * @param relations Relations à associer à l'objet créé
     */
-   public create(
+   public createEntity(
       attributes: ExtractModelAttributes<TModel>,
       relations?: Record<string, any>
    ): this {

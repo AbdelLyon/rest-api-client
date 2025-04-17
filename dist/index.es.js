@@ -271,7 +271,7 @@ const h = class h {
   /**
    * Crée une nouvelle instance du Builder
    */
-  static createBuilder() {
+  createBuilder() {
     return new h();
   }
   /**
@@ -279,7 +279,7 @@ const h = class h {
    * @param attributes Attributs de l'objet à créer
    * @param relations Relations à associer à l'objet créé
    */
-  create(t, e) {
+  createEntity(t, e) {
     const s = {
       operation: "create",
       attributes: t,
