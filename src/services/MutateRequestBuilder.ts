@@ -173,7 +173,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "create"
     */
-   public static createRelation<T>(
+   public createRelation<T>(
       attributes: T,
       nestedRelations?: Record<string, any>
    ): CreateRelationDefinitionBase<T> & {
@@ -189,7 +189,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "update"
     */
-   public static updateRelation<T>(
+   public updateRelation<T>(
       key: string | number,
       attributes: T,
       nestedRelations?: Record<string, any>
@@ -207,7 +207,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "attach"
     */
-   public static attach(key: string | number): AttachRelationDefinition {
+   public attach(key: string | number): AttachRelationDefinition {
       return {
          operation: "attach",
          key
@@ -217,7 +217,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "detach"
     */
-   public static detach(key: string | number): DetachRelationDefinition {
+   public detach(key: string | number): DetachRelationDefinition {
       return {
          operation: "detach",
          key
@@ -227,7 +227,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "sync"
     */
-   public static sync<T>(
+   public sync<T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>,
@@ -245,7 +245,7 @@ export class Builder<TModel> {
    /**
     * Crée une définition de relation de type "toggle"
     */
-   public static toggle<T>(
+   public toggle<T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>

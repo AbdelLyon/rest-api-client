@@ -11,9 +11,9 @@ class d extends Error {
     a(this, "originalError");
     a(this, "requestConfig");
     if (this.name = "ApiRequestError", this.originalError = e, this.requestConfig = s, e && typeof e == "object") {
-      const i = e;
-      if ("status" in i && (this.status = i.status), "statusText" in i && (this.statusText = i.statusText), "data" in i && (this.data = i.data), "response" in i && i.response instanceof Response) {
-        const o = i.response;
+      const n = e;
+      if ("status" in n && (this.status = n.status), "statusText" in n && (this.statusText = n.statusText), "data" in n && (this.data = n.data), "response" in n && n.response instanceof Response) {
+        const o = n.response;
         this.status = o.status, this.statusText = o.statusText;
       }
     }
@@ -36,7 +36,7 @@ class d extends Error {
     return this.status === void 0 || this.status === 0;
   }
 }
-const n = class n {
+const i = class i {
   constructor() {
     a(this, "baseURL");
     a(this, "defaultTimeout");
@@ -49,19 +49,19 @@ const n = class n {
    * Initialise une nouvelle instance HTTP avec intercepteurs
    */
   static init(t) {
-    var r, i;
+    var r, n;
     const { httpConfig: e, instanceName: s } = t;
-    if (n.requestInterceptors = [
-      ...n.requestInterceptors,
+    if (i.requestInterceptors = [
+      ...i.requestInterceptors,
       ...((r = e.interceptors) == null ? void 0 : r.request) ?? []
-    ], (i = e.interceptors) != null && i.response && (n.responseSuccessInterceptors = [
-      ...n.responseSuccessInterceptors,
+    ], (n = e.interceptors) != null && n.response && (i.responseSuccessInterceptors = [
+      ...i.responseSuccessInterceptors,
       ...e.interceptors.response.success ?? []
-    ], n.responseErrorInterceptors = [
-      ...n.responseErrorInterceptors,
+    ], i.responseErrorInterceptors = [
+      ...i.responseErrorInterceptors,
       ...e.interceptors.response.error ?? []
     ]), !this.instances.has(s)) {
-      const o = new n();
+      const o = new i();
       o.configure(e), this.instances.set(s, o), this.instances.size === 1 && (this.defaultInstanceName = s);
     }
     return this.instances.get(s);
@@ -126,7 +126,7 @@ const n = class n {
    * Configure les intercepteurs par défaut
    */
   setupDefaultInterceptors() {
-    n.responseErrorInterceptors.length === 0 && n.responseErrorInterceptors.push((t) => (this.logError(t), Promise.reject(t)));
+    i.responseErrorInterceptors.length === 0 && i.responseErrorInterceptors.push((t) => (this.logError(t), Promise.reject(t)));
   }
   /**
    * Journalise les erreurs de requête
@@ -147,7 +147,7 @@ const n = class n {
    */
   async applyRequestInterceptors(t) {
     let e = { ...t };
-    for (const s of n.requestInterceptors)
+    for (const s of i.requestInterceptors)
       e = await Promise.resolve(s(e));
     return e;
   }
@@ -156,7 +156,7 @@ const n = class n {
    */
   async applyResponseSuccessInterceptors(t) {
     let e = t;
-    for (const s of n.responseSuccessInterceptors)
+    for (const s of i.responseSuccessInterceptors)
       e = await Promise.resolve(s(e.clone()));
     return e;
   }
@@ -165,7 +165,7 @@ const n = class n {
    */
   async applyResponseErrorInterceptors(t) {
     let e = t;
-    for (const s of n.responseErrorInterceptors)
+    for (const s of i.responseErrorInterceptors)
       try {
         if (e = await Promise.resolve(s(e)), !(e instanceof Error))
           return e;
@@ -187,11 +187,11 @@ const n = class n {
    */
   async fetchWithRetry(t, e, s = 1) {
     try {
-      const { timeout: r = this.defaultTimeout, params: i, data: o, ...u } = e;
+      const { timeout: r = this.defaultTimeout, params: n, data: o, ...u } = e;
       let w = t;
-      if (i && Object.keys(i).length > 0) {
+      if (n && Object.keys(n).length > 0) {
         const l = new URLSearchParams();
-        for (const [f, I] of Object.entries(i))
+        for (const [f, I] of Object.entries(n))
           l.append(f, I);
         w += `?${l.toString()}`;
       }
@@ -213,8 +213,8 @@ const n = class n {
       if (r instanceof DOMException && r.name === "AbortError")
         throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
       if (s < this.maxRetries && this.isRetryableError(0, e.method)) {
-        const i = Math.pow(2, s) * 100;
-        return await new Promise((o) => setTimeout(o, i)), this.fetchWithRetry(t, e, s + 1);
+        const n = Math.pow(2, s) * 100;
+        return await new Promise((o) => setTimeout(o, n)), this.fetchWithRetry(t, e, s + 1);
       }
       throw r;
     }
@@ -235,27 +235,27 @@ const n = class n {
           ...t.headers || {},
           ...e.headers || {}
         }
-      }, i = new URL(
+      }, n = new URL(
         r.url.startsWith("http") ? r.url : `${this.baseURL}${r.url.startsWith("/") ? "" : "/"}${r.url}`
       ).toString(), o = await this.applyRequestInterceptors({
         ...r,
-        url: i
+        url: n
       });
-      let u = await this.fetchWithRetry(i, o);
+      let u = await this.fetchWithRetry(n, o);
       return u = await this.applyResponseSuccessInterceptors(u), (s = u.headers.get("content-type")) != null && s.includes("application/json") ? await u.json() : await u.text();
     } catch (r) {
-      const i = r instanceof d ? r : new d(r, {
+      const n = r instanceof d ? r : new d(r, {
         ...t,
         ...e,
         url: t.url
       });
-      return this.applyResponseErrorInterceptors(i);
+      return this.applyResponseErrorInterceptors(n);
     }
   }
 };
-a(n, "instances", /* @__PURE__ */ new Map()), a(n, "defaultInstanceName"), // Intercepteurs statiques
-a(n, "requestInterceptors", []), a(n, "responseSuccessInterceptors", []), a(n, "responseErrorInterceptors", []);
-let p = n;
+a(i, "instances", /* @__PURE__ */ new Map()), a(i, "defaultInstanceName"), // Intercepteurs statiques
+a(i, "requestInterceptors", []), a(i, "responseSuccessInterceptors", []), a(i, "responseErrorInterceptors", []);
+let p = i;
 const h = class h {
   constructor() {
     a(this, "request", {
@@ -312,7 +312,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "create"
    */
-  static createRelation(t, e) {
+  createRelation(t, e) {
     return {
       operation: "create",
       attributes: t,
@@ -322,7 +322,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "update"
    */
-  static updateRelation(t, e, s) {
+  updateRelation(t, e, s) {
     return {
       operation: "update",
       key: t,
@@ -333,7 +333,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "attach"
    */
-  static attach(t) {
+  attach(t) {
     return {
       operation: "attach",
       key: t
@@ -342,7 +342,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "detach"
    */
-  static detach(t) {
+  detach(t) {
     return {
       operation: "detach",
       key: t
@@ -351,7 +351,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "sync"
    */
-  static sync(t, e, s, r) {
+  sync(t, e, s, r) {
     return {
       operation: "sync",
       key: t,
@@ -363,7 +363,7 @@ const h = class h {
   /**
    * Crée une définition de relation de type "toggle"
    */
-  static toggle(t, e, s) {
+  toggle(t, e, s) {
     return {
       operation: "toggle",
       key: t,
@@ -539,8 +539,8 @@ class b {
         method: "POST",
         url: `${this.pathname}/login`,
         data: t
-      }, e), r = this.userSchema.parse(s.user), i = this.tokenSchema ? this.tokenSchema.parse(s.tokens) : s.tokens;
-      return { user: r, tokens: i };
+      }, e), r = this.userSchema.parse(s.user), n = this.tokenSchema ? this.tokenSchema.parse(s.tokens) : s.tokens;
+      return { user: r, tokens: n };
     } catch (s) {
       throw console.error("Login error", s), s;
     }

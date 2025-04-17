@@ -141,31 +141,31 @@ declare class Builder<TModel> {
     /**
      * Crée une définition de relation de type "create"
      */
-    static createRelation<T>(attributes: T, nestedRelations?: Record<string, any>): CreateRelationDefinitionBase_2<T> & {
+    createRelation<T>(attributes: T, nestedRelations?: Record<string, any>): CreateRelationDefinitionBase_2<T> & {
         relations?: typeof nestedRelations;
     };
     /**
      * Crée une définition de relation de type "update"
      */
-    static updateRelation<T>(key: string | number, attributes: T, nestedRelations?: Record<string, any>): UpdateRelationDefinitionBase_2<T> & {
+    updateRelation<T>(key: string | number, attributes: T, nestedRelations?: Record<string, any>): UpdateRelationDefinitionBase_2<T> & {
         relations?: typeof nestedRelations;
     };
     /**
      * Crée une définition de relation de type "attach"
      */
-    static attach(key: string | number): AttachRelationDefinition_2;
+    attach(key: string | number): AttachRelationDefinition_2;
     /**
      * Crée une définition de relation de type "detach"
      */
-    static detach(key: string | number): DetachRelationDefinition_2;
+    detach(key: string | number): DetachRelationDefinition_2;
     /**
      * Crée une définition de relation de type "sync"
      */
-    static sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition_2<T>;
+    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition_2<T>;
     /**
      * Crée une définition de relation de type "toggle"
      */
-    static toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition_2<T>;
+    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition_2<T>;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
