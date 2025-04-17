@@ -37,7 +37,6 @@ export type {
   DetachRelationDefinition,
   SyncRelationDefinition,
   MutationOperation,
-  MutationRequest,
   MutationResponse,
   RelationDefinitionType,
   ToggleRelationDefinition,

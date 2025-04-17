@@ -85,17 +85,14 @@ export interface UpdateMutationOperation<
   key: string | number;
 };
 
-export type MutationOperation<
-  TAttributes,
-  TRelations
-> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
+export interface MutationOperation<TAttributes> {
+  operation: "create" | "update";
+  attributes: TAttributes;
+  relations?: Record<string, any>;
+  key?: string | number;
+}
 
-export interface MutationRequest<
-  TAttributes,
-  TRelations
-> {
-  mutate: Array<MutationOperation<TAttributes, TRelations>>;
-};
+
 
 export interface MutationResponse {
   created: Array<string | number>;
