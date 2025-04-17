@@ -73,88 +73,118 @@ interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
 }
 
 /**
- * Définit les types de relations autorisés selon le contexte (création ou mise à jour)
+ * Définition des relations possibles en contexte de création
  */
-type RelationDefinition<T, InCreateContext extends boolean = false> =
-   InCreateContext extends true
-   ? (CreateRelationDefinitionBase<T> & {
-      relations?: { [key: string]: RelationDefinition<any, true>; };
-   }) | AttachRelationDefinition
-   : (CreateRelationDefinitionBase<T> & {
-      relations?: { [key: string]: RelationDefinition<any, false>; };
-   }) | (UpdateRelationDefinitionBase<T> & {
-      relations?: { [key: string]: RelationDefinition<any, false>; };
-   }) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
+type CreateRelationDefinitions<T> =
+   | (CreateRelationDefinitionBase<T> & { relations?: Record<string, CreateRelationDefinitions<any>>; })
+   | AttachRelationDefinition;
 
 /**
- * Interface pour les données de mutation incluant les attributs et les relations
+ * Définition des relations possibles en contexte de mise à jour
  */
-interface MutationData<
-   TAttributes,
-   TRelations,
-   InCreateContext extends boolean
-> {
+type UpdateRelationDefinitions<T> =
+   | (CreateRelationDefinitionBase<T> & { relations?: Record<string, UpdateRelationDefinitions<any>>; })
+   | (UpdateRelationDefinitionBase<T> & { relations?: Record<string, UpdateRelationDefinitions<any>>; })
+   | AttachRelationDefinition
+   | DetachRelationDefinition
+   | SyncRelationDefinition<T>
+   | ToggleRelationDefinition<T>;
+
+/**
+ * Interface générique pour une opération de mutation
+ */
+interface MutationOperation<TAttributes> {
+   operation: "create" | "update";
    attributes: TAttributes;
-   relations?: {
-      [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any>
-      ? RelationDefinition<T, InCreateContext>
-      : never
-   };
-};
+   relations?: Record<string, any>;
+   key?: string | number;
+}
 
 /**
- * Interface pour une opération de création
+ * Builder intelligent pour les requêtes de mutation et les opérations de relation
  */
-interface CreateMutationOperation<
-   TAttributes,
-   TRelations
-> extends MutationData<TAttributes, TRelations, true> {
-   operation: "create";
-};
+export class Builder<TModel> {
+   private static instance: Builder<unknown>;
+   private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
+   private inUpdateContext: boolean = false;
 
-/**
- * Interface pour une opération de mise à jour
- */
-interface UpdateMutationOperation<
-   TAttributes,
-   TRelations
-> extends MutationData<TAttributes, TRelations, false> {
-   operation: "update";
-   key: string | number;
-};
-
-/**
- * Type pour une opération de mutation (création ou mise à jour)
- */
-type MutationOperation<
-   TAttributes,
-   TRelations
-> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
-
-/**
- * Interface pour la requête de mutation
- */
-interface MutationRequest<
-   TAttributes,
-   TRelations
-> {
-   mutate: Array<MutationOperation<TAttributes, TRelations>>;
-};
-
-/**
- * Interface pour la réponse de mutation
- */
-
-/**
- * Helper pour la génération des définitions de relations en fonction du contexte
- */
-export class RelationBuilder {
    /**
-    * Crée une définition de relation de type "create" (valide dans tous les contextes)
+    * Récupère l'instance unique du Builder (pattern Singleton)
     */
-   public static createRelation<T>(
+   public static getInstance<T>(): Builder<T> {
+      if (!Builder.instance) {
+         Builder.instance = new Builder<T>();
+      }
+      return Builder.instance as Builder<T>;
+   }
+
+   /**
+    * Crée une nouvelle instance du Builder
+    */
+   public static createBuilder<T>(): Builder<T> {
+      return new Builder<T>();
+   }
+
+   /**
+    * Ajoute une opération de création à la requête
+    * @param attributes Attributs de l'objet à créer
+    * @param relations Relations à associer à l'objet créé (seulement create et attach autorisés)
+    */
+   public createEntity<R extends Record<string, CreateRelationDefinitions<any>>>(
+      attributes: ExtractModelAttributes<TModel>,
+      relations?: R
+   ): this {
+      this.inUpdateContext = false;
+
+      const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
+         operation: "create",
+         attributes,
+         ...(relations && { relations })
+      };
+
+      this.mutate.push(operation);
+      return this;
+   }
+
+   /**
+    * Ajoute une opération de mise à jour à la requête
+    * @param key ID de l'objet à mettre à jour
+    * @param attributes Attributs à mettre à jour
+    * @param relations Relations à mettre à jour (toutes les opérations autorisées)
+    */
+   public update<R extends Record<string, UpdateRelationDefinitions<any>>>(
+      key: string | number,
+      attributes: Partial<ExtractModelAttributes<TModel>>,
+      relations?: R
+   ): this {
+      this.inUpdateContext = true;
+
+      const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
+         operation: "update",
+         key,
+         attributes: attributes as ExtractModelAttributes<TModel>,
+         ...(relations && { relations })
+      };
+
+      this.mutate.push(operation);
+      return this;
+   }
+
+   /**
+    * Construit et retourne l'objet de requête final
+    */
+   public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
+      return this.mutate;
+   }
+
+   // Méthodes pour la construction des opérations de relation
+
+   /**
+    * Crée une définition de relation de type "create" (disponible dans tous les contextes)
+    */
+   public createRelation<T>(
       attributes: T,
-      nestedRelations?: Record<string, any>
+      nestedRelations?: Record<string, CreateRelationDefinitions<any> | UpdateRelationDefinitions<any>>
    ): CreateRelationDefinitionBase<T> & {
       relations?: typeof nestedRelations;
    } {
@@ -166,15 +196,31 @@ export class RelationBuilder {
    }
 
    /**
-    * Crée une définition de relation de type "update" (valide uniquement en contexte de mise à jour)
+    * Méthode d'aide pour créer une opération de création (pour les relations imbriquées)
     */
-   public static updateRelation<T>(
+   public addCreateOperation<T>(
+      attributes: T,
+      nestedRelations?: Record<string, CreateRelationDefinitions<any> | UpdateRelationDefinitions<any>>
+   ): CreateRelationDefinitionBase<T> & {
+      relations?: typeof nestedRelations;
+   } {
+      return this.createRelation(attributes, nestedRelations);
+   }
+
+   /**
+    * Crée une définition de relation de type "update" (seulement disponible en contexte de mise à jour)
+    */
+   public updateRelation<T>(
       key: string | number,
       attributes: T,
-      nestedRelations?: Record<string, any>
+      nestedRelations?: Record<string, UpdateRelationDefinitions<any>>
    ): UpdateRelationDefinitionBase<T> & {
       relations?: typeof nestedRelations;
    } {
+      if (!this.inUpdateContext) {
+         throw new Error("Cannot update a relation in create context. The entity doesn't exist yet.");
+      }
+
       return {
          operation: "update",
          key,
@@ -184,9 +230,9 @@ export class RelationBuilder {
    }
 
    /**
-    * Crée une définition de relation de type "attach" (valide dans tous les contextes)
+    * Crée une définition de relation de type "attach" (disponible dans tous les contextes)
     */
-   public static attach(key: string | number): AttachRelationDefinition {
+   public attach(key: string | number): AttachRelationDefinition {
       return {
          operation: "attach",
          key
@@ -194,9 +240,13 @@ export class RelationBuilder {
    }
 
    /**
-    * Crée une définition de relation de type "detach" (valide uniquement en contexte de mise à jour)
+    * Crée une définition de relation de type "detach" (seulement disponible en contexte de mise à jour)
     */
-   public static detach(key: string | number): DetachRelationDefinition {
+   public detach(key: string | number): DetachRelationDefinition {
+      if (!this.inUpdateContext) {
+         throw new Error("Cannot detach a relation in create context. The entity doesn't exist yet.");
+      }
+
       return {
          operation: "detach",
          key
@@ -204,14 +254,18 @@ export class RelationBuilder {
    }
 
    /**
-    * Crée une définition de relation de type "sync" (valide uniquement en contexte de mise à jour)
+    * Crée une définition de relation de type "sync" (seulement disponible en contexte de mise à jour)
     */
-   public static sync<T>(
+   public sync<T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>,
       withoutDetaching?: boolean
    ): SyncRelationDefinition<T> {
+      if (!this.inUpdateContext) {
+         throw new Error("Cannot sync relations in create context. The entity doesn't exist yet.");
+      }
+
       return {
          operation: "sync",
          key,
@@ -222,13 +276,17 @@ export class RelationBuilder {
    }
 
    /**
-    * Crée une définition de relation de type "toggle" (valide uniquement en contexte de mise à jour)
+    * Crée une définition de relation de type "toggle" (seulement disponible en contexte de mise à jour)
     */
-   public static toggle<T>(
+   public toggle<T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>
    ): ToggleRelationDefinition<T> {
+      if (!this.inUpdateContext) {
+         throw new Error("Cannot toggle relations in create context. The entity doesn't exist yet.");
+      }
+
       return {
          operation: "toggle",
          key,
@@ -238,136 +296,3 @@ export class RelationBuilder {
    }
 }
 
-/**
- * Builder pour la création d'entités avec des relations
- */
-export class CreateEntityBuilder<TModel, TRelations = any> {
-   private attributes: ExtractModelAttributes<TModel>;
-   private relations?: Record<string, RelationDefinition<any, true>>;
-
-   constructor (attributes: ExtractModelAttributes<TModel>) {
-      this.attributes = attributes;
-   }
-
-   /**
-    * Ajoute une relation à l'entité
-    * Dans le contexte de création, seules les opérations "create" et "attach" sont autorisées
-    */
-   public withRelation<K extends keyof TRelations, T>(
-      relationName: K & string,
-      relation: RelationDefinition<T, true>
-   ): this {
-      if (!this.relations) {
-         this.relations = {};
-      }
-      this.relations[relationName] = relation;
-      return this;
-   }
-
-   /**
-    * Finalise la construction de l'opération de création
-    */
-   public build(): CreateMutationOperation<ExtractModelAttributes<TModel>, TRelations> {
-      return {
-         operation: "create",
-         attributes: this.attributes,
-         ...(this.relations && { relations: this.relations as any })
-      };
-   }
-}
-
-/**
- * Builder pour la mise à jour d'entités avec des relations
- */
-export class UpdateEntityBuilder<TModel, TRelations = any> {
-   private key: string | number;
-   private attributes: Partial<ExtractModelAttributes<TModel>>;
-   private relations?: Record<string, RelationDefinition<any, false>>;
-
-   constructor (key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>) {
-      this.key = key;
-      this.attributes = attributes;
-   }
-
-   /**
-    * Ajoute une relation à l'entité
-    * Dans le contexte de mise à jour, toutes les opérations sont autorisées
-    */
-   public withRelation<K extends keyof TRelations, T>(
-      relationName: K & string,
-      relation: RelationDefinition<T, false>
-   ): this {
-      if (!this.relations) {
-         this.relations = {};
-      }
-      this.relations[relationName] = relation;
-      return this;
-   }
-
-   /**
-    * Finalise la construction de l'opération de mise à jour
-    */
-   public build(): UpdateMutationOperation<Partial<ExtractModelAttributes<TModel>>, TRelations> {
-      return {
-         operation: "update",
-         key: this.key,
-         attributes: this.attributes,
-         ...(this.relations && { relations: this.relations as any })
-      };
-   }
-}
-
-/**
- * Builder principal pour les opérations de mutation
- */
-export class Builder<TModel, TRelations = any> {
-   private mutate: Array<MutationOperation<ExtractModelAttributes<TModel> | Partial<ExtractModelAttributes<TModel>>, TRelations>> = [];
-
-   /**
-    * Crée une nouvelle instance du Builder
-    */
-   public static createBuilder<T, R = any>(): Builder<T, R> {
-      return new Builder<T, R>();
-   }
-
-   /**
-    * Commence la construction d'une opération de création
-    */
-   public createEntity(attributes: ExtractModelAttributes<TModel>): CreateEntityBuilder<TModel, TRelations> {
-      const builder = new CreateEntityBuilder<TModel, TRelations>(attributes);
-      this.mutate.push(builder.build());
-      return builder;
-   }
-
-   /**
-    * Commence la construction d'une opération de mise à jour
-    */
-   public updateEntity(key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>): UpdateEntityBuilder<TModel, TRelations> {
-      const builder = new UpdateEntityBuilder<TModel, TRelations>(key, attributes);
-      this.mutate.push(builder.build());
-      return builder;
-   }
-
-   /**
-    * Ajoute une opération de création déjà construite
-    */
-   public addCreateOperation(operation: CreateMutationOperation<ExtractModelAttributes<TModel>, TRelations>): this {
-      this.mutate.push(operation);
-      return this;
-   }
-
-   /**
-    * Ajoute une opération de mise à jour déjà construite
-    */
-   public addUpdateOperation(operation: UpdateMutationOperation<Partial<ExtractModelAttributes<TModel>>, TRelations>): this {
-      this.mutate.push(operation);
-      return this;
-   }
-
-   /**
-    * Construit et retourne l'objet de requête final
-    */
-   public build(): MutationRequest<ExtractModelAttributes<TModel> | Partial<ExtractModelAttributes<TModel>>, TRelations> {
-      return { mutate: this.mutate };
-   }
-}
