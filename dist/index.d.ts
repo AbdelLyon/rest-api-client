@@ -103,9 +103,15 @@ declare class Builder<TModel> {
      */
     getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
     /**
+     * Contrôle comment cet objet est sérialisé en JSON
+     */
+    toJSON(): {
+        mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+    };
+    /**
      * Exécute la mutation en délégant au service parent
      */
-    mutateNow(options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    exec(options?: Partial<RequestConfig>): Promise<MutationResponse>;
     createEntity<T extends Record<string, unknown>>(attributes: T): this;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
     /**

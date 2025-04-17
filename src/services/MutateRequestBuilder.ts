@@ -50,9 +50,16 @@ export class Builder<TModel> {
    }
 
    /**
+    * Contrôle comment cet objet est sérialisé en JSON
+    */
+   public toJSON(): { mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>>; } {
+      return { mutate: this.mutate };
+   }
+
+   /**
     * Exécute la mutation en délégant au service parent
     */
-   public mutateNow(options?: Partial<RequestConfig>): Promise<MutationResponse> {
+   public exec(options?: Partial<RequestConfig>): Promise<MutationResponse> {
       if (!this.mutationService) {
          throw new Error("Aucun service de mutation n'a été associé à ce builder");
       }
@@ -246,4 +253,6 @@ export class Builder<TModel> {
    public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
       return this.mutate;
    }
+
+
 }

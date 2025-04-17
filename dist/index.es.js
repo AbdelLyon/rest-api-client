@@ -273,9 +273,15 @@ const u = class u {
     return this.mutate;
   }
   /**
+   * Contrôle comment cet objet est sérialisé en JSON
+   */
+  toJSON() {
+    return { mutate: this.mutate };
+  }
+  /**
    * Exécute la mutation en délégant au service parent
    */
-  mutateNow(t) {
+  exec(t) {
     if (!this.mutationService)
       throw new Error("Aucun service de mutation n'a été associé à ce builder");
     return this.mutationService.mutate(this, t);
