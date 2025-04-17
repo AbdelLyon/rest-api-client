@@ -86,23 +86,15 @@ interface MutationOperation<TAttributes> {
    key?: string | number;
 }
 
-/**
- * Interface pour une requête de mutation
- */
-interface MutationRequest<TAttributes> {
-   mutate: Array<MutationOperation<TAttributes>>;
-}
+
 
 
 /**
  * Builder intelligent pour les requêtes de mutation et les opérations de relation
  */
 export class Builder<TModel> {
-   private static instance: Builder<any>;
-   private request: MutationRequest<ExtractModelAttributes<TModel>> = {
-      mutate: []
-   };
-
+   private static instance: Builder<unknown>;
+   private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
    /**
     * Récupère l'instance unique du Builder (pattern Singleton)
     */
@@ -135,7 +127,7 @@ export class Builder<TModel> {
          ...(relations && { relations })
       };
 
-      this.request.mutate.push(operation);
+      this.mutate.push(operation);
       return this;
    }
 
@@ -157,15 +149,15 @@ export class Builder<TModel> {
          ...(relations && { relations })
       };
 
-      this.request.mutate.push(operation);
+      this.mutate.push(operation);
       return this;
    }
 
    /**
     * Construit et retourne l'objet de requête final
     */
-   public build(): MutationRequest<ExtractModelAttributes<TModel>> {
-      return this.request;
+   public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
+      return this.mutate;
    }
 
    // Méthodes de l'ancienne classe RelationBuilder

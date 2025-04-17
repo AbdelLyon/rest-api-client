@@ -112,7 +112,7 @@ declare interface BaseRelationDefinition_2 {
  */
 declare class Builder<TModel> {
     private static instance;
-    private request;
+    private mutate;
     /**
      * Récupère l'instance unique du Builder (pattern Singleton)
      */
@@ -137,7 +137,7 @@ declare class Builder<TModel> {
     /**
      * Construit et retourne l'objet de requête final
      */
-    build(): MutationRequest_2<ExtractModelAttributes<TModel>>;
+    build(): Array<MutationOperation_2<ExtractModelAttributes<TModel>>>;
     /**
      * Crée une définition de relation de type "create"
      */
@@ -461,13 +461,6 @@ declare interface MutationOperation_2<TAttributes> {
 
 export declare interface MutationRequest<TAttributes, TRelations> {
     mutate: Array<MutationOperation<TAttributes, TRelations>>;
-}
-
-/**
- * Interface pour une requête de mutation
- */
-declare interface MutationRequest_2<TAttributes> {
-    mutate: Array<MutationOperation_2<TAttributes>>;
 }
 
 export declare interface MutationResponse {

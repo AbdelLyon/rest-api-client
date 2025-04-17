@@ -258,9 +258,7 @@ a(i, "requestInterceptors", []), a(i, "responseSuccessInterceptors", []), a(i, "
 let p = i;
 const h = class h {
   constructor() {
-    a(this, "request", {
-      mutate: []
-    });
+    a(this, "mutate", []);
   }
   /**
    * Récupère l'instance unique du Builder (pattern Singleton)
@@ -285,7 +283,7 @@ const h = class h {
       attributes: t,
       ...e && { relations: e }
     };
-    return this.request.mutate.push(s), this;
+    return this.mutate.push(s), this;
   }
   /**
    * Ajoute une opération de mise à jour à la requête
@@ -300,13 +298,13 @@ const h = class h {
       attributes: e,
       ...s && { relations: s }
     };
-    return this.request.mutate.push(r), this;
+    return this.mutate.push(r), this;
   }
   /**
    * Construit et retourne l'objet de requête final
    */
   build() {
-    return this.request;
+    return this.mutate;
   }
   // Méthodes de l'ancienne classe RelationBuilder
   /**
