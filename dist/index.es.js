@@ -258,24 +258,24 @@ i(c, "requestInterceptors", []), i(c, "responseSuccessInterceptors", []), i(c, "
 let l = c;
 const u = class u {
   constructor() {
-    i(this, "operations", []);
+    i(this, "mutate", []);
     i(this, "mutationService", null);
   }
   static createBuilder(t) {
     u.instance || (u.instance = new u());
     const e = u.instance;
-    return t && (e.mutationService = t), e.operations = [], e;
+    return t && (e.mutationService = t), e.mutate = [], e;
   }
   /**
    * Permet à la classe Mutation d'accéder aux opérations
    */
   getOperations() {
-    return this.operations;
+    return this.mutate;
   }
   /**
    * Exécute la mutation en délégant au service parent
    */
-  mutate(t) {
+  mutateNow(t) {
     if (!this.mutationService)
       throw new Error("Aucun service de mutation n'a été associé à ce builder");
     return this.mutationService.mutate(this, t);
@@ -289,7 +289,7 @@ const u = class u {
       attributes: e,
       ...Object.keys(s).length > 0 && { relations: s }
     };
-    return this.operations.push(r), this;
+    return this.mutate.push(r), this;
   }
   updateEntity(t, e) {
     const s = {}, r = {};
@@ -301,7 +301,7 @@ const u = class u {
       attributes: s,
       ...Object.keys(r).length > 0 && { relations: r }
     };
-    return this.operations.push(a), this;
+    return this.mutate.push(a), this;
   }
   /**
    * Crée une relation avec des attributs donnés.
@@ -380,7 +380,7 @@ const u = class u {
     };
   }
   build() {
-    return this.operations;
+    return this.mutate;
   }
 };
 i(u, "instance");

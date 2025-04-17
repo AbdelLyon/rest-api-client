@@ -17,7 +17,7 @@ type RelationDefinition<T = unknown> =
 
 export class Builder<TModel> {
    private static instance: Builder<unknown>;
-   private operations: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
+   private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
    private mutationService: IMutation<TModel> | null = null;
 
    private constructor () {
@@ -37,7 +37,7 @@ export class Builder<TModel> {
       }
 
       // Réinitialiser les opérations pour chaque nouvelle instance
-      builder.operations = [];
+      builder.mutate = [];
 
       return builder;
    }
@@ -46,13 +46,13 @@ export class Builder<TModel> {
     * Permet à la classe Mutation d'accéder aux opérations
     */
    public getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
-      return this.operations;
+      return this.mutate;
    }
 
    /**
     * Exécute la mutation en délégant au service parent
     */
-   public mutate(options?: Partial<RequestConfig>): Promise<MutationResponse> {
+   public mutateNow(options?: Partial<RequestConfig>): Promise<MutationResponse> {
       if (!this.mutationService) {
          throw new Error("Aucun service de mutation n'a été associé à ce builder");
       }
@@ -84,7 +84,7 @@ export class Builder<TModel> {
          ...(Object.keys(relations).length > 0 && { relations })
       };
 
-      this.operations.push(operation);
+      this.mutate.push(operation);
       return this;
    }
 
@@ -111,7 +111,7 @@ export class Builder<TModel> {
          ...(Object.keys(relations).length > 0 && { relations })
       };
 
-      this.operations.push(operation);
+      this.mutate.push(operation);
       return this;
    }
 
@@ -244,6 +244,6 @@ export class Builder<TModel> {
    }
 
    public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
-      return this.operations;
+      return this.mutate;
    }
 }

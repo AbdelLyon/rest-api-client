@@ -94,7 +94,7 @@ declare interface BaseRelationDefinition {
 
 declare class Builder<TModel> {
     private static instance;
-    private operations;
+    private mutate;
     private mutationService;
     private constructor();
     static createBuilder<T>(mutationService?: IMutation<T>): Builder<T>;
@@ -105,7 +105,7 @@ declare class Builder<TModel> {
     /**
      * Exécute la mutation en délégant au service parent
      */
-    mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutateNow(options?: Partial<RequestConfig>): Promise<MutationResponse>;
     createEntity<T extends Record<string, unknown>>(attributes: T): this;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
     /**
