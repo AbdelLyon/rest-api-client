@@ -95,23 +95,7 @@ declare interface BaseRelationDefinition {
 declare class Builder<TModel> {
     private static instance;
     private mutate;
-    private mutationService;
-    private constructor();
-    static createBuilder<T>(mutationService?: IMutation<T>): Builder<T>;
-    /**
-     * Permet à la classe Mutation d'accéder aux opérations
-     */
-    getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
-    /**
-     * Contrôle comment cet objet est sérialisé en JSON
-     */
-    toJSON(): {
-        mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>>;
-    };
-    /**
-     * Exécute la mutation en délégant au service parent
-     */
-    exec(options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    static createBuilder<T>(): Builder<T>;
     createEntity<T extends Record<string, unknown>>(attributes: T): this;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
     /**
@@ -463,11 +447,13 @@ declare type RelationDefinition_2<T = unknown> = {
     operation: "create";
     attributes: T;
     relations?: Record<string, RelationDefinition_2<unknown>>;
+    __relationDefinition?: true;
 } | {
     operation: "update";
     key: string | number;
     attributes: T;
     relations?: Record<string, RelationDefinition_2<unknown>>;
+    __relationDefinition?: true;
 } | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";

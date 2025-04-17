@@ -1,15 +1,10 @@
-import { } from "@/types";
 import { AttachRelationDefinition, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, MutationOperation } from "@/types/mutate";
-import type { RequestConfig } from "@/types/common";
-import type { MutationResponse } from "@/types/mutate";
-import { IMutation } from "@/interfaces";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
-// Type de relation
 type RelationDefinition<T = unknown> =
-   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; }
-   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; }
+   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; }
+   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; }
    | AttachRelationDefinition
    | DetachRelationDefinition
    | SyncRelationDefinition<T>
@@ -18,54 +13,12 @@ type RelationDefinition<T = unknown> =
 export class Builder<TModel> {
    private static instance: Builder<unknown>;
    private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
-   private mutationService: IMutation<TModel> | null = null;
 
-   private constructor () {
-      // Constructeur privé pour le pattern singleton
-   }
-
-   public static createBuilder<T>(mutationService?: IMutation<T>): Builder<T> {
+   public static createBuilder<T>(): Builder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
-
-      const builder = Builder.instance as Builder<T>;
-
-      // Si un service de mutation est fourni, l'enregistrer
-      if (mutationService) {
-         builder.mutationService = mutationService;
-      }
-
-      // Réinitialiser les opérations pour chaque nouvelle instance
-      builder.mutate = [];
-
-      return builder;
-   }
-
-   /**
-    * Permet à la classe Mutation d'accéder aux opérations
-    */
-   public getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
-      return this.mutate;
-   }
-
-   /**
-    * Contrôle comment cet objet est sérialisé en JSON
-    */
-   public toJSON(): { mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>>; } {
-      return { mutate: this.mutate };
-   }
-
-   /**
-    * Exécute la mutation en délégant au service parent
-    */
-   public exec(options?: Partial<RequestConfig>): Promise<MutationResponse> {
-      if (!this.mutationService) {
-         throw new Error("Aucun service de mutation n'a été associé à ce builder");
-      }
-
-      // On passe this (le builder) au service de mutation
-      return this.mutationService.mutate(this, options);
+      return Builder.instance as Builder<T>;
    }
 
    public createEntity<T extends Record<string, unknown>>(
@@ -253,6 +206,4 @@ export class Builder<TModel> {
    public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
       return this.mutate;
    }
-
-
 }
