@@ -16,7 +16,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
-    this.builder = Builder.createBuilder();
+    this.builder = Builder.createBuilder<T>(this);
 
     this.pathname = pathname;
     this.schema = schema;

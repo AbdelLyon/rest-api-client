@@ -95,14 +95,19 @@ declare interface BaseRelationDefinition {
 declare class Builder<TModel> {
     private static instance;
     private operations;
-    private parent;
-    static createBuilder<T>(parent?: MutationService<T>): Builder<T>;
+    private mutationService;
+    private constructor();
+    static createBuilder<T>(mutationService?: IMutation<T>): Builder<T>;
+    /**
+     * Permet à la classe Mutation d'accéder aux opérations
+     */
+    getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
     /**
      * Exécute la mutation en délégant au service parent
      */
     mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
-    createEntity<T extends Record<string, any>>(attributes: T): this;
-    updateEntity<T extends Record<string, any>>(key: string | number, attributes: T): this;
+    createEntity<T extends Record<string, unknown>>(attributes: T): this;
+    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
     /**
      * Crée une relation avec des attributs donnés.
      * Retourne un objet qui correspond au type T tout en étant une relation.
@@ -110,14 +115,14 @@ declare class Builder<TModel> {
     createRelation<T>(attributes: T): T & {
         operation: "create";
         attributes: T;
-        relations?: Record<string, RelationDefinition_2>;
+        relations?: Record<string, RelationDefinition_2<unknown>>;
         __relationDefinition?: true;
     };
     updateRelation<T>(key: string | number, attributes: T): T & {
         operation: "update";
         key: string | number;
         attributes: T;
-        relations?: Record<string, RelationDefinition_2>;
+        relations?: Record<string, RelationDefinition_2<unknown>>;
         __relationDefinition?: true;
     };
     attach(key: string | number): AttachRelationDefinition;
@@ -399,10 +404,6 @@ export declare interface MutationResponse {
     updated: Array<string | number>;
 }
 
-declare interface MutationService<T> {
-    mutate(operations: Array<MutationOperation<ExtractModelAttributes<T>>>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
-}
-
 export declare interface NestedFilterCriteria {
     nested: Array<FilterCriteria>;
 }
@@ -455,12 +456,12 @@ export declare type RelationDefinition<T, InCreateContext extends boolean = fals
 declare type RelationDefinition_2<T = unknown> = {
     operation: "create";
     attributes: T;
-    relations?: Record<string, RelationDefinition_2>;
+    relations?: Record<string, RelationDefinition_2<unknown>>;
 } | {
     operation: "update";
     key: string | number;
     attributes: T;
-    relations?: Record<string, RelationDefinition_2>;
+    relations?: Record<string, RelationDefinition_2<unknown>>;
 } | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";

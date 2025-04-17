@@ -2,64 +2,77 @@ import { } from "@/types";
 import { AttachRelationDefinition, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, MutationOperation } from "@/types/mutate";
 import type { RequestConfig } from "@/types/common";
 import type { MutationResponse } from "@/types/mutate";
+import { IMutation } from "@/interfaces";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
 // Type de relation
 type RelationDefinition<T = unknown> =
-   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition>; }
-   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition>; }
+   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; }
+   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; }
    | AttachRelationDefinition
    | DetachRelationDefinition
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-// Interface représentant la méthode mutate de la classe Mutation
-interface MutationService<T> {
-   mutate(operations: Array<MutationOperation<ExtractModelAttributes<T>>>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
-}
-
 export class Builder<TModel> {
    private static instance: Builder<unknown>;
    private operations: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
-   private parent: MutationService<TModel> | null = null;
+   private mutationService: IMutation<TModel> | null = null;
 
-   public static createBuilder<T>(parent?: MutationService<T>): Builder<T> {
+   private constructor () {
+      // Constructeur privé pour le pattern singleton
+   }
+
+   public static createBuilder<T>(mutationService?: IMutation<T>): Builder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
 
-      // Si un parent est fourni, l'enregistrer
-      if (parent) {
-         (Builder.instance as Builder<T>).parent = parent;
+      const builder = Builder.instance as Builder<T>;
+
+      // Si un service de mutation est fourni, l'enregistrer
+      if (mutationService) {
+         builder.mutationService = mutationService;
       }
 
-      return Builder.instance as Builder<T>;
+      // Réinitialiser les opérations pour chaque nouvelle instance
+      builder.operations = [];
+
+      return builder;
+   }
+
+   /**
+    * Permet à la classe Mutation d'accéder aux opérations
+    */
+   public getOperations(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
+      return this.operations;
    }
 
    /**
     * Exécute la mutation en délégant au service parent
     */
    public mutate(options?: Partial<RequestConfig>): Promise<MutationResponse> {
-      if (!this.parent) {
+      if (!this.mutationService) {
          throw new Error("Aucun service de mutation n'a été associé à ce builder");
       }
 
-      return this.parent.mutate(this.operations, options);
+      // On passe this (le builder) au service de mutation
+      return this.mutationService.mutate(this, options);
    }
 
-   public createEntity<T extends Record<string, any>>(
+   public createEntity<T extends Record<string, unknown>>(
       attributes: T
    ): this {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition> = {};
+      const relations: Record<string, RelationDefinition<unknown>> = {};
 
       // Parcourir tous les attributs pour identifier les relations
       for (const [key, value] of Object.entries(attributes)) {
          // Vérifier si l'attribut est une relation (a une propriété 'operation')
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[key] = value as RelationDefinition;
+            relations[key] = value as RelationDefinition<unknown>;
          } else {
             normalAttributes[key] = value;
          }
@@ -75,17 +88,17 @@ export class Builder<TModel> {
       return this;
    }
 
-   public updateEntity<T extends Record<string, any>>(
+   public updateEntity<T extends Record<string, unknown>>(
       key: string | number,
       attributes: T
    ): this {
       // Même logique que createEntity pour séparer les attributs normaux des relations
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition> = {};
+      const relations: Record<string, RelationDefinition<unknown>> = {};
 
       for (const [attrKey, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[attrKey] = value as RelationDefinition;
+            relations[attrKey] = value as RelationDefinition<unknown>;
          } else {
             normalAttributes[attrKey] = value;
          }
@@ -108,15 +121,15 @@ export class Builder<TModel> {
     */
    public createRelation<T>(
       attributes: T
-   ): T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition>; __relationDefinition?: true; } {
+   ): T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; } {
       // Séparer les attributs normaux des attributs de relation pour les relations imbriquées
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<string, RelationDefinition> = {};
+      const nestedRelations: Record<string, RelationDefinition<unknown>> = {};
 
       if (attributes && typeof attributes === 'object') {
          for (const [key, value] of Object.entries(attributes as Record<string, unknown>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[key] = value as RelationDefinition;
+               nestedRelations[key] = value as RelationDefinition<unknown>;
             } else {
                normalAttributes[key] = value;
             }
@@ -129,7 +142,7 @@ export class Builder<TModel> {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
          __relationDefinition: true
-      } as T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition>; __relationDefinition?: true; };
+      } as T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; };
 
       // Pour les propriétés de l'objet original, créer des getters qui renvoient les valeurs
       // depuis attributes pour que l'objet relation se comporte comme l'objet original
@@ -150,15 +163,15 @@ export class Builder<TModel> {
    public updateRelation<T>(
       key: string | number,
       attributes: T
-   ): T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition>; __relationDefinition?: true; } {
+   ): T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; } {
       // Même logique pour les relations imbriquées
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<string, RelationDefinition> = {};
+      const nestedRelations: Record<string, RelationDefinition<unknown>> = {};
 
       if (attributes && typeof attributes === 'object') {
          for (const [attrKey, value] of Object.entries(attributes as Record<string, unknown>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[attrKey] = value as RelationDefinition;
+               nestedRelations[attrKey] = value as RelationDefinition<unknown>;
             } else {
                normalAttributes[attrKey] = value;
             }
@@ -171,7 +184,7 @@ export class Builder<TModel> {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
          __relationDefinition: true
-      } as T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition>; __relationDefinition?: true; };
+      } as T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; };
 
       // Même approche avec les getters
       if (attributes && typeof attributes === 'object') {

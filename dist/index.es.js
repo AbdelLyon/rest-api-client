@@ -190,10 +190,10 @@ const c = class c {
       const { timeout: r = this.defaultTimeout, params: a, data: n, ...o } = e;
       let g = t;
       if (a && Object.keys(a).length > 0) {
-        const l = new URLSearchParams();
+        const p = new URLSearchParams();
         for (const [m, b] of Object.entries(a))
-          l.append(m, b);
-        g += `?${l.toString()}`;
+          p.append(m, b);
+        g += `?${p.toString()}`;
       }
       const w = new AbortController(), S = setTimeout(() => w.abort("Request timeout"), r);
       let E;
@@ -205,8 +205,8 @@ const c = class c {
         credentials: this.withCredentials ? "include" : "same-origin"
       });
       if (clearTimeout(S), !f.ok && s < this.maxRetries && this.isRetryableError(f.status, e.method)) {
-        const l = Math.pow(2, s) * 100;
-        return await new Promise((m) => setTimeout(m, l)), this.fetchWithRetry(t, e, s + 1);
+        const p = Math.pow(2, s) * 100;
+        return await new Promise((m) => setTimeout(m, p)), this.fetchWithRetry(t, e, s + 1);
       }
       return f;
     } catch (r) {
@@ -255,22 +255,30 @@ const c = class c {
 };
 i(c, "instances", /* @__PURE__ */ new Map()), i(c, "defaultInstanceName"), // Intercepteurs statiques
 i(c, "requestInterceptors", []), i(c, "responseSuccessInterceptors", []), i(c, "responseErrorInterceptors", []);
-let p = c;
+let l = c;
 const u = class u {
   constructor() {
     i(this, "operations", []);
-    i(this, "parent", null);
+    i(this, "mutationService", null);
   }
   static createBuilder(t) {
-    return u.instance || (u.instance = new u()), t && (u.instance.parent = t), u.instance;
+    u.instance || (u.instance = new u());
+    const e = u.instance;
+    return t && (e.mutationService = t), e.operations = [], e;
+  }
+  /**
+   * Permet à la classe Mutation d'accéder aux opérations
+   */
+  getOperations() {
+    return this.operations;
   }
   /**
    * Exécute la mutation en délégant au service parent
    */
   mutate(t) {
-    if (!this.parent)
+    if (!this.mutationService)
       throw new Error("Aucun service de mutation n'a été associé à ce builder");
-    return this.parent.mutate(this.operations, t);
+    return this.mutationService.mutate(this, t);
   }
   createEntity(t) {
     const e = {}, s = {};
@@ -383,7 +391,7 @@ class k {
     i(this, "builder");
     i(this, "pathname");
     i(this, "schema");
-    this.http = p.getInstance(), this.builder = y.createBuilder(), this.pathname = t, this.schema = e;
+    this.http = l.getInstance(), this.builder = y.createBuilder(this), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -458,12 +466,12 @@ class k {
     };
   }
 }
-class q {
+class O {
   constructor(t, e) {
     i(this, "http");
     i(this, "pathname");
     i(this, "schema");
-    this.http = p.getInstance(), this.pathname = t, this.schema = e;
+    this.http = l.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -506,7 +514,7 @@ class q {
     );
   }
 }
-class O {
+class q {
   constructor(t, e) {
     i(this, "http");
     i(this, "pathname");
@@ -514,7 +522,7 @@ class O {
     i(this, "credentialsSchema");
     i(this, "registerDataSchema");
     i(this, "tokenSchema");
-    this.http = p.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
+    this.http = l.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
   }
   /**
    * Inscription
@@ -592,9 +600,9 @@ class O {
   }
 }
 export {
-  O as Auth,
-  p as HttpClient,
+  q as Auth,
+  l as HttpClient,
   k as Mutation,
-  q as Query
+  O as Query
 };
 //# sourceMappingURL=index.es.js.map
