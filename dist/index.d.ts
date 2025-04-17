@@ -95,16 +95,11 @@ declare interface BaseRelationDefinition {
 declare class Builder<TModel> {
     private static instance;
     private mutate;
-    private hasCreatedEntity;
     static createBuilder<T>(): Builder<T>;
-    createEntity(attributes: ExtractModelAttributes<TModel>, relations?: Record<string, RelationDefinition_2>): this;
-    updateEntity(key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>, relations?: Record<string, RelationDefinition_2>): this;
-    createRelation<T>(attributes: T, nestedRelations?: Record<string, RelationDefinition_2>): CreateRelationDefinitionBase<T> & {
-        relations?: typeof nestedRelations;
-    };
-    updateRelation<T>(key: string | number, attributes: T, nestedRelations?: Record<string, RelationDefinition_2>): UpdateRelationDefinitionBase<T> & {
-        relations?: typeof nestedRelations;
-    };
+    createEntity<T extends Record<string, any>>(attributes: T): this;
+    updateEntity<T extends Record<string, any>>(key: string | number, attributes: T): this;
+    createRelation<T>(attributes: T): CreateRelationDefinitionBase<T>;
+    updateRelation<T>(key: string | number, attributes: T): UpdateRelationDefinitionBase<T>;
     attach(key: string | number): AttachRelationDefinition;
     detach(key: string | number): DetachRelationDefinition;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
@@ -432,8 +427,6 @@ export declare type RelationDefinition<T, InCreateContext extends boolean = fals
         [key: string]: RelationDefinition<any, false>;
     };
 }) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
-
-declare type RelationDefinition_2<T = unknown> = CreateRelationDefinitionBase<T> | UpdateRelationDefinitionBase<T> | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 

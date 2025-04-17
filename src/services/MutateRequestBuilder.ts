@@ -15,7 +15,6 @@ type RelationDefinition<T = unknown> =
 export class Builder<TModel> {
    private static instance: Builder<unknown>;
    private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
-   private hasCreatedEntity = false; // Flag pour suivre si createEntity a été appelé
 
    public static createBuilder<T>(): Builder<T> {
       if (!Builder.instance) {
@@ -24,31 +23,54 @@ export class Builder<TModel> {
       return Builder.instance as Builder<T>;
    }
 
-   public createEntity(
-      attributes: ExtractModelAttributes<TModel>,
-      relations?: Record<string, RelationDefinition>
+   public createEntity<T extends Record<string, any>>(
+      attributes: T
    ): this {
+      // Séparer les attributs normaux des attributs de relation
+      const normalAttributes: Record<string, any> = {};
+      const relations: Record<string, RelationDefinition> = {};
+
+      // Parcourir tous les attributs pour identifier les relations
+      for (const [key, value] of Object.entries(attributes)) {
+         // Vérifier si l'attribut est une relation (a une propriété 'operation')
+         if (value && typeof value === 'object' && 'operation' in value) {
+            relations[key] = value as RelationDefinition;
+         } else {
+            normalAttributes[key] = value;
+         }
+      }
+
       const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
          operation: "create",
-         attributes,
-         ...(relations && { relations })
+         attributes: normalAttributes as ExtractModelAttributes<TModel>,
+         ...(Object.keys(relations).length > 0 && { relations })
       };
 
       this.mutate.push(operation);
-      this.hasCreatedEntity = true; // Marquer qu'une entité a été créée
       return this;
    }
 
-   public updateEntity(
+   public updateEntity<T extends Record<string, any>>(
       key: string | number,
-      attributes: Partial<ExtractModelAttributes<TModel>>,
-      relations?: Record<string, RelationDefinition>
+      attributes: T
    ): this {
+      // Même logique que createEntity pour séparer les attributs normaux des relations
+      const normalAttributes: Record<string, any> = {};
+      const relations: Record<string, RelationDefinition> = {};
+
+      for (const [attrKey, value] of Object.entries(attributes)) {
+         if (value && typeof value === 'object' && 'operation' in value) {
+            relations[attrKey] = value as RelationDefinition;
+         } else {
+            normalAttributes[attrKey] = value;
+         }
+      }
+
       const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
          operation: "update",
          key,
-         attributes: attributes as ExtractModelAttributes<TModel>,
-         ...(relations && { relations })
+         attributes: normalAttributes as ExtractModelAttributes<TModel>,
+         ...(Object.keys(relations).length > 0 && { relations })
       };
 
       this.mutate.push(operation);
@@ -56,35 +78,52 @@ export class Builder<TModel> {
    }
 
    public createRelation<T>(
-      attributes: T,
-      nestedRelations?: Record<string, RelationDefinition>
-   ): CreateRelationDefinitionBase<T> & {
-      relations?: typeof nestedRelations;
-   } {
+      attributes: T
+   ): CreateRelationDefinitionBase<T> {
+      // Séparer les attributs normaux des attributs de relation pour les relations imbriquées
+      const normalAttributes: Record<string, any> = {};
+      const nestedRelations: Record<string, RelationDefinition> = {};
+
+      if (attributes && typeof attributes === 'object') {
+         for (const [key, value] of Object.entries(attributes as Record<string, any>)) {
+            if (value && typeof value === 'object' && 'operation' in value) {
+               nestedRelations[key] = value as RelationDefinition;
+            } else {
+               normalAttributes[key] = value;
+            }
+         }
+      }
+
       return {
          operation: "create",
-         attributes,
-         ...(nestedRelations && { relations: nestedRelations })
+         attributes: normalAttributes as T,
+         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations })
       };
    }
 
    public updateRelation<T>(
       key: string | number,
-      attributes: T,
-      nestedRelations?: Record<string, RelationDefinition>
-   ): UpdateRelationDefinitionBase<T> & {
-      relations?: typeof nestedRelations;
-   } {
-      // Empêcher la mise à jour d'une relation si une entité a été créée
-      if (this.hasCreatedEntity) {
-         throw new Error("Impossible de mettre à jour une relation après la création d'une entité");
+      attributes: T
+   ): UpdateRelationDefinitionBase<T> {
+      // Même logique pour les relations imbriquées
+      const normalAttributes: Record<string, any> = {};
+      const nestedRelations: Record<string, RelationDefinition> = {};
+
+      if (attributes && typeof attributes === 'object') {
+         for (const [attrKey, value] of Object.entries(attributes as Record<string, any>)) {
+            if (value && typeof value === 'object' && 'operation' in value) {
+               nestedRelations[attrKey] = value as RelationDefinition;
+            } else {
+               normalAttributes[attrKey] = value;
+            }
+         }
       }
 
       return {
          operation: "update",
          key,
-         attributes,
-         ...(nestedRelations && { relations: nestedRelations })
+         attributes: normalAttributes as T,
+         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations })
       };
    }
 
