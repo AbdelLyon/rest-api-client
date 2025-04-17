@@ -1,10 +1,3 @@
-/**
- * Modèle de base avec propriété ID
- */
-export interface BaseModel {
-   id: string;
-   [key: string]: any;
-}
 
 /**
  * Types d'opérations de relation

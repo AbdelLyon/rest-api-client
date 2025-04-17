@@ -9,7 +9,7 @@ import { Builder } from "./MutateRequestBuilder";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
-  protected builder: Builder<T>;
+  public builder: Builder<T>;
 
   protected pathname: string;
   protected schema: z.ZodType<T>;
