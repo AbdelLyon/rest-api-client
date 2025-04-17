@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { DeleteRequest, DeleteResponse } from "@/types/delete";
 import type { ActionRequest, ActionResponse } from "@/types/action";
-import type { MutationRequest, MutationResponse } from "@/types/mutate";
+import type { MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
 import { Builder } from "./MutateRequestBuilder";
@@ -35,9 +35,9 @@ export abstract class Mutation<T> implements IMutation<T> {
     });
   }
 
-  public async mutate<TAttributes, TRelations>
+  public async mutate
     (
-      mutateRequest: MutationRequest<TAttributes, TRelations>,
+      mutateRequest: Builder<T>,
       options?: Partial<RequestConfig>
     ): Promise<MutationResponse> {
     const response = await this.http.request<MutationResponse>(

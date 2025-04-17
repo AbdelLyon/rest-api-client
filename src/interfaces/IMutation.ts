@@ -1,15 +1,16 @@
 import {
 } from "@/types";
 import { RequestConfig } from "@/types/common";
-import type { MutationRequest, MutationResponse } from '@/types/mutate';
+import type { MutationResponse } from '@/types/mutate';
 import type { ActionRequest, ActionResponse } from '@/types/action';
 import type { DeleteRequest, DeleteResponse } from '@/types/delete';
+import { Builder } from "@/services/MutateRequestBuilder";
 
 
 export interface IMutation<T> {
 
-  mutate<TAttributes, TRelations>(
-    mutateRequest: MutationRequest<TAttributes, TRelations>,
+  mutate(
+    mutateRequest: Builder<T>,
     options?: Partial<RequestConfig>
   ): Promise<MutationResponse>;
 
