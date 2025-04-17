@@ -45,9 +45,15 @@ export declare interface ApiErrorSource {
     response?: Response;
 }
 
-declare type AttachContext = 'attach';
+export declare interface AttachRelationDefinition extends BaseRelationDefinition_2 {
+    operation: "attach";
+    key: string | number;
+}
 
-export declare interface AttachRelationDefinition extends BaseRelationDefinition {
+/**
+ * Interface pour une relation de type "attach"
+ */
+declare interface AttachRelationDefinition_2 extends BaseRelationDefinition {
     operation: "attach";
     key: string | number;
 }
@@ -90,69 +96,88 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
+/**
+ * Interface de base pour une définition de relation
+ */
 declare interface BaseRelationDefinition {
+    operation: RelationDefinitionType_2;
+}
+
+declare interface BaseRelationDefinition_2 {
     operation: RelationDefinitionType;
 }
 
-declare class Builder<TModel, TContext extends OperationContext = 'root'> {
-    private context;
+/**
+ * Builder principal pour les opérations de mutation
+ */
+declare class Builder<TModel, TRelations = any> {
     private mutate;
-    constructor(context?: TContext);
     /**
      * Crée une nouvelle instance du Builder
      */
-    static createBuilder<T>(): Builder<T, 'root'>;
+    static createBuilder<T, R = any>(): Builder<T, R>;
     /**
-     * Ajoute une opération de création à la requête
-     * Disponible seulement dans les contextes root ou create
+     * Commence la construction d'une opération de création
      */
-    createEntity(this: Builder<TModel, Extract<TContext, 'root' | 'create'>>, attributes: ExtractModelAttributes<TModel>, relations?: Record<string, any>): Builder<TModel, 'root'>;
+    createEntity(attributes: ExtractModelAttributes<TModel>): CreateEntityBuilder<TModel, TRelations>;
     /**
-     * Ajoute une opération de mise à jour à la requête
-     * Disponible seulement dans les contextes root ou update
+     * Commence la construction d'une opération de mise à jour
      */
-    update(this: Builder<TModel, Extract<TContext, 'root' | 'update'>>, key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>, relations?: Record<string, any>): Builder<TModel, 'root'>;
+    updateEntity(key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>): UpdateEntityBuilder<TModel, TRelations>;
+    /**
+     * Ajoute une opération de création déjà construite
+     */
+    addCreateOperation(operation: CreateMutationOperation_2<ExtractModelAttributes<TModel>, TRelations>): this;
+    /**
+     * Ajoute une opération de mise à jour déjà construite
+     */
+    addUpdateOperation(operation: UpdateMutationOperation_2<Partial<ExtractModelAttributes<TModel>>, TRelations>): this;
     /**
      * Construit et retourne l'objet de requête final
      */
-    build(this: Builder<TModel, 'root'>): Array<any>;
-    /**
-     * Crée une définition de relation de type "create"
-     */
-    createRelation<TRelation>(attributes: ExtractModelAttributes<TRelation>, nestedRelations?: Record<string, any>): ReturnType<Builder<TRelation, 'create'>['withRelations']>;
-    /**
-     * Crée une définition de relation de type "update"
-     */
-    updateRelation<TRelation>(key: string | number, attributes: Partial<ExtractModelAttributes<TRelation>>, nestedRelations?: Record<string, any>): ReturnType<Builder<TRelation, 'update'>['withRelations']>;
-    /**
-     * Crée une définition de relation de type "attach"
-     */
-    attach<TRelation>(key: string | number | Array<string | number>): ReturnType<Builder<TRelation, 'attach'>['withRelations']>;
-    /**
-     * Crée une définition de relation de type "detach"
-     */
-    detach<TRelation>(key: string | number | Array<string | number>): ReturnType<Builder<TRelation, 'detach'>['withRelations']>;
-    /**
-     * Crée une définition de relation de type "sync"
-     */
-    sync<TRelation>(key: string | number | Array<string | number>, attributes?: Partial<ExtractModelAttributes<TRelation>>, pivot?: Record<string, string | number>, withoutDetaching?: boolean): ReturnType<Builder<TRelation, 'sync'>['withRelations']>;
-    /**
-     * Crée une définition de relation de type "toggle"
-     */
-    toggle<TRelation>(key: string | number | Array<string | number>, attributes?: Partial<ExtractModelAttributes<TRelation>>, pivot?: Record<string, string | number>): ReturnType<Builder<TRelation, 'toggle'>['withRelations']>;
-    private withRelations;
-    getValidOperations(): Array<keyof OperationConstraints[TContext]>;
+    build(): MutationRequest_2<ExtractModelAttributes<TModel> | Partial<ExtractModelAttributes<TModel>>, TRelations>;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-declare type CreateContext = 'create';
+/**
+ * Builder pour la création d'entités avec des relations
+ */
+declare class CreateEntityBuilder<TModel, TRelations = any> {
+    private attributes;
+    private relations?;
+    constructor(attributes: ExtractModelAttributes<TModel>);
+    /**
+     * Ajoute une relation à l'entité
+     * Dans le contexte de création, seules les opérations "create" et "attach" sont autorisées
+     */
+    withRelation<K extends keyof TRelations, T>(relationName: K & string, relation: RelationDefinition_2<T, true>): this;
+    /**
+     * Finalise la construction de l'opération de création
+     */
+    build(): CreateMutationOperation_2<ExtractModelAttributes<TModel>, TRelations>;
+}
 
-export declare interface CreateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, true> {
+export declare interface CreateMutationOperation<TAttributes, TRelations> extends MutationData_2<TAttributes, TRelations, true> {
     operation: "create";
 }
 
+/**
+ * Interface pour une opération de création
+ */
+declare interface CreateMutationOperation_2<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, true> {
+    operation: "create";
+}
+
+/**
+ * Interface pour une relation de type "create"
+ */
 declare interface CreateRelationDefinitionBase<T> extends BaseRelationDefinition {
+    operation: "create";
+    attributes: T;
+}
+
+declare interface CreateRelationDefinitionBase_2<T> extends BaseRelationDefinition_2 {
     operation: "create";
     attributes: T;
 }
@@ -168,9 +193,15 @@ export declare interface DeleteResponse<T> {
     };
 }
 
-declare type DetachContext = 'detach';
+export declare interface DetachRelationDefinition extends BaseRelationDefinition_2 {
+    operation: "detach";
+    key: string | number;
+}
 
-export declare interface DetachRelationDefinition extends BaseRelationDefinition {
+/**
+ * Interface pour une relation de type "detach"
+ */
+declare interface DetachRelationDefinition_2 extends BaseRelationDefinition {
     operation: "detach";
     key: string | number;
 }
@@ -401,7 +432,17 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
+/**
+ * Interface pour les données de mutation incluant les attributs et les relations
+ */
 declare interface MutationData<TAttributes, TRelations, InCreateContext extends boolean> {
+    attributes: TAttributes;
+    relations?: {
+        [K in keyof TRelations]: TRelations[K] extends RelationDefinition_2<infer T, any> ? RelationDefinition_2<T, InCreateContext> : never;
+    };
+}
+
+declare interface MutationData_2<TAttributes, TRelations, InCreateContext extends boolean> {
     attributes: TAttributes;
     relations?: {
         [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any> ? RelationDefinition<T, InCreateContext> : never;
@@ -410,8 +451,20 @@ declare interface MutationData<TAttributes, TRelations, InCreateContext extends 
 
 export declare type MutationOperation<TAttributes, TRelations> = CreateMutationOperation<TAttributes, TRelations> | UpdateMutationOperation<TAttributes, TRelations>;
 
+/**
+ * Type pour une opération de mutation (création ou mise à jour)
+ */
+declare type MutationOperation_2<TAttributes, TRelations> = CreateMutationOperation_2<TAttributes, TRelations> | UpdateMutationOperation_2<TAttributes, TRelations>;
+
 export declare interface MutationRequest<TAttributes, TRelations> {
     mutate: Array<MutationOperation<TAttributes, TRelations>>;
+}
+
+/**
+ * Interface pour la requête de mutation
+ */
+declare interface MutationRequest_2<TAttributes, TRelations> {
+    mutate: Array<MutationOperation_2<TAttributes, TRelations>>;
 }
 
 export declare interface MutationResponse {
@@ -422,18 +475,6 @@ export declare interface MutationResponse {
 export declare interface NestedFilterCriteria {
     nested: Array<FilterCriteria>;
 }
-
-declare interface OperationConstraints {
-    root: 'create' | 'update';
-    create: 'create' | 'attach' | 'sync';
-    update: 'update' | 'attach' | 'detach' | 'sync' | 'toggle';
-    attach: never;
-    detach: never;
-    sync: never;
-    toggle: never;
-}
-
-declare type OperationContext = RootContext | CreateContext | UpdateContext | AttachContext | DetachContext | SyncContext | ToggleContext;
 
 export declare interface PaginatedSearchRequest extends SearchRequest {
     page?: number;
@@ -466,21 +507,43 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
-export declare type RelationDefinition<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationDefinitionBase<T> & {
+export declare type RelationDefinition<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationDefinitionBase_2<T> & {
     relations?: {
         [key: string]: RelationDefinition<any, true>;
     };
-}) | AttachRelationDefinition : (CreateRelationDefinitionBase<T> & {
+}) | AttachRelationDefinition : (CreateRelationDefinitionBase_2<T> & {
     relations?: {
         [key: string]: RelationDefinition<any, false>;
     };
-}) | (UpdateRelationDefinitionBase<T> & {
+}) | (UpdateRelationDefinitionBase_2<T> & {
     relations?: {
         [key: string]: RelationDefinition<any, false>;
     };
 }) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
+/**
+ * Définit les types de relations autorisés selon le contexte (création ou mise à jour)
+ */
+declare type RelationDefinition_2<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition_2<any, true>;
+    };
+}) | AttachRelationDefinition_2 : (CreateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition_2<any, false>;
+    };
+}) | (UpdateRelationDefinitionBase<T> & {
+    relations?: {
+        [key: string]: RelationDefinition_2<any, false>;
+    };
+}) | AttachRelationDefinition_2 | DetachRelationDefinition_2 | SyncRelationDefinition_2<T> | ToggleRelationDefinition_2<T>;
+
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
+
+/**
+ * Types d'opérations de relation
+ */
+declare type RelationDefinitionType_2 = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
 export declare interface RelationInclude {
     relation: string;
@@ -505,11 +568,6 @@ export declare type RequestInterceptor = (config: RequestConfig) => Promise<Requ
 export declare type ResponseErrorInterceptor = (error: any) => Promise<any>;
 
 export declare type ResponseSuccessInterceptor = (response: Response) => Promise<Response> | Response;
-
-/**
- * Système de builder avec contraintes sur les opérations et typage générique
- */
-declare type RootContext = 'root';
 
 export declare interface ScopeDefinition {
     name: string;
@@ -548,9 +606,18 @@ export declare interface SortCriteria {
 
 export declare type SortDirection = "asc" | "desc";
 
-declare type SyncContext = 'sync';
+export declare interface SyncRelationDefinition<T> extends BaseRelationDefinition_2 {
+    operation: "sync";
+    without_detaching?: boolean;
+    key: string | number | Array<string | number>;
+    attributes?: T;
+    pivot?: Record<string, string | number>;
+}
 
-export declare interface SyncRelationDefinition<T> extends BaseRelationDefinition {
+/**
+ * Interface pour une relation de type "sync"
+ */
+declare interface SyncRelationDefinition_2<T> extends BaseRelationDefinition {
     operation: "sync";
     without_detaching?: boolean;
     key: string | number | Array<string | number>;
@@ -562,23 +629,65 @@ export declare interface TextSearch {
     value: string;
 }
 
-declare type ToggleContext = 'toggle';
-
-export declare interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
+export declare interface ToggleRelationDefinition<T> extends BaseRelationDefinition_2 {
     operation: "toggle";
     key: string | number | Array<string | number>;
     attributes?: T;
     pivot?: Record<string, string | number>;
 }
 
-declare type UpdateContext = 'update';
+/**
+ * Interface pour une relation de type "toggle"
+ */
+declare interface ToggleRelationDefinition_2<T> extends BaseRelationDefinition {
+    operation: "toggle";
+    key: string | number | Array<string | number>;
+    attributes?: T;
+    pivot?: Record<string, string | number>;
+}
 
-export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
+/**
+ * Builder pour la mise à jour d'entités avec des relations
+ */
+declare class UpdateEntityBuilder<TModel, TRelations = any> {
+    private key;
+    private attributes;
+    private relations?;
+    constructor(key: string | number, attributes: Partial<ExtractModelAttributes<TModel>>);
+    /**
+     * Ajoute une relation à l'entité
+     * Dans le contexte de mise à jour, toutes les opérations sont autorisées
+     */
+    withRelation<K extends keyof TRelations, T>(relationName: K & string, relation: RelationDefinition_2<T, false>): this;
+    /**
+     * Finalise la construction de l'opération de mise à jour
+     */
+    build(): UpdateMutationOperation_2<Partial<ExtractModelAttributes<TModel>>, TRelations>;
+}
+
+export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData_2<TAttributes, TRelations, false> {
     operation: "update";
     key: string | number;
 }
 
+/**
+ * Interface pour une opération de mise à jour
+ */
+declare interface UpdateMutationOperation_2<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
+    operation: "update";
+    key: string | number;
+}
+
+/**
+ * Interface pour une relation de type "update"
+ */
 declare interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition {
+    operation: "update";
+    key: string | number;
+    attributes: T;
+}
+
+declare interface UpdateRelationDefinitionBase_2<T> extends BaseRelationDefinition_2 {
     operation: "update";
     key: string | number;
     attributes: T;
