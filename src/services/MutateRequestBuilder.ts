@@ -1,16 +1,8 @@
 import { } from "@/types";
-import { AttachRelationDefinition, CreateRelationDefinitionBase, DetachRelationDefinition, UpdateRelationDefinitionBase, SyncRelationDefinition, ToggleRelationDefinition, MutationOperation } from "@/types/mutate";
+import { AttachRelationDefinition, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, MutationOperation } from "@/types/mutate";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
-// Type qui regroupe tous les types de relations possibles
-type RelationDefinition<T = unknown> =
-   | CreateRelationDefinitionBase<T>
-   | UpdateRelationDefinitionBase<T>
-   | AttachRelationDefinition
-   | DetachRelationDefinition
-   | SyncRelationDefinition<T>
-   | ToggleRelationDefinition<T>;
 
 export class Builder<TModel> {
    private static instance: Builder<unknown>;
@@ -28,13 +20,13 @@ export class Builder<TModel> {
    ): this {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, any> = {};
-      const relations: Record<string, RelationDefinition> = {};
+      const relations: Record<string, any> = {};
 
       // Parcourir tous les attributs pour identifier les relations
       for (const [key, value] of Object.entries(attributes)) {
          // Vérifier si l'attribut est une relation (a une propriété 'operation')
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[key] = value as RelationDefinition;
+            relations[key] = value;
          } else {
             normalAttributes[key] = value;
          }
@@ -56,11 +48,11 @@ export class Builder<TModel> {
    ): this {
       // Même logique que createEntity pour séparer les attributs normaux des relations
       const normalAttributes: Record<string, any> = {};
-      const relations: Record<string, RelationDefinition> = {};
+      const relations: Record<string, any> = {};
 
       for (const [attrKey, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[attrKey] = value as RelationDefinition;
+            relations[attrKey] = value;
          } else {
             normalAttributes[attrKey] = value;
          }
@@ -77,54 +69,90 @@ export class Builder<TModel> {
       return this;
    }
 
+   /**
+    * Crée une relation avec des attributs donnés.
+    * Retourne un objet qui correspond au type T tout en étant une relation.
+    */
    public createRelation<T>(
       attributes: T
-   ): CreateRelationDefinitionBase<T> {
+   ): T & { operation: "create"; attributes: T; relations?: Record<string, any>; __relationDefinition?: true; } {
       // Séparer les attributs normaux des attributs de relation pour les relations imbriquées
       const normalAttributes: Record<string, any> = {};
-      const nestedRelations: Record<string, RelationDefinition> = {};
+      const nestedRelations: Record<string, any> = {};
 
       if (attributes && typeof attributes === 'object') {
          for (const [key, value] of Object.entries(attributes as Record<string, any>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[key] = value as RelationDefinition;
+               nestedRelations[key] = value;
             } else {
                normalAttributes[key] = value;
             }
          }
       }
 
-      return {
+      // Créer un objet qui est à la fois une relation et correspond au type T
+      const relationDefinition = {
          operation: "create",
-         attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations })
-      };
+         attributes: normalAttributes,
+         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
+         __relationDefinition: true
+      } as T & { operation: "create"; attributes: T; relations?: Record<string, any>; __relationDefinition?: true; };
+
+      // Pour les propriétés de l'objet original, créer des getters qui renvoient les valeurs
+      // depuis attributes pour que l'objet relation se comporte comme l'objet original
+      if (attributes && typeof attributes === 'object') {
+         for (const key of Object.keys(normalAttributes)) {
+            Object.defineProperty(relationDefinition, key, {
+               get() {
+                  return normalAttributes[key];
+               },
+               enumerable: true
+            });
+         }
+      }
+
+      return relationDefinition;
    }
 
    public updateRelation<T>(
       key: string | number,
       attributes: T
-   ): UpdateRelationDefinitionBase<T> {
+   ): T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, any>; __relationDefinition?: true; } {
       // Même logique pour les relations imbriquées
       const normalAttributes: Record<string, any> = {};
-      const nestedRelations: Record<string, RelationDefinition> = {};
+      const nestedRelations: Record<string, any> = {};
 
       if (attributes && typeof attributes === 'object') {
          for (const [attrKey, value] of Object.entries(attributes as Record<string, any>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[attrKey] = value as RelationDefinition;
+               nestedRelations[attrKey] = value;
             } else {
                normalAttributes[attrKey] = value;
             }
          }
       }
 
-      return {
+      const relationDefinition = {
          operation: "update",
          key,
-         attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations })
-      };
+         attributes: normalAttributes,
+         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
+         __relationDefinition: true
+      } as T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, any>; __relationDefinition?: true; };
+
+      // Même approche avec les getters
+      if (attributes && typeof attributes === 'object') {
+         for (const key of Object.keys(normalAttributes)) {
+            Object.defineProperty(relationDefinition, key, {
+               get() {
+                  return normalAttributes[key];
+               },
+               enumerable: true
+            });
+         }
+      }
+
+      return relationDefinition;
    }
 
    public attach(key: string | number): AttachRelationDefinition {

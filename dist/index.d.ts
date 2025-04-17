@@ -98,8 +98,23 @@ declare class Builder<TModel> {
     static createBuilder<T>(): Builder<T>;
     createEntity<T extends Record<string, any>>(attributes: T): this;
     updateEntity<T extends Record<string, any>>(key: string | number, attributes: T): this;
-    createRelation<T>(attributes: T): CreateRelationDefinitionBase<T>;
-    updateRelation<T>(key: string | number, attributes: T): UpdateRelationDefinitionBase<T>;
+    /**
+     * Crée une relation avec des attributs donnés.
+     * Retourne un objet qui correspond au type T tout en étant une relation.
+     */
+    createRelation<T>(attributes: T): T & {
+        operation: "create";
+        attributes: T;
+        relations?: Record<string, any>;
+        __relationDefinition?: true;
+    };
+    updateRelation<T>(key: string | number, attributes: T): T & {
+        operation: "update";
+        key: string | number;
+        attributes: T;
+        relations?: Record<string, any>;
+        __relationDefinition?: true;
+    };
     attach(key: string | number): AttachRelationDefinition;
     detach(key: string | number): DetachRelationDefinition;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
