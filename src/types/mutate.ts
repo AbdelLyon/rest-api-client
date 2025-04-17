@@ -34,14 +34,14 @@ export interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition 
 export interface SyncRelationDefinition<T> extends BaseRelationDefinition {
   operation: "sync";
   without_detaching?: boolean;
-  key: string | number;
+  key: string | number | Array<string | number>;
   attributes?: T;
   pivot?: Record<string, string | number>;
 }
 
 export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   operation: "toggle";
-  key: string | number;
+  key: string | number | Array<string | number>;
   attributes?: T;
   pivot?: Record<string, string | number>;
 }

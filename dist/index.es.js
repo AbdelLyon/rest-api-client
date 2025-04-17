@@ -1,7 +1,7 @@
-var S = Object.defineProperty;
-var I = (h, t, e) => t in h ? S(h, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : h[t] = e;
-var a = (h, t, e) => I(h, typeof t != "symbol" ? t + "" : t, e);
-class l extends Error {
+var T = Object.defineProperty;
+var R = (c, t, e) => t in c ? T(c, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : c[t] = e;
+var a = (c, t, e) => R(c, typeof t != "symbol" ? t + "" : t, e);
+class d extends Error {
   constructor(e, s) {
     const r = e instanceof Error ? e.message : "API Service Request Failed";
     super(r);
@@ -17,7 +17,7 @@ class l extends Error {
         this.status = o.status, this.statusText = o.statusText;
       }
     }
-    Error.captureStackTrace && Error.captureStackTrace(this, l);
+    Error.captureStackTrace && Error.captureStackTrace(this, d);
   }
   // Méthodes utilitaires pour vérifier le type d'erreur
   isNotFound() {
@@ -187,28 +187,28 @@ const n = class n {
    */
   async fetchWithRetry(t, e, s = 1) {
     try {
-      const { timeout: r = this.defaultTimeout, params: i, data: o, ...c } = e;
-      let f = t;
+      const { timeout: r = this.defaultTimeout, params: i, data: o, ...u } = e;
+      let w = t;
       if (i && Object.keys(i).length > 0) {
-        const p = new URLSearchParams();
-        for (const [m, E] of Object.entries(i))
-          p.append(m, E);
-        f += `?${p.toString()}`;
+        const l = new URLSearchParams();
+        for (const [f, I] of Object.entries(i))
+          l.append(f, I);
+        w += `?${l.toString()}`;
       }
-      const y = new AbortController(), g = setTimeout(() => y.abort("Request timeout"), r);
-      let w;
-      o !== void 0 && (w = typeof o == "string" ? o : JSON.stringify(o));
-      const d = await fetch(f, {
-        ...c,
-        body: w,
-        signal: y.signal,
+      const g = new AbortController(), S = setTimeout(() => g.abort("Request timeout"), r);
+      let E;
+      o !== void 0 && (E = typeof o == "string" ? o : JSON.stringify(o));
+      const m = await fetch(w, {
+        ...u,
+        body: E,
+        signal: g.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(g), !d.ok && s < this.maxRetries && this.isRetryableError(d.status, e.method)) {
-        const p = Math.pow(2, s) * 100;
-        return await new Promise((m) => setTimeout(m, p)), this.fetchWithRetry(t, e, s + 1);
+      if (clearTimeout(S), !m.ok && s < this.maxRetries && this.isRetryableError(m.status, e.method)) {
+        const l = Math.pow(2, s) * 100;
+        return await new Promise((f) => setTimeout(f, l)), this.fetchWithRetry(t, e, s + 1);
       }
-      return d;
+      return m;
     } catch (r) {
       if (r instanceof DOMException && r.name === "AbortError")
         throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
@@ -241,10 +241,10 @@ const n = class n {
         ...r,
         url: i
       });
-      let c = await this.fetchWithRetry(i, o);
-      return c = await this.applyResponseSuccessInterceptors(c), (s = c.headers.get("content-type")) != null && s.includes("application/json") ? await c.json() : await c.text();
+      let u = await this.fetchWithRetry(i, o);
+      return u = await this.applyResponseSuccessInterceptors(u), (s = u.headers.get("content-type")) != null && s.includes("application/json") ? await u.json() : await u.text();
     } catch (r) {
-      const i = r instanceof l ? r : new l(r, {
+      const i = r instanceof d ? r : new d(r, {
         ...t,
         ...e,
         url: t.url
@@ -255,13 +255,132 @@ const n = class n {
 };
 a(n, "instances", /* @__PURE__ */ new Map()), a(n, "defaultInstanceName"), // Intercepteurs statiques
 a(n, "requestInterceptors", []), a(n, "responseSuccessInterceptors", []), a(n, "responseErrorInterceptors", []);
-let u = n;
-class R {
+let p = n;
+const h = class h {
+  constructor() {
+    a(this, "request", {
+      mutate: []
+    });
+  }
+  /**
+   * Récupère l'instance unique du Builder (pattern Singleton)
+   */
+  static getInstance() {
+    return h.instance || (h.instance = new h()), h.instance;
+  }
+  /**
+   * Crée une nouvelle instance du Builder
+   */
+  static createBuilder() {
+    return new h();
+  }
+  /**
+   * Ajoute une opération de création à la requête
+   * @param attributes Attributs de l'objet à créer
+   * @param relations Relations à associer à l'objet créé
+   */
+  create(t, e) {
+    const s = {
+      operation: "create",
+      attributes: t,
+      ...e && { relations: e }
+    };
+    return this.request.mutate.push(s), this;
+  }
+  /**
+   * Ajoute une opération de mise à jour à la requête
+   * @param key ID de l'objet à mettre à jour
+   * @param attributes Attributs à mettre à jour
+   * @param relations Relations à mettre à jour
+   */
+  update(t, e, s) {
+    const r = {
+      operation: "update",
+      key: t,
+      attributes: e,
+      ...s && { relations: s }
+    };
+    return this.request.mutate.push(r), this;
+  }
+  /**
+   * Construit et retourne l'objet de requête final
+   */
+  build() {
+    return this.request;
+  }
+  // Méthodes de l'ancienne classe RelationBuilder
+  /**
+   * Crée une définition de relation de type "create"
+   */
+  static createRelation(t, e) {
+    return {
+      operation: "create",
+      attributes: t,
+      ...e && { relations: e }
+    };
+  }
+  /**
+   * Crée une définition de relation de type "update"
+   */
+  static updateRelation(t, e, s) {
+    return {
+      operation: "update",
+      key: t,
+      attributes: e,
+      ...s && { relations: s }
+    };
+  }
+  /**
+   * Crée une définition de relation de type "attach"
+   */
+  static attach(t) {
+    return {
+      operation: "attach",
+      key: t
+    };
+  }
+  /**
+   * Crée une définition de relation de type "detach"
+   */
+  static detach(t) {
+    return {
+      operation: "detach",
+      key: t
+    };
+  }
+  /**
+   * Crée une définition de relation de type "sync"
+   */
+  static sync(t, e, s, r) {
+    return {
+      operation: "sync",
+      key: t,
+      without_detaching: r,
+      ...e && { attributes: e },
+      ...s && { pivot: s }
+    };
+  }
+  /**
+   * Crée une définition de relation de type "toggle"
+   */
+  static toggle(t, e, s) {
+    return {
+      operation: "toggle",
+      key: t,
+      ...e && { attributes: e },
+      ...s && { pivot: s }
+    };
+  }
+};
+a(h, "instance");
+let y = h;
+class P {
   constructor(t, e) {
     a(this, "http");
+    a(this, "builder");
     a(this, "pathname");
     a(this, "schema");
-    this.http = u.getInstance(), this.pathname = t, this.schema = e;
+    this.http = p.getInstance(), this.builder = y.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -336,12 +455,12 @@ class R {
     };
   }
 }
-class q {
+class k {
   constructor(t, e) {
     a(this, "http");
     a(this, "pathname");
     a(this, "schema");
-    this.http = u.getInstance(), this.pathname = t, this.schema = e;
+    this.http = p.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -384,7 +503,7 @@ class q {
     );
   }
 }
-class P {
+class b {
   constructor(t, e) {
     a(this, "http");
     a(this, "pathname");
@@ -392,7 +511,7 @@ class P {
     a(this, "credentialsSchema");
     a(this, "registerDataSchema");
     a(this, "tokenSchema");
-    this.http = u.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
+    this.http = p.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
   }
   /**
    * Inscription
@@ -470,9 +589,9 @@ class P {
   }
 }
 export {
-  P as Auth,
-  u as HttpClient,
-  R as Mutation,
-  q as Query
+  b as Auth,
+  p as HttpClient,
+  P as Mutation,
+  k as Query
 };
 //# sourceMappingURL=index.es.js.map

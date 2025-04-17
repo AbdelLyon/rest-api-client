@@ -5,14 +5,19 @@ import type { ActionRequest, ActionResponse } from "@/types/action";
 import type { MutationRequest, MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
+import { Builder } from "./MutateRequestBuilder";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
+  protected builder: Builder<T>;
+
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
   constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
+    this.builder = Builder.getInstance();
+
     this.pathname = pathname;
     this.schema = schema;
   }
