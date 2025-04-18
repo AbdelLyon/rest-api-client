@@ -1,3 +1,4 @@
+// Mutation.ts
 import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { DeleteRequest, DeleteResponse } from "@/types/delete";
@@ -18,6 +19,9 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.http = HttpClient.getInstance();
     this.builder = Builder.createBuilder<T>();
 
+    // Injecter la fonction de mutation sans créer de référence circulaire
+    this.builder.setMutationFunction((data, options) => this.mutate(data, options));
+
     this.pathname = pathname;
     this.schema = schema;
   }
@@ -35,23 +39,24 @@ export abstract class Mutation<T> implements IMutation<T> {
     });
   }
 
-  public async mutate
-    (
-      mutateRequest: BuildOnly<T>,
-      options?: Partial<RequestConfig>
-    ): Promise<MutationResponse> {
+  public async mutate(
+    mutateRequest: BuildOnly<T> | Array<any>,
+    options?: Partial<RequestConfig>
+  ): Promise<MutationResponse> {
+    // Déterminer si c'est un BuildOnly ou directement un tableau d'opérations
+    const data = Array.isArray(mutateRequest) ? mutateRequest : mutateRequest.build();
+
     const response = await this.http.request<MutationResponse>(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
-        data: mutateRequest,
+        data,
       },
       options,
     );
 
     return response;
   }
-
 
   public executeAction(
     actionRequest: ActionRequest,

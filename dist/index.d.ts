@@ -92,54 +92,9 @@ declare interface BaseRelationDefinition {
     operation: RelationDefinitionType;
 }
 
-declare class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
-    private static instance;
-    private mutate;
-    static createBuilder<T>(): IBuilder<T>;
-    /**
-     * Crée une entité avec les attributs donnés, y compris des relations imbriquées
-     * @param attributes Les attributs de l'entité, pouvant contenir des relations
-     */
-    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    /**
-     * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
-     * @param key La clé de l'entité à mettre à jour
-     * @param attributes Les attributs de l'entité, pouvant contenir des relations
-     */
-    updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    /**
-     * Crée une relation avec des attributs donnés et des relations optionnelles.
-     * @param attributes Les attributs de la relation
-     * @param relations Les relations imbriquées explicites (optionnel)
-     */
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "create";
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    /**
-     * Met à jour une relation avec des attributs donnés et des relations optionnelles.
-     * @param key La clé de la relation à mettre à jour
-     * @param attributes Les attributs de la relation
-     * @param relations Les relations imbriquées explicites (optionnel)
-     */
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "update";
-        key: string | number;
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    attach(key: string | number): AttachRelationDefinition;
-    detach(key: string | number): DetachRelationDefinition;
-    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
-    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
-    build(): Array<TypedMutationOperation<TModel, any>>;
-}
-
 declare interface BuildOnly<TModel, TRelations = {}> {
     build(): Array<TypedMutationOperation<TModel, TRelations>>;
+    mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
@@ -354,7 +309,7 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 declare interface IBuilder<TModel> {
     build(): Array<TypedMutationOperation<TModel, {}>>;
     createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
     createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "create";
         attributes: T;
@@ -372,6 +327,7 @@ declare interface IBuilder<TModel> {
     detach(key: string | number): DetachRelationDefinition;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
     toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
+    setMutationFunction(fn: MutationFunction): void;
 }
 
 export declare interface IHttpClient {
@@ -379,7 +335,7 @@ export declare interface IHttpClient {
 }
 
 export declare interface IMutation<T> {
-    mutate(mutateRequest: Builder<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -411,7 +367,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutate(mutateRequest: BuildOnly<T> | Array<any>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -423,6 +379,10 @@ declare interface MutationData<TAttributes, TRelations, InCreateContext extends 
     relations?: {
         [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any> ? RelationDefinition<T, InCreateContext> : never;
     };
+}
+
+declare interface MutationFunction {
+    (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
 export declare interface MutationOperation<TAttributes> {

@@ -4,13 +4,13 @@ import { RequestConfig } from "@/types/common";
 import type { MutationResponse } from '@/types/mutate';
 import type { ActionRequest, ActionResponse } from '@/types/action';
 import type { DeleteRequest, DeleteResponse } from '@/types/delete';
-import { Builder } from "@/services/MutateRequestBuilder";
+import { BuildOnly } from "@/services/MutateRequestBuilder";
 
 
 export interface IMutation<T> {
 
   mutate(
-    mutateRequest: Builder<T>,
+    mutateRequest: BuildOnly<T>,
     options?: Partial<RequestConfig>
   ): Promise<MutationResponse>;
 

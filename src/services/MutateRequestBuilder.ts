@@ -1,9 +1,12 @@
+// MutateRequestBuilder.ts
 import {
    AttachRelationDefinition,
    DetachRelationDefinition,
    SyncRelationDefinition,
    ToggleRelationDefinition,
+   MutationResponse
 } from "@/types/mutate";
+import { RequestConfig } from "@/types/common";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
@@ -16,8 +19,6 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-
-
 // Type plus précis pour les opérations de mutation avec relations typées
 type TypedMutationOperation<TModel, TRelations = {}> = {
    operation: "create" | "update";
@@ -26,9 +27,15 @@ type TypedMutationOperation<TModel, TRelations = {}> = {
    relations: TRelations;
 };
 
-// Interface qui expose uniquement build() avec relations typées
+// Interface pour la fonction de mutation
+export interface MutationFunction {
+   (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+}
+
+// Interface qui expose uniquement build() et mutate() avec relations typées
 export interface BuildOnly<TModel, TRelations = {}> {
    build(): Array<TypedMutationOperation<TModel, TRelations>>;
+   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
 // Interface complète pour le builder initial
@@ -39,10 +46,10 @@ export interface IBuilder<TModel> {
       attributes: T
    ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
-   updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   updateEntity<T extends Record<string, unknown>>(
       key: string | number,
       attributes: T
-   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+   ): IBuilder<TModel>;
 
    createRelation<T, R = unknown>(
       attributes: T,
@@ -81,17 +88,28 @@ export interface IBuilder<TModel> {
       attributes?: T,
       pivot?: Record<string, string | number>
    ): ToggleRelationDefinition<T>;
+
+   // Méthode pour injecter la fonction de mutation
+   setMutationFunction(fn: MutationFunction): void;
 }
 
 export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
    private static instance: Builder<unknown>;
-   private mutate: Array<TypedMutationOperation<TModel, any>> = [];
+   private operations: Array<TypedMutationOperation<TModel, any>> = [];
+   private mutationFn: MutationFunction | null = null;
+
+   private constructor () { }
 
    public static createBuilder<T>(): IBuilder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
       return Builder.instance as IBuilder<T>;
+   }
+
+   // Méthode pour définir la fonction de mutation
+   public setMutationFunction(fn: MutationFunction): void {
+      this.mutationFn = fn;
    }
 
    /**
@@ -121,8 +139,8 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
          relations
       };
 
-      this.mutate.push(operation);
-      return this as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+      this.operations.push(operation);
+      return this as unknown as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
    }
 
    /**
@@ -130,10 +148,10 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     * @param key La clé de l'entité à mettre à jour
     * @param attributes Les attributs de l'entité, pouvant contenir des relations
     */
-   public updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   public updateEntity<T extends Record<string, unknown>>(
       key: string | number,
       attributes: T
-   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
+   ): IBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, unknown> = {};
@@ -153,8 +171,8 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
          relations
       };
 
-      this.mutate.push(operation);
-      return this as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+      this.operations.push(operation);
+      return this;
    }
 
    /**
@@ -335,8 +353,17 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
    }
 
    public build(): Array<TypedMutationOperation<TModel, any>> {
-      const result = [...this.mutate];
-      this.mutate = []; // Réinitialiser le builder pour une utilisation future
+      const result = [...this.operations];
+      this.operations = []; // Réinitialiser le builder pour une utilisation future
       return result;
+   }
+
+   public async mutate(options?: Partial<RequestConfig>): Promise<MutationResponse> {
+      if (!this.mutationFn) {
+         throw new Error("Mutation function not provided to builder");
+      }
+
+      const data = this.build();
+      return this.mutationFn(data, options);
    }
 }

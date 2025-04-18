@@ -1,6 +1,6 @@
 var I = Object.defineProperty;
-var R = (u, t, e) => t in u ? I(u, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[t] = e;
-var o = (u, t, e) => R(u, typeof t != "symbol" ? t + "" : t, e);
+var T = (u, t, e) => t in u ? I(u, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[t] = e;
+var o = (u, t, e) => T(u, typeof t != "symbol" ? t + "" : t, e);
 class f extends Error {
   constructor(e, s) {
     const r = e instanceof Error ? e.message : "API Service Request Failed";
@@ -191,20 +191,20 @@ const c = class c {
       let h = t;
       if (a && Object.keys(a).length > 0) {
         const d = new URLSearchParams();
-        for (const [y, b] of Object.entries(a))
-          d.append(y, b);
+        for (const [y, S] of Object.entries(a))
+          d.append(y, S);
         h += `?${d.toString()}`;
       }
-      const w = new AbortController(), S = setTimeout(() => w.abort("Request timeout"), r);
+      const g = new AbortController(), b = setTimeout(() => g.abort("Request timeout"), r);
       let E;
       n !== void 0 && (E = typeof n == "string" ? n : JSON.stringify(n));
       const m = await fetch(h, {
         ...i,
         body: E,
-        signal: w.signal,
+        signal: g.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(S), !m.ok && s < this.maxRetries && this.isRetryableError(m.status, e.method)) {
+      if (clearTimeout(b), !m.ok && s < this.maxRetries && this.isRetryableError(m.status, e.method)) {
         const d = Math.pow(2, s) * 100;
         return await new Promise((y) => setTimeout(y, d)), this.fetchWithRetry(t, e, s + 1);
       }
@@ -258,10 +258,15 @@ o(c, "requestInterceptors", []), o(c, "responseSuccessInterceptors", []), o(c, "
 let l = c;
 const p = class p {
   constructor() {
-    o(this, "mutate", []);
+    o(this, "operations", []);
+    o(this, "mutationFn", null);
   }
   static createBuilder() {
     return p.instance || (p.instance = new p()), p.instance;
+  }
+  // Méthode pour définir la fonction de mutation
+  setMutationFunction(t) {
+    this.mutationFn = t;
   }
   /**
    * Crée une entité avec les attributs donnés, y compris des relations imbriquées
@@ -276,7 +281,7 @@ const p = class p {
       attributes: e,
       relations: s
     };
-    return this.mutate.push(r), this;
+    return this.operations.push(r), this;
   }
   /**
    * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
@@ -293,7 +298,7 @@ const p = class p {
       attributes: s,
       relations: r
     };
-    return this.mutate.push(a), this;
+    return this.operations.push(a), this;
   }
   /**
    * Crée une relation avec des attributs donnés et des relations optionnelles.
@@ -387,19 +392,25 @@ const p = class p {
     };
   }
   build() {
-    const t = [...this.mutate];
-    return this.mutate = [], t;
+    const t = [...this.operations];
+    return this.operations = [], t;
+  }
+  async mutate(t) {
+    if (!this.mutationFn)
+      throw new Error("Mutation function not provided to builder");
+    const e = this.build();
+    return this.mutationFn(e, t);
   }
 };
 o(p, "instance");
-let g = p;
+let w = p;
 class j {
   constructor(t, e) {
     o(this, "http");
     o(this, "builder");
     o(this, "pathname");
     o(this, "schema");
-    this.http = l.getInstance(), this.builder = g.createBuilder(), this.pathname = t, this.schema = e;
+    this.http = l.getInstance(), this.builder = w.createBuilder(), this.builder.setMutationFunction((s, r) => this.mutate(s, r)), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -412,11 +423,12 @@ class j {
     });
   }
   async mutate(t, e) {
+    const s = Array.isArray(t) ? t : t.build();
     return await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
-        data: t
+        data: s
       },
       e
     );
@@ -522,7 +534,7 @@ class k {
     );
   }
 }
-class q {
+class O {
   constructor(t, e) {
     o(this, "http");
     o(this, "pathname");
@@ -608,7 +620,7 @@ class q {
   }
 }
 export {
-  q as Auth,
+  O as Auth,
   l as HttpClient,
   j as Mutation,
   k as Query
