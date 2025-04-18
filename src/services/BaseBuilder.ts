@@ -13,7 +13,7 @@ import {
 
 export class BaseBuilder implements IRelationBuilder {
 
-   public createRelation<T, RelationKeys extends string = never>(
+   public createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T,
       relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
    ): T & CreateRelationOperation<T> & {
@@ -60,7 +60,7 @@ export class BaseBuilder implements IRelationBuilder {
    }
 
 
-   public updateRelation<T, RelationKeys extends string = never>(
+   public updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
       relations?: Record<RelationKeys, NestedRelationOperation<unknown>>

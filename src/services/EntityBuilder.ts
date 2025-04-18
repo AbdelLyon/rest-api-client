@@ -82,16 +82,16 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
       return this.mutationFn(data, options);
    }
 
-   public override createRelation<T, RelationKeys extends string = never>(
+   public override createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T,
       relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
    ) {
       return this.relationBuilder.createRelation<T, RelationKeys>(attributes, relations);
    }
-   public override updateRelation<T, RelationKeys extends string = never>(
+   public override updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<string, NestedRelationOperation<RelationKeys>>
+      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
    ) {
       return this.relationBuilder.updateRelation<T, RelationKeys>(key, attributes, relations);
    }

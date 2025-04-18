@@ -329,10 +329,10 @@ export declare interface IQuery<T> {
 }
 
 declare interface IRelationBuilder {
-    createRelation<T, RelationKeys extends string = never>(attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & CreateRelationOperation<T> & {
+    createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & CreateRelationOperation<T> & {
         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
     };
-    updateRelation<T, RelationKeys extends string = never>(key: string | number, attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & UpdateRelationOperation<T> & {
+    updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & UpdateRelationOperation<T> & {
         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
     };
     attach(key: string | number): AttachRelationOperation;

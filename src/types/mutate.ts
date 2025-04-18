@@ -155,14 +155,14 @@ export type NestedRelationOperation<T> =
 
 // Interface pour les méthodes de relation uniquement
 export interface IRelationBuilder {
-  createRelation<T, RelationKeys extends string = never>(
+  createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
     attributes: T,
     relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
   ): T & CreateRelationOperation<T> & {
     relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
   };
 
-  updateRelation<T, RelationKeys extends string = never>(
+  updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
     key: string | number,
     attributes: T,
     relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
