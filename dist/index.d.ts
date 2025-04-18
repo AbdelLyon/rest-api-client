@@ -329,8 +329,8 @@ export declare interface IQuery<T> {
 }
 
 declare interface IRelationBuilder {
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, NestedRelationOperation<R>>): T & CreateRelationOperation<T> & {
-        relations?: Record<string, NestedRelationOperation<R>>;
+    createRelation<T, RelationKeys extends string = never>(attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & CreateRelationOperation<T> & {
+        relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
     };
     updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, NestedRelationOperation<R>>): T & UpdateRelationOperation<T> & {
         relations?: Record<string, NestedRelationOperation<R>>;
