@@ -194,35 +194,33 @@ export interface BuildOnly<TModel, TRelations = {}> {
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
-type IsRelationOperation<T> = T extends { operation: string; } ? true : false;
 
-type IsValidCreateOperation<T> = T extends { operation: "update" | "detach"; } ? false : true;
-type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
-  [K in keyof T]: K extends RelationKeys
-  ? IsRelationOperation<T[K]> extends true
-  ? IsValidCreateOperation<T[K]> extends true
-  ? T[K]
-  : never
-  : T[K]
-  : T[K]
-};
 
 
 export interface IEntityBuilder<TModel> {
-  createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-    attributes: CreateEntityAttributes<T, RelationKeys>
-  ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+  createEntity<
+    T extends Record<string, unknown>,
+    R extends Record<string, unknown> = {}
+  >(options: {
+    attributes: T;
+    relations?: R;
+  }): BuildOnly<TModel, R>;
 
-  updateEntity<T extends Record<string, unknown>>(
+  updateEntity<
+    T extends Record<string, unknown>,
+    R extends Record<string, unknown> = {}
+  >(
     key: string | number,
-    attributes: T
+    options: {
+      attributes?: T;
+      relations?: R;
+    }
   ): IEntityBuilder<TModel>;
 
   build(): MutationRequest<TModel>;
 
   setMutationFunction(fn: MutationFunction): void;
 }
-
 // Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
