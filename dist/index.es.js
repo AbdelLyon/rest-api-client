@@ -1,6 +1,6 @@
 var S = Object.defineProperty;
-var T = (u, e, t) => e in u ? S(u, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : u[e] = t;
-var n = (u, e, t) => T(u, typeof e != "symbol" ? e + "" : e, t);
+var T = (h, e, t) => e in h ? S(h, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : h[e] = t;
+var n = (h, e, t) => T(h, typeof e != "symbol" ? e + "" : e, t);
 class f extends Error {
   constructor(t, r) {
     const s = t instanceof Error ? t.message : "API Service Request Failed";
@@ -13,8 +13,8 @@ class f extends Error {
     if (this.name = "ApiRequestError", this.originalError = t, this.requestConfig = r, t && typeof t == "object") {
       const a = t;
       if ("status" in a && (this.status = a.status), "statusText" in a && (this.statusText = a.statusText), "data" in a && (this.data = a.data), "response" in a && a.response instanceof Response) {
-        const i = a.response;
-        this.status = i.status, this.statusText = i.statusText;
+        const o = a.response;
+        this.status = o.status, this.statusText = o.statusText;
       }
     }
     Error.captureStackTrace && Error.captureStackTrace(this, f);
@@ -58,8 +58,8 @@ const c = class c {
       ...c.responseErrorInterceptors,
       ...t.interceptors.response.error ?? []
     ]), !this.instances.has(r)) {
-      const i = new c();
-      i.configure(t), this.instances.set(r, i), this.instances.size === 1 && (this.defaultInstanceName = r);
+      const o = new c();
+      o.configure(t), this.instances.set(r, o), this.instances.size === 1 && (this.defaultInstanceName = r);
     }
     return this.instances.get(r);
   }
@@ -143,34 +143,34 @@ const c = class c {
   }
   async fetchWithRetry(e, t, r = 1) {
     try {
-      const { timeout: s = this.defaultTimeout, params: a, data: i, ...o } = t;
-      let h = e;
+      const { timeout: s = this.defaultTimeout, params: a, data: o, ...i } = t;
+      let u = e;
       if (a && Object.keys(a).length > 0) {
         const d = new URLSearchParams();
-        for (const [w, I] of Object.entries(a))
-          d.append(w, I);
-        h += `?${d.toString()}`;
+        for (const [g, I] of Object.entries(a))
+          d.append(g, I);
+        u += `?${d.toString()}`;
       }
-      const y = new AbortController(), R = setTimeout(() => y.abort("Request timeout"), s);
-      let b;
-      i !== void 0 && (b = typeof i == "string" ? i : JSON.stringify(i));
-      const g = await fetch(h, {
-        ...o,
-        body: b,
-        signal: y.signal,
+      const b = new AbortController(), R = setTimeout(() => b.abort("Request timeout"), s);
+      let w;
+      o !== void 0 && (w = typeof o == "string" ? o : JSON.stringify(o));
+      const y = await fetch(u, {
+        ...i,
+        body: w,
+        signal: b.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(R), !g.ok && r < this.maxRetries && this.isRetryableError(g.status, t.method)) {
+      if (clearTimeout(R), !y.ok && r < this.maxRetries && this.isRetryableError(y.status, t.method)) {
         const d = Math.pow(2, r) * 100;
-        return await new Promise((w) => setTimeout(w, d)), this.fetchWithRetry(e, t, r + 1);
+        return await new Promise((g) => setTimeout(g, d)), this.fetchWithRetry(e, t, r + 1);
       }
-      return g;
+      return y;
     } catch (s) {
       if (s instanceof DOMException && s.name === "AbortError")
         throw new Error(`Request timeout after ${t.timeout || this.defaultTimeout}ms`);
       if (r < this.maxRetries && this.isRetryableError(0, t.method)) {
         const a = Math.pow(2, r) * 100;
-        return await new Promise((i) => setTimeout(i, a)), this.fetchWithRetry(e, t, r + 1);
+        return await new Promise((o) => setTimeout(o, a)), this.fetchWithRetry(e, t, r + 1);
       }
       throw s;
     }
@@ -190,12 +190,12 @@ const c = class c {
         }
       }, a = new URL(
         s.url.startsWith("http") ? s.url : `${this.baseURL}${s.url.startsWith("/") ? "" : "/"}${s.url}`
-      ).toString(), i = await this.applyRequestInterceptors({
+      ).toString(), o = await this.applyRequestInterceptors({
         ...s,
         url: a
       });
-      let o = await this.fetchWithRetry(a, i);
-      return o = await this.applyResponseSuccessInterceptors(o), (r = o.headers.get("content-type")) != null && r.includes("application/json") ? await o.json() : await o.text();
+      let i = await this.fetchWithRetry(a, o);
+      return i = await this.applyResponseSuccessInterceptors(i), (r = i.headers.get("content-type")) != null && r.includes("application/json") ? await i.json() : await i.text();
     } catch (s) {
       const a = s instanceof f ? s : new f(s, {
         ...e,
@@ -210,42 +210,55 @@ n(c, "instances", /* @__PURE__ */ new Map()), n(c, "defaultInstanceName"), n(c, 
 let p = c;
 class E {
   createRelation(e, t) {
-    const r = {}, s = t ? { ...t } : {};
-    Object.entries(e).forEach(([i, o]) => {
-      o !== null && typeof o == "object" && "operation" in o && ["create", "update", "attach", "detach"].includes(o.operation) ? s[i] = o : r[i] = o;
-    });
+    const r = {}, s = {};
+    for (const [o, i] of Object.entries(e))
+      i && typeof i == "object" && "operation" in i ? s[o] = i : r[o] = i;
+    if (t)
+      for (const [o, i] of Object.entries(t))
+        s[o] = i;
     const a = {
       operation: "create",
       attributes: r,
-      ...Object.keys(s).length ? { relations: s } : {}
+      ...Object.keys(s).length > 0 ? { relations: s } : {}
     };
-    return Object.defineProperty(a, "__relationDefinition", {
+    Object.defineProperty(a, "__relationDefinition", {
       value: !0,
       enumerable: !1
-    }), Object.keys(r).forEach(
-      (i) => Object.defineProperty(a, i, {
-        get: () => r[i],
+    });
+    for (const o of Object.keys(r))
+      Object.defineProperty(a, o, {
+        get() {
+          return r[o];
+        },
         enumerable: !0
-      })
-    ), a;
+      });
+    return a;
   }
   updateRelation(e, t, r) {
-    const s = {}, a = r ? { ...r } : {};
-    Object.entries(t).forEach(([o, h]) => {
-      h !== null && typeof h == "object" && "operation" in h && ["create", "attach"].includes(h.operation) ? a[o] = h : s[o] = h;
-    });
-    const i = {
+    const s = {}, a = {};
+    for (const [i, u] of Object.entries(t))
+      u && typeof u == "object" && "operation" in u ? a[i] = u : s[i] = u;
+    if (r)
+      for (const [i, u] of Object.entries(r))
+        a[i] = u;
+    const o = {
       operation: "update",
       key: e,
       attributes: s,
-      ...Object.keys(a).length ? { relations: a } : {}
+      ...Object.keys(a).length > 0 ? { relations: a } : {}
     };
-    return Object.defineProperty(i, "__relationDefinition", { value: !0, enumerable: !1 }), Object.keys(s).forEach(
-      (o) => Object.defineProperty(i, o, {
-        get: () => s[o],
+    Object.defineProperty(o, "__relationDefinition", {
+      value: !0,
+      enumerable: !1
+    });
+    for (const i of Object.keys(s))
+      Object.defineProperty(o, i, {
+        get() {
+          return s[i];
+        },
         enumerable: !0
-      })
-    ), i;
+      });
+    return o;
   }
   // Les autres méthodes restent inchangées
   attach(e) {
@@ -303,8 +316,8 @@ class O extends E {
   }
   createEntity(t) {
     const r = {}, s = {};
-    for (const [i, o] of Object.entries(t))
-      o && typeof o == "object" && "operation" in o ? s[i] = o : r[i] = o;
+    for (const [o, i] of Object.entries(t))
+      i && typeof i == "object" && "operation" in i ? s[o] = i : r[o] = i;
     const a = {
       operation: "create",
       attributes: r,
@@ -314,15 +327,15 @@ class O extends E {
   }
   updateEntity(t, r) {
     const s = {}, a = {};
-    for (const [o, h] of Object.entries(r))
-      h && typeof h == "object" && "operation" in h ? a[o] = h : s[o] = h;
-    const i = {
+    for (const [i, u] of Object.entries(r))
+      u && typeof u == "object" && "operation" in u ? a[i] = u : s[i] = u;
+    const o = {
       operation: "update",
       key: t,
       attributes: s,
       relations: a
     };
-    return this.operations.push(i), this;
+    return this.operations.push(o), this;
   }
   build() {
     const t = [...this.operations];
@@ -363,7 +376,7 @@ const l = class l {
 };
 n(l, "relationInstance");
 let m = l;
-class q {
+class P {
   constructor(e, t) {
     n(this, "http");
     n(this, "pathname");
@@ -452,7 +465,7 @@ class q {
     };
   }
 }
-class j {
+class v {
   constructor(e, t) {
     n(this, "http");
     n(this, "pathname");
@@ -500,7 +513,7 @@ class j {
     );
   }
 }
-class D {
+class j {
   constructor(e, t) {
     n(this, "http");
     n(this, "pathname");
@@ -586,9 +599,9 @@ class D {
   }
 }
 export {
-  D as Auth,
+  j as Auth,
   p as HttpClient,
-  q as Mutation,
-  j as Query
+  P as Mutation,
+  v as Query
 };
 //# sourceMappingURL=index.es.js.map

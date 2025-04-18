@@ -20,45 +20,51 @@ export class BaseBuilder implements IRelationBuilder {
       relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<RelationKeys, NestedRelationOperation<unknown>> =
-         (relations ? { ...relations } : {}) as Record<RelationKeys, NestedRelationOperation<unknown>>;
+      const nestedRelations: Record<string, unknown> = {};
 
-      Object.entries(attributes as Record<string, unknown>)
-         .forEach(([key, value]) => {
-            const isNestedRelation =
-               value !== null &&
-               typeof value === 'object' &&
-               'operation' in value &&
-               ['create', 'update', 'attach', 'detach'].includes((value as { operation: string; }).operation);
+      // Extraire les relations des attributs - style plus simple comme dans createEntity
+      for (const [key, value] of Object.entries(attributes)) {
+         if (value && typeof value === 'object' && 'operation' in value) {
+            nestedRelations[key] = value;
+         } else {
+            normalAttributes[key] = value;
+         }
+      }
 
-            isNestedRelation
-               ? nestedRelations[key as RelationKeys] = value as NestedRelationOperation<unknown>
-               : normalAttributes[key] = value;
-         });
+      // Ajouter les relations explicites si fournies
+      if (relations) {
+         for (const [key, value] of Object.entries(relations)) {
+            nestedRelations[key] = value;
+         }
+      }
 
+      // Créer la définition de relation
       const relationDefinition = {
          operation: "create" as const,
          attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length ? { relations: nestedRelations } : {})
+         ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & CreateRelationOperation<T> & {
          relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
       };
 
+      // Définir __relationDefinition comme propriété non-énumérable
       Object.defineProperty(relationDefinition, '__relationDefinition', {
          value: true,
          enumerable: false
       });
 
-      Object.keys(normalAttributes).forEach(key =>
+      // Ajouter les getters pour les propriétés normales
+      for (const key of Object.keys(normalAttributes)) {
          Object.defineProperty(relationDefinition, key, {
-            get: () => normalAttributes[key],
+            get() {
+               return normalAttributes[key];
+            },
             enumerable: true
-         })
-      );
+         });
+      }
 
       return relationDefinition;
    }
-
 
    public updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
@@ -68,38 +74,49 @@ export class BaseBuilder implements IRelationBuilder {
       relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<RelationKeys, NestedRelationOperation<unknown>> =
-         (relations ? { ...relations } : {}) as Record<RelationKeys, NestedRelationOperation<unknown>>;
+      const nestedRelations: Record<string, unknown> = {};
 
-      Object.entries(attributes as Record<string, unknown>)
-         .forEach(([attrKey, value]) => {
-            const isNestedRelation =
-               value !== null &&
-               typeof value === 'object' &&
-               'operation' in value &&
-               ['create', 'attach'].includes((value as { operation: string; }).operation);
+      // Extraire les relations des attributs - style plus simple comme dans createEntity
+      for (const [attrKey, value] of Object.entries(attributes)) {
+         if (value && typeof value === 'object' && 'operation' in value) {
+            nestedRelations[attrKey] = value;
+         } else {
+            normalAttributes[attrKey] = value;
+         }
+      }
 
-            isNestedRelation
-               ? nestedRelations[attrKey as RelationKeys] = value as NestedRelationOperation<unknown>
-               : normalAttributes[attrKey] = value;
-         });
+      // Ajouter les relations explicites si fournies
+      if (relations) {
+         for (const [key, value] of Object.entries(relations)) {
+            nestedRelations[key] = value;
+         }
+      }
 
+      // Créer la définition de relation
       const relationDefinition = {
          operation: "update" as const,
          key,
          attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length ? { relations: nestedRelations } : {})
+         ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & UpdateRelationOperation<T> & {
          relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
       };
 
-      Object.defineProperty(relationDefinition, '__relationDefinition', { value: true, enumerable: false });
-      Object.keys(normalAttributes).forEach(key =>
+      // Définir __relationDefinition comme propriété non-énumérable
+      Object.defineProperty(relationDefinition, '__relationDefinition', {
+         value: true,
+         enumerable: false
+      });
+
+      // Ajouter les getters pour les propriétés normales
+      for (const key of Object.keys(normalAttributes)) {
          Object.defineProperty(relationDefinition, key, {
-            get: () => normalAttributes[key],
+            get() {
+               return normalAttributes[key];
+            },
             enumerable: true
-         })
-      );
+         });
+      }
 
       return relationDefinition;
    }
