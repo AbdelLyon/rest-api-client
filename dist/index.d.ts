@@ -228,11 +228,7 @@ export declare interface DetailsValidationRules {
 
 declare type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
-declare type ExtractRelations<T> = {
-    [K in keyof T as T[K] extends {
-        operation: string;
-    } ? K : never]: T[K];
-};
+declare type ExtractRelations<T> = Pick<T, RelationKeys<T>>;
 
 export declare interface FieldSelection {
     field: string;
@@ -515,6 +511,12 @@ export declare interface RelationInclude {
     scopes?: Array<ScopeDefinition>;
     limit?: number;
 }
+
+declare type RelationKeys<T> = {
+    [K in keyof T]: T[K] extends {
+        operation: string;
+    } ? K : never;
+}[keyof T];
 
 export declare interface RequestConfig extends RequestInit {
     url: string;

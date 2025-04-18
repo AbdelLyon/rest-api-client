@@ -16,11 +16,11 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-// Type extraction pour obtenir seulement les relations d'un objet
-type ExtractRelations<T> = {
-   [K in keyof T as T[K] extends { operation: string; } ? K : never]: T[K]
-};
+type RelationKeys<T> = {
+   [K in keyof T]: T[K] extends { operation: string; } ? K : never
+}[keyof T];
 
+type ExtractRelations<T> = Pick<T, RelationKeys<T>>;
 // Type plus précis pour les opérations de mutation avec relations typées
 type TypedMutationOperation<TModel, TRelations = {}> = {
    operation: "create" | "update";
