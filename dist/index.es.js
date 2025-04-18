@@ -1,15 +1,15 @@
 var I = Object.defineProperty;
-var R = (h, e, t) => e in h ? I(h, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : h[e] = t;
-var i = (h, e, t) => R(h, typeof e != "symbol" ? e + "" : e, t);
-class d extends Error {
+var R = (u, e, t) => e in u ? I(u, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : u[e] = t;
+var o = (u, e, t) => R(u, typeof e != "symbol" ? e + "" : e, t);
+class f extends Error {
   constructor(t, s) {
     const r = t instanceof Error ? t.message : "API Service Request Failed";
     super(r);
-    i(this, "status");
-    i(this, "statusText");
-    i(this, "data");
-    i(this, "originalError");
-    i(this, "requestConfig");
+    o(this, "status");
+    o(this, "statusText");
+    o(this, "data");
+    o(this, "originalError");
+    o(this, "requestConfig");
     if (this.name = "ApiRequestError", this.originalError = t, this.requestConfig = s, t && typeof t == "object") {
       const a = t;
       if ("status" in a && (this.status = a.status), "statusText" in a && (this.statusText = a.statusText), "data" in a && (this.data = a.data), "response" in a && a.response instanceof Response) {
@@ -17,7 +17,7 @@ class d extends Error {
         this.status = n.status, this.statusText = n.statusText;
       }
     }
-    Error.captureStackTrace && Error.captureStackTrace(this, d);
+    Error.captureStackTrace && Error.captureStackTrace(this, f);
   }
   // Méthodes utilitaires pour vérifier le type d'erreur
   isNotFound() {
@@ -38,11 +38,11 @@ class d extends Error {
 }
 const c = class c {
   constructor() {
-    i(this, "baseURL");
-    i(this, "defaultTimeout");
-    i(this, "defaultHeaders");
-    i(this, "withCredentials");
-    i(this, "maxRetries");
+    o(this, "baseURL");
+    o(this, "defaultTimeout");
+    o(this, "defaultHeaders");
+    o(this, "withCredentials");
+    o(this, "maxRetries");
     this.baseURL = "", this.defaultTimeout = 1e4, this.defaultHeaders = {}, this.withCredentials = !0, this.maxRetries = 3;
   }
   /**
@@ -187,28 +187,28 @@ const c = class c {
    */
   async fetchWithRetry(e, t, s = 1) {
     try {
-      const { timeout: r = this.defaultTimeout, params: a, data: n, ...o } = t;
-      let g = e;
+      const { timeout: r = this.defaultTimeout, params: a, data: n, ...i } = t;
+      let h = e;
       if (a && Object.keys(a).length > 0) {
-        const p = new URLSearchParams();
-        for (const [m, b] of Object.entries(a))
-          p.append(m, b);
-        g += `?${p.toString()}`;
+        const d = new URLSearchParams();
+        for (const [y, b] of Object.entries(a))
+          d.append(y, b);
+        h += `?${d.toString()}`;
       }
       const w = new AbortController(), S = setTimeout(() => w.abort("Request timeout"), r);
       let E;
       n !== void 0 && (E = typeof n == "string" ? n : JSON.stringify(n));
-      const f = await fetch(g, {
-        ...o,
+      const m = await fetch(h, {
+        ...i,
         body: E,
         signal: w.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(S), !f.ok && s < this.maxRetries && this.isRetryableError(f.status, t.method)) {
-        const p = Math.pow(2, s) * 100;
-        return await new Promise((m) => setTimeout(m, p)), this.fetchWithRetry(e, t, s + 1);
+      if (clearTimeout(S), !m.ok && s < this.maxRetries && this.isRetryableError(m.status, t.method)) {
+        const d = Math.pow(2, s) * 100;
+        return await new Promise((y) => setTimeout(y, d)), this.fetchWithRetry(e, t, s + 1);
       }
-      return f;
+      return m;
     } catch (r) {
       if (r instanceof DOMException && r.name === "AbortError")
         throw new Error(`Request timeout after ${t.timeout || this.defaultTimeout}ms`);
@@ -241,10 +241,10 @@ const c = class c {
         ...r,
         url: a
       });
-      let o = await this.fetchWithRetry(a, n);
-      return o = await this.applyResponseSuccessInterceptors(o), (s = o.headers.get("content-type")) != null && s.includes("application/json") ? await o.json() : await o.text();
+      let i = await this.fetchWithRetry(a, n);
+      return i = await this.applyResponseSuccessInterceptors(i), (s = i.headers.get("content-type")) != null && s.includes("application/json") ? await i.json() : await i.text();
     } catch (r) {
-      const a = r instanceof d ? r : new d(r, {
+      const a = r instanceof f ? r : new f(r, {
         ...e,
         ...t,
         url: e.url
@@ -253,15 +253,15 @@ const c = class c {
     }
   }
 };
-i(c, "instances", /* @__PURE__ */ new Map()), i(c, "defaultInstanceName"), // Intercepteurs statiques
-i(c, "requestInterceptors", []), i(c, "responseSuccessInterceptors", []), i(c, "responseErrorInterceptors", []);
+o(c, "instances", /* @__PURE__ */ new Map()), o(c, "defaultInstanceName"), // Intercepteurs statiques
+o(c, "requestInterceptors", []), o(c, "responseSuccessInterceptors", []), o(c, "responseErrorInterceptors", []);
 let l = c;
-const u = class u {
+const p = class p {
   constructor() {
-    i(this, "mutate", []);
+    o(this, "mutate", []);
   }
   static createBuilder() {
-    return u.instance || (u.instance = new u()), u.instance;
+    return p.instance || (p.instance = new p()), p.instance;
   }
   createEntity(e) {
     const t = {}, s = {};
@@ -276,8 +276,8 @@ const u = class u {
   }
   updateEntity(e, t) {
     const s = {}, r = {};
-    for (const [n, o] of Object.entries(t))
-      o && typeof o == "object" && "operation" in o ? r[n] = o : s[n] = o;
+    for (const [n, i] of Object.entries(t))
+      i && typeof i == "object" && "operation" in i ? r[n] = i : s[n] = i;
     const a = {
       operation: "update",
       key: e,
@@ -287,43 +287,26 @@ const u = class u {
     return this.mutate.push(a), this;
   }
   /**
-   * Crée une relation avec des attributs donnés.
-   * Retourne un objet qui correspond au type T tout en étant une relation.
+   * Crée une relation avec des attributs donnés et des relations optionnelles.
+   * @param attributes Les attributs de la relation
+   * @param relations Les relations imbriquées explicites (optionnel)
    */
-  createRelation(e) {
-    const t = {}, s = {};
-    if (e && typeof e == "object")
-      for (const [a, n] of Object.entries(e))
-        n && typeof n == "object" && "operation" in n ? s[a] = n : t[a] = n;
-    const r = {
-      operation: "create",
-      attributes: t,
-      ...Object.keys(s).length > 0 && { relations: s },
-      __relationDefinition: !0
-    };
-    if (e && typeof e == "object")
-      for (const a of Object.keys(t))
-        Object.defineProperty(r, a, {
-          get() {
-            return t[a];
-          },
-          enumerable: !0
-        });
-    return r;
-  }
-  updateRelation(e, t) {
+  createRelation(e, t) {
     const s = {}, r = {};
-    if (t && typeof t == "object")
-      for (const [n, o] of Object.entries(t))
-        o && typeof o == "object" && "operation" in o ? r[n] = o : s[n] = o;
+    if (!t && e && typeof e == "object")
+      for (const [n, i] of Object.entries(e))
+        i && typeof i == "object" && "operation" in i ? r[n] = i : s[n] = i;
+    else if (e && typeof e == "object")
+      for (const [n, i] of Object.entries(e))
+        i && typeof i == "object" && "operation" in i || (s[n] = i);
     const a = {
-      operation: "update",
-      key: e,
+      operation: "create",
       attributes: s,
-      ...Object.keys(r).length > 0 && { relations: r },
+      // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
+      ...t ? { relations: t } : Object.keys(r).length > 0 ? { relations: r } : {},
       __relationDefinition: !0
     };
-    if (t && typeof t == "object")
+    if (e && typeof e == "object")
       for (const n of Object.keys(s))
         Object.defineProperty(a, n, {
           get() {
@@ -332,6 +315,38 @@ const u = class u {
           enumerable: !0
         });
     return a;
+  }
+  /**
+   * Met à jour une relation avec des attributs donnés et des relations optionnelles.
+   * @param key La clé de la relation à mettre à jour
+   * @param attributes Les attributs de la relation
+   * @param relations Les relations imbriquées explicites (optionnel)
+   */
+  updateRelation(e, t, s) {
+    const r = {}, a = {};
+    if (!s && t && typeof t == "object")
+      for (const [i, h] of Object.entries(t))
+        h && typeof h == "object" && "operation" in h ? a[i] = h : r[i] = h;
+    else if (t && typeof t == "object")
+      for (const [i, h] of Object.entries(t))
+        h && typeof h == "object" && "operation" in h || (r[i] = h);
+    const n = {
+      operation: "update",
+      key: e,
+      attributes: r,
+      // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
+      ...s ? { relations: s } : Object.keys(a).length > 0 ? { relations: a } : {},
+      __relationDefinition: !0
+    };
+    if (t && typeof t == "object")
+      for (const i of Object.keys(r))
+        Object.defineProperty(n, i, {
+          get() {
+            return r[i];
+          },
+          enumerable: !0
+        });
+    return n;
   }
   attach(e) {
     return {
@@ -366,15 +381,15 @@ const u = class u {
     return this.mutate;
   }
 };
-i(u, "instance");
-let y = u;
-class k {
+o(p, "instance");
+let g = p;
+class j {
   constructor(e, t) {
-    i(this, "http");
-    i(this, "builder");
-    i(this, "pathname");
-    i(this, "schema");
-    this.http = l.getInstance(), this.builder = y.createBuilder(), this.pathname = e, this.schema = t;
+    o(this, "http");
+    o(this, "builder");
+    o(this, "pathname");
+    o(this, "schema");
+    this.http = l.getInstance(), this.builder = g.createBuilder(), this.pathname = e, this.schema = t;
   }
   validateData(e) {
     return e.map((t) => {
@@ -449,11 +464,11 @@ class k {
     };
   }
 }
-class q {
+class k {
   constructor(e, t) {
-    i(this, "http");
-    i(this, "pathname");
-    i(this, "schema");
+    o(this, "http");
+    o(this, "pathname");
+    o(this, "schema");
     this.http = l.getInstance(), this.pathname = e, this.schema = t;
   }
   validateData(e) {
@@ -499,12 +514,12 @@ class q {
 }
 class O {
   constructor(e, t) {
-    i(this, "http");
-    i(this, "pathname");
-    i(this, "userSchema");
-    i(this, "credentialsSchema");
-    i(this, "registerDataSchema");
-    i(this, "tokenSchema");
+    o(this, "http");
+    o(this, "pathname");
+    o(this, "userSchema");
+    o(this, "credentialsSchema");
+    o(this, "registerDataSchema");
+    o(this, "tokenSchema");
     this.http = l.getInstance(), this.pathname = e, this.userSchema = t.user, this.credentialsSchema = t.credentials, this.registerDataSchema = t.registerData, this.tokenSchema = t.tokens;
   }
   /**
@@ -585,7 +600,7 @@ class O {
 export {
   O as Auth,
   l as HttpClient,
-  k as Mutation,
-  q as Query
+  j as Mutation,
+  k as Query
 };
 //# sourceMappingURL=index.es.js.map

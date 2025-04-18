@@ -99,20 +99,27 @@ declare class Builder<TModel> {
     createEntity<T extends Record<string, unknown>>(attributes: T): this;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
     /**
-     * Crée une relation avec des attributs donnés.
-     * Retourne un objet qui correspond au type T tout en étant une relation.
+     * Crée une relation avec des attributs donnés et des relations optionnelles.
+     * @param attributes Les attributs de la relation
+     * @param relations Les relations imbriquées explicites (optionnel)
      */
-    createRelation<T>(attributes: T): T & {
+    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<unknown, R>>): T & {
         operation: "create";
         attributes: T;
-        relations?: Record<string, RelationDefinition_2<unknown>>;
+        relations?: Record<string, RelationDefinition_2<unknown, R>>;
         __relationDefinition?: true;
     };
-    updateRelation<T>(key: string | number, attributes: T): T & {
+    /**
+     * Met à jour une relation avec des attributs donnés et des relations optionnelles.
+     * @param key La clé de la relation à mettre à jour
+     * @param attributes Les attributs de la relation
+     * @param relations Les relations imbriquées explicites (optionnel)
+     */
+    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<unknown, R>>): T & {
         operation: "update";
         key: string | number;
         attributes: T;
-        relations?: Record<string, RelationDefinition_2<unknown>>;
+        relations?: Record<string, RelationDefinition_2<unknown, R>>;
         __relationDefinition?: true;
     };
     attach(key: string | number): AttachRelationDefinition;
@@ -443,16 +450,16 @@ export declare type RelationDefinition<T, InCreateContext extends boolean = fals
     };
 }) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
-declare type RelationDefinition_2<T = unknown> = {
+declare type RelationDefinition_2<T = unknown, R = unknown> = {
     operation: "create";
     attributes: T;
-    relations?: Record<string, RelationDefinition_2<unknown>>;
+    relations?: Record<string, RelationDefinition_2<R, unknown>>;
     __relationDefinition?: true;
 } | {
     operation: "update";
     key: string | number;
     attributes: T;
-    relations?: Record<string, RelationDefinition_2<unknown>>;
+    relations?: Record<string, RelationDefinition_2<R, unknown>>;
     __relationDefinition?: true;
 } | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 

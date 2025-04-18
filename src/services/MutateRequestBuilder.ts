@@ -2,9 +2,11 @@ import { AttachRelationDefinition, DetachRelationDefinition, SyncRelationDefinit
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
-type RelationDefinition<T = unknown> =
-   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; }
-   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; }
+// Type de relation avec paramètre générique pour le type des relations
+// Type de relation avec paramètre générique pour le type des relations
+type RelationDefinition<T = unknown, R = unknown> =
+   | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<R, unknown>>; __relationDefinition?: true; }
+   | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<R, unknown>>; __relationDefinition?: true; }
    | AttachRelationDefinition
    | DetachRelationDefinition
    | SyncRelationDefinition<T>
@@ -26,13 +28,13 @@ export class Builder<TModel> {
    ): this {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition<unknown>> = {};
+      const relations: Record<string, RelationDefinition<unknown, unknown>> = {};
 
       // Parcourir tous les attributs pour identifier les relations
       for (const [key, value] of Object.entries(attributes)) {
          // Vérifier si l'attribut est une relation (a une propriété 'operation')
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[key] = value as RelationDefinition<unknown>;
+            relations[key] = value as RelationDefinition<unknown, unknown>;
          } else {
             normalAttributes[key] = value;
          }
@@ -54,11 +56,11 @@ export class Builder<TModel> {
    ): this {
       // Même logique que createEntity pour séparer les attributs normaux des relations
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition<unknown>> = {};
+      const relations: Record<string, RelationDefinition<unknown, unknown>> = {};
 
       for (const [attrKey, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[attrKey] = value as RelationDefinition<unknown>;
+            relations[attrKey] = value as RelationDefinition<unknown, unknown>;
          } else {
             normalAttributes[attrKey] = value;
          }
@@ -76,21 +78,36 @@ export class Builder<TModel> {
    }
 
    /**
-    * Crée une relation avec des attributs donnés.
-    * Retourne un objet qui correspond au type T tout en étant une relation.
+    * Crée une relation avec des attributs donnés et des relations optionnelles.
+    * @param attributes Les attributs de la relation
+    * @param relations Les relations imbriquées explicites (optionnel)
     */
-   public createRelation<T>(
-      attributes: T
-   ): T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; } {
+   public createRelation<T, R = unknown>(
+      attributes: T,
+      relations?: Record<string, RelationDefinition<unknown, R>>
+   ): T & {
+      operation: "create";
+      attributes: T;
+      relations?: Record<string, RelationDefinition<unknown, R>>;
+      __relationDefinition?: true;
+   } {
       // Séparer les attributs normaux des attributs de relation pour les relations imbriquées
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<string, RelationDefinition<unknown>> = {};
+      const nestedRelations: Record<string, RelationDefinition<unknown, unknown>> = {};
 
-      if (attributes && typeof attributes === 'object') {
+      // Extraire les relations des attributs si elles ne sont pas fournies explicitement
+      if (!relations && attributes && typeof attributes === 'object') {
          for (const [key, value] of Object.entries(attributes as Record<string, unknown>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[key] = value as RelationDefinition<unknown>;
+               nestedRelations[key] = value as RelationDefinition<unknown, unknown>;
             } else {
+               normalAttributes[key] = value;
+            }
+         }
+      } else if (attributes && typeof attributes === 'object') {
+         // Si des relations sont fournies explicitement, extraire seulement les attributs normaux
+         for (const [key, value] of Object.entries(attributes as Record<string, unknown>)) {
+            if (!(value && typeof value === 'object' && 'operation' in value)) {
                normalAttributes[key] = value;
             }
          }
@@ -100,9 +117,15 @@ export class Builder<TModel> {
       const relationDefinition = {
          operation: "create",
          attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
+         // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
+         ...(relations ? { relations } : (Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})),
          __relationDefinition: true
-      } as T & { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; };
+      } as T & {
+         operation: "create";
+         attributes: T;
+         relations?: Record<string, RelationDefinition<unknown, R>>;
+         __relationDefinition?: true;
+      };
 
       // Pour les propriétés de l'objet original, créer des getters qui renvoient les valeurs
       // depuis attributes pour que l'objet relation se comporte comme l'objet original
@@ -120,19 +143,40 @@ export class Builder<TModel> {
       return relationDefinition;
    }
 
-   public updateRelation<T>(
+   /**
+    * Met à jour une relation avec des attributs donnés et des relations optionnelles.
+    * @param key La clé de la relation à mettre à jour
+    * @param attributes Les attributs de la relation
+    * @param relations Les relations imbriquées explicites (optionnel)
+    */
+   public updateRelation<T, R = unknown>(
       key: string | number,
-      attributes: T
-   ): T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; } {
-      // Même logique pour les relations imbriquées
+      attributes: T,
+      relations?: Record<string, RelationDefinition<unknown, R>>
+   ): T & {
+      operation: "update";
+      key: string | number;
+      attributes: T;
+      relations?: Record<string, RelationDefinition<unknown, R>>;
+      __relationDefinition?: true;
+   } {
+      // Séparer les attributs normaux des attributs de relation pour les relations imbriquées
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<string, RelationDefinition<unknown>> = {};
+      const nestedRelations: Record<string, RelationDefinition<unknown, unknown>> = {};
 
-      if (attributes && typeof attributes === 'object') {
+      // Extraire les relations des attributs si elles ne sont pas fournies explicitement
+      if (!relations && attributes && typeof attributes === 'object') {
          for (const [attrKey, value] of Object.entries(attributes as Record<string, unknown>)) {
             if (value && typeof value === 'object' && 'operation' in value) {
-               nestedRelations[attrKey] = value as RelationDefinition<unknown>;
+               nestedRelations[attrKey] = value as RelationDefinition<unknown, unknown>;
             } else {
+               normalAttributes[attrKey] = value;
+            }
+         }
+      } else if (attributes && typeof attributes === 'object') {
+         // Si des relations sont fournies explicitement, extraire seulement les attributs normaux
+         for (const [attrKey, value] of Object.entries(attributes as Record<string, unknown>)) {
+            if (!(value && typeof value === 'object' && 'operation' in value)) {
                normalAttributes[attrKey] = value;
             }
          }
@@ -142,9 +186,16 @@ export class Builder<TModel> {
          operation: "update",
          key,
          attributes: normalAttributes as T,
-         ...(Object.keys(nestedRelations).length > 0 && { relations: nestedRelations }),
+         // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
+         ...(relations ? { relations } : (Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})),
          __relationDefinition: true
-      } as T & { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<unknown>>; __relationDefinition?: true; };
+      } as T & {
+         operation: "update";
+         key: string | number;
+         attributes: T;
+         relations?: Record<string, RelationDefinition<unknown, R>>;
+         __relationDefinition?: true;
+      };
 
       // Même approche avec les getters
       if (attributes && typeof attributes === 'object') {
