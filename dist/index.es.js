@@ -393,7 +393,7 @@ const p = class p {
   }
   build() {
     const t = [...this.operations];
-    return this.operations = [], t;
+    return this.operations = [], { mutate: t };
   }
   async mutate(t) {
     if (!this.mutationFn)
@@ -423,7 +423,7 @@ class j {
     });
   }
   async mutate(t, e) {
-    const s = Array.isArray(t) ? t : t.build();
+    const s = "build" in t ? t.build() : t;
     return await this.http.request(
       {
         method: "POST",

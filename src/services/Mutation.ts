@@ -40,11 +40,10 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate(
-    mutateRequest: BuildOnly<T> | Array<any>,
+    mutateRequest: BuildOnly<T>,
     options?: Partial<RequestConfig>
   ): Promise<MutationResponse> {
-    // Déterminer si c'est un BuildOnly ou directement un tableau d'opérations
-    const data = Array.isArray(mutateRequest) ? mutateRequest : mutateRequest.build();
+    const data = 'build' in mutateRequest ? mutateRequest.build() : mutateRequest;
 
     const response = await this.http.request<MutationResponse>(
       {

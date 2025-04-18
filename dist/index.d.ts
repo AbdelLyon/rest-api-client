@@ -93,7 +93,7 @@ declare interface BaseRelationDefinition {
 }
 
 declare interface BuildOnly<TModel, TRelations = {}> {
-    build(): Array<TypedMutationOperation<TModel, TRelations>>;
+    build(): MutationRequest<TModel, TRelations>;
     mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
@@ -307,7 +307,7 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 }
 
 declare interface IBuilder<TModel> {
-    build(): Array<TypedMutationOperation<TModel, {}>>;
+    build(): MutationRequest<TModel, {}>;
     createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
     createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
@@ -367,7 +367,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate(mutateRequest: BuildOnly<T> | Array<any>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -391,6 +391,10 @@ export declare interface MutationOperation<TAttributes> {
     relations?: Record<string, any>;
     key?: string | number;
 }
+
+declare type MutationRequest<TModel, TRelations = {}> = {
+    mutate: Array<TypedMutationOperation<TModel, TRelations>>;
+};
 
 export declare interface MutationResponse {
     created: Array<string | number>;

@@ -27,6 +27,11 @@ type TypedMutationOperation<TModel, TRelations = {}> = {
    relations: TRelations;
 };
 
+type MutationRequest<TModel, TRelations = {}> = {
+   mutate: Array<TypedMutationOperation<TModel, TRelations>>;
+};
+
+
 // Interface pour la fonction de mutation
 export interface MutationFunction {
    (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
@@ -34,13 +39,13 @@ export interface MutationFunction {
 
 // Interface qui expose uniquement build() et mutate() avec relations typées
 export interface BuildOnly<TModel, TRelations = {}> {
-   build(): Array<TypedMutationOperation<TModel, TRelations>>;
+   build(): MutationRequest<TModel, TRelations>;
    mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
 // Interface complète pour le builder initial
 export interface IBuilder<TModel> {
-   build(): Array<TypedMutationOperation<TModel, {}>>;
+   build(): MutationRequest<TModel, {}>;
 
    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T
@@ -352,11 +357,12 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
       };
    }
 
-   public build(): Array<TypedMutationOperation<TModel, any>> {
+   public build(): MutationRequest<TModel, any> {
       const result = [...this.operations];
-      this.operations = []; // Réinitialiser le builder pour une utilisation future
-      return result;
+      this.operations = []; // Réinitialiser le builder
+      return { mutate: result };
    }
+
 
    public async mutate(options?: Partial<RequestConfig>): Promise<MutationResponse> {
       if (!this.mutationFn) {
