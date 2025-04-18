@@ -1,4 +1,10 @@
-import { AttachRelationDefinition, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, MutationOperation } from "@/types/mutate";
+import {
+   AttachRelationDefinition,
+   DetachRelationDefinition,
+   SyncRelationDefinition,
+   ToggleRelationDefinition,
+   MutationOperation,
+} from "@/types/mutate";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
@@ -11,15 +17,90 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-export class Builder<TModel> {
+// Méthodes communes à tous les états du builder
+interface CommonBuilderMethods<TModel> {
+   build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+
+   createRelation<T, R = unknown>(
+      attributes: T,
+      relations?: Record<string, RelationDefinition<R, unknown>>
+   ): T & {
+      operation: "create";
+      attributes: T;
+      relations?: Record<string, RelationDefinition<R, unknown>>;
+      __relationDefinition?: true;
+   };
+
+   updateRelation<T, R = unknown>(
+      key: string | number,
+      attributes: T,
+      relations?: Record<string, RelationDefinition<R, unknown>>
+   ): T & {
+      operation: "update";
+      key: string | number;
+      attributes: T;
+      relations?: Record<string, RelationDefinition<R, unknown>>;
+      __relationDefinition?: true;
+   };
+
+   attach(key: string | number): AttachRelationDefinition;
+   detach(key: string | number): DetachRelationDefinition;
+
+   sync<T>(
+      key: string | number | Array<string | number>,
+      attributes?: T,
+      pivot?: Record<string, string | number>,
+      withoutDetaching?: boolean
+   ): SyncRelationDefinition<T>;
+
+   toggle<T>(
+      key: string | number | Array<string | number>,
+      attributes?: T,
+      pivot?: Record<string, string | number>
+   ): ToggleRelationDefinition<T>;
+}
+
+// État initial du builder
+export interface InitialBuilder<TModel> extends CommonBuilderMethods<TModel> {
+   createEntity<T extends Record<string, unknown>>(
+      attributes: T
+   ): CreateOnlyBuilder<TModel>;
+
+   updateEntity<T extends Record<string, unknown>>(
+      key: string | number,
+      attributes: T
+   ): UpdateOnlyBuilder<TModel>;
+}
+
+// État après avoir appelé createEntity
+interface CreateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
+   createEntity<T extends Record<string, unknown>>(
+      attributes: T
+   ): CreateOnlyBuilder<TModel>;
+
+   // Pas de méthode updateEntity
+}
+
+// État après avoir appelé updateEntity
+interface UpdateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
+   updateEntity<T extends Record<string, unknown>>(
+      key: string | number,
+      attributes: T
+   ): UpdateOnlyBuilder<TModel>;
+
+   // Pas de méthode createEntity
+}
+
+export class Builder<TModel> implements InitialBuilder<TModel> {
    private static instance: Builder<unknown>;
    private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
 
-   public static createBuilder<T>(): Builder<T> {
+   // Méthode factory pour créer une nouvelle instance du builder
+   public static createBuilder<T>(): InitialBuilder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
-      return Builder.instance as Builder<T>;
+      return Builder.instance as InitialBuilder<T>;
    }
 
    /**
@@ -28,7 +109,7 @@ export class Builder<TModel> {
     */
    public createEntity<T extends Record<string, unknown>, R = unknown>(
       attributes: T
-   ): this {
+   ): CreateOnlyBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, RelationDefinition<R, unknown>> = {};
@@ -50,7 +131,7 @@ export class Builder<TModel> {
       };
 
       this.mutate.push(operation);
-      return this;
+      return this as unknown as CreateOnlyBuilder<TModel>;
    }
 
    /**
@@ -61,7 +142,7 @@ export class Builder<TModel> {
    public updateEntity<T extends Record<string, unknown>, R = unknown>(
       key: string | number,
       attributes: T
-   ): this {
+   ): UpdateOnlyBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, RelationDefinition<R, unknown>> = {};
@@ -82,7 +163,7 @@ export class Builder<TModel> {
       };
 
       this.mutate.push(operation);
-      return this;
+      return this as unknown as UpdateOnlyBuilder<TModel>;
    }
 
    /**
@@ -263,6 +344,8 @@ export class Builder<TModel> {
    }
 
    public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
-      return this.mutate;
+      const result = [...this.mutate];
+      this.mutate = []; // Réinitialiser le builder pour une utilisation future
+      return result;
    }
 }

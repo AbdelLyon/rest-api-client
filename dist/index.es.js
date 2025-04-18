@@ -260,6 +260,7 @@ const p = class p {
   constructor() {
     o(this, "mutate", []);
   }
+  // Méthode factory pour créer une nouvelle instance du builder
   static createBuilder() {
     return p.instance || (p.instance = new p()), p.instance;
   }
@@ -387,7 +388,8 @@ const p = class p {
     };
   }
   build() {
-    return this.mutate;
+    const e = [...this.mutate];
+    return this.mutate = [], e;
   }
 };
 o(p, "instance");
