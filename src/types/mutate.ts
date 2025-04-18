@@ -198,7 +198,15 @@ export interface BuildOnly<TModel, TRelations = {}> {
 // Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-    attributes: T
+    attributes: {
+      [K in keyof T]: K extends RelationKeys
+      ? T[K] extends { operation: string; }
+      ? T[K] extends { operation: "update"; } | { operation: "detach"; }
+      ? never
+      : T[K]
+      : T[K]
+      : T[K]
+    }
   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
   updateEntity<T extends Record<string, unknown>>(

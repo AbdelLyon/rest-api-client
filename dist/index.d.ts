@@ -275,7 +275,15 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 }
 
 declare interface IEntityBuilder<TModel> {
-    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: {
+        [K in keyof T]: K extends RelationKeys ? T[K] extends {
+            operation: string;
+        } ? T[K] extends {
+            operation: "update";
+        } | {
+            operation: "detach";
+        } ? never : T[K] : T[K] : T[K];
+    }): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IEntityBuilder<TModel>;
     build(): MutationRequest<TModel>;
     setMutationFunction(fn: MutationFunction): void;
