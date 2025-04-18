@@ -1,5 +1,5 @@
-var b = Object.defineProperty;
-var T = (u, e, t) => e in u ? b(u, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : u[e] = t;
+var S = Object.defineProperty;
+var T = (u, e, t) => e in u ? S(u, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : u[e] = t;
 var i = (u, e, t) => T(u, typeof e != "symbol" ? e + "" : e, t);
 class f extends Error {
   constructor(t, r) {
@@ -147,11 +147,11 @@ const h = class h {
       let c = e;
       if (a && Object.keys(a).length > 0) {
         const d = new URLSearchParams();
-        for (const [g, S] of Object.entries(a))
-          d.append(g, S);
+        for (const [g, I] of Object.entries(a))
+          d.append(g, I);
         c += `?${d.toString()}`;
       }
-      const w = new AbortController(), I = setTimeout(() => w.abort("Request timeout"), s);
+      const w = new AbortController(), R = setTimeout(() => w.abort("Request timeout"), s);
       let E;
       o !== void 0 && (E = typeof o == "string" ? o : JSON.stringify(o));
       const y = await fetch(c, {
@@ -160,7 +160,7 @@ const h = class h {
         signal: w.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(I), !y.ok && r < this.maxRetries && this.isRetryableError(y.status, t.method)) {
+      if (clearTimeout(R), !y.ok && r < this.maxRetries && this.isRetryableError(y.status, t.method)) {
         const d = Math.pow(2, r) * 100;
         return await new Promise((g) => setTimeout(g, d)), this.fetchWithRetry(e, t, r + 1);
       }
@@ -208,7 +208,7 @@ const h = class h {
 };
 i(h, "instances", /* @__PURE__ */ new Map()), i(h, "defaultInstanceName"), i(h, "requestInterceptors", []), i(h, "responseSuccessInterceptors", []), i(h, "responseErrorInterceptors", []);
 let p = h;
-class R {
+class b {
   createRelation(e, t) {
     const r = {}, s = {};
     if (!t && e && typeof e == "object")
@@ -223,7 +223,12 @@ class R {
       ...t ? { relations: t } : Object.keys(s).length > 0 ? { relations: s } : {},
       __relationDefinition: !0
     };
-    if (e && typeof e == "object")
+    if (Object.defineProperty(a, "__relationDefinition", {
+      value: !0,
+      enumerable: !1,
+      writable: !1,
+      configurable: !0
+    }), e && typeof e == "object")
       for (const o of Object.keys(r))
         Object.defineProperty(a, o, {
           get() {
@@ -288,7 +293,7 @@ class R {
     };
   }
 }
-class j extends R {
+class j extends b {
   constructor(t) {
     super();
     i(this, "operations", []);
@@ -353,7 +358,7 @@ class j extends R {
 }
 const l = class l {
   static getRelationBuilder() {
-    return l.relationInstance || (l.relationInstance = new R()), l.relationInstance;
+    return l.relationInstance || (l.relationInstance = new b()), l.relationInstance;
   }
   static createEntityBuilder(e) {
     return new j(e || l.getRelationBuilder());

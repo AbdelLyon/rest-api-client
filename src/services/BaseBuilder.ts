@@ -51,6 +51,14 @@ export class BaseBuilder implements IRelationBuilder {
          __relationDefinition?: true;
       };
 
+      Object.defineProperty(relationDefinition, '__relationDefinition', {
+         value: true,
+         enumerable: false,
+         writable: false,
+         configurable: true
+      });
+
+
       if (attributes && typeof attributes === 'object') {
          for (const key of Object.keys(normalAttributes)) {
             Object.defineProperty(relationDefinition, key, {

@@ -183,3 +183,7 @@ export interface IEntityBuilder<TModel> {
 
   setMutationFunction(fn: MutationFunction): void;
 }
+
+export type RelationResult<T, Op extends string> = T & {
+  operation: Op;
+};
