@@ -17,9 +17,23 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-// Méthodes communes à tous les états du builder
-interface CommonBuilderMethods<TModel> {
+// Interface qui expose uniquement build()
+interface BuildOnly<TModel> {
    build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+}
+
+// Interface complète pour le builder initial
+export interface FullBuilder<TModel> {
+   build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+
+   createEntity<T extends Record<string, unknown>>(
+      attributes: T
+   ): BuildOnly<TModel>;
+
+   updateEntity<T extends Record<string, unknown>>(
+      key: string | number,
+      attributes: T
+   ): FullBuilder<TModel>;
 
    createRelation<T, R = unknown>(
       attributes: T,
@@ -60,47 +74,15 @@ interface CommonBuilderMethods<TModel> {
    ): ToggleRelationDefinition<T>;
 }
 
-// État initial du builder
-export interface InitialBuilder<TModel> extends CommonBuilderMethods<TModel> {
-   createEntity<T extends Record<string, unknown>>(
-      attributes: T
-   ): CreateOnlyBuilder<TModel>;
-
-   updateEntity<T extends Record<string, unknown>>(
-      key: string | number,
-      attributes: T
-   ): UpdateOnlyBuilder<TModel>;
-}
-
-// État après avoir appelé createEntity
-interface CreateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
-   createEntity<T extends Record<string, unknown>>(
-      attributes: T
-   ): CreateOnlyBuilder<TModel>;
-
-   // Pas de méthode updateEntity
-}
-
-// État après avoir appelé updateEntity
-interface UpdateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
-   updateEntity<T extends Record<string, unknown>>(
-      key: string | number,
-      attributes: T
-   ): UpdateOnlyBuilder<TModel>;
-
-   // Pas de méthode createEntity
-}
-
-export class Builder<TModel> implements InitialBuilder<TModel> {
+export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
    private static instance: Builder<unknown>;
    private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
 
-   // Méthode factory pour créer une nouvelle instance du builder
-   public static createBuilder<T>(): InitialBuilder<T> {
+   public static createBuilder<T>(): FullBuilder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
-      return Builder.instance as InitialBuilder<T>;
+      return Builder.instance as FullBuilder<T>;
    }
 
    /**
@@ -109,7 +91,7 @@ export class Builder<TModel> implements InitialBuilder<TModel> {
     */
    public createEntity<T extends Record<string, unknown>, R = unknown>(
       attributes: T
-   ): CreateOnlyBuilder<TModel> {
+   ): BuildOnly<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, RelationDefinition<R, unknown>> = {};
@@ -131,7 +113,7 @@ export class Builder<TModel> implements InitialBuilder<TModel> {
       };
 
       this.mutate.push(operation);
-      return this as unknown as CreateOnlyBuilder<TModel>;
+      return this as unknown as BuildOnly<TModel>;
    }
 
    /**
@@ -142,7 +124,7 @@ export class Builder<TModel> implements InitialBuilder<TModel> {
    public updateEntity<T extends Record<string, unknown>, R = unknown>(
       key: string | number,
       attributes: T
-   ): UpdateOnlyBuilder<TModel> {
+   ): FullBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, RelationDefinition<R, unknown>> = {};
@@ -163,7 +145,7 @@ export class Builder<TModel> implements InitialBuilder<TModel> {
       };
 
       this.mutate.push(operation);
-      return this as unknown as UpdateOnlyBuilder<TModel>;
+      return this;
    }
 
    /**

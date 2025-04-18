@@ -92,21 +92,21 @@ declare interface BaseRelationDefinition {
     operation: RelationDefinitionType;
 }
 
-declare class Builder<TModel> implements InitialBuilder<TModel> {
+declare class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
     private static instance;
     private mutate;
-    static createBuilder<T>(): InitialBuilder<T>;
+    static createBuilder<T>(): FullBuilder<T>;
     /**
      * Crée une entité avec les attributs donnés, y compris des relations imbriquées
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    createEntity<T extends Record<string, unknown>, R = unknown>(attributes: T): CreateOnlyBuilder<TModel>;
+    createEntity<T extends Record<string, unknown>, R = unknown>(attributes: T): BuildOnly<TModel>;
     /**
      * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
      * @param key La clé de l'entité à mettre à jour
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    updateEntity<T extends Record<string, unknown>, R = unknown>(key: string | number, attributes: T): UpdateOnlyBuilder<TModel>;
+    updateEntity<T extends Record<string, unknown>, R = unknown>(key: string | number, attributes: T): FullBuilder<TModel>;
     /**
      * Crée une relation avec des attributs donnés et des relations optionnelles.
      * @param attributes Les attributs de la relation
@@ -138,35 +138,14 @@ declare class Builder<TModel> implements InitialBuilder<TModel> {
     build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
 }
 
-declare interface CommonBuilderMethods<TModel> {
+declare interface BuildOnly<TModel> {
     build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "create";
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "update";
-        key: string | number;
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    attach(key: string | number): AttachRelationDefinition;
-    detach(key: string | number): DetachRelationDefinition;
-    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
-    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
 export declare interface CreateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, true> {
     operation: "create";
-}
-
-declare interface CreateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
-    createEntity<T extends Record<string, unknown>>(attributes: T): CreateOnlyBuilder<TModel>;
 }
 
 declare interface CreateRelationDefinitionBase<T> extends BaseRelationDefinition {
@@ -260,6 +239,29 @@ export declare interface FilterCriteria {
     operator: ComparisonOperator;
     value: string | number | boolean | Array<string | number | boolean>;
     type?: LogicalOperator;
+}
+
+declare interface FullBuilder<TModel> {
+    build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel>;
+    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): FullBuilder<TModel>;
+    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
+        operation: "create";
+        attributes: T;
+        relations?: Record<string, RelationDefinition_2<R, unknown>>;
+        __relationDefinition?: true;
+    };
+    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
+        operation: "update";
+        key: string | number;
+        attributes: T;
+        relations?: Record<string, RelationDefinition_2<R, unknown>>;
+        __relationDefinition?: true;
+    };
+    attach(key: string | number): AttachRelationDefinition;
+    detach(key: string | number): DetachRelationDefinition;
+    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
+    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
 }
 
 export declare class HttpClient implements IHttpClient {
@@ -384,11 +386,6 @@ export declare interface IMutation<T> {
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-declare interface InitialBuilder<TModel> extends CommonBuilderMethods<TModel> {
-    createEntity<T extends Record<string, unknown>>(attributes: T): CreateOnlyBuilder<TModel>;
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): UpdateOnlyBuilder<TModel>;
-}
-
 export declare interface Instruction {
     name: string;
     fields: Array<InstructionField>;
@@ -409,7 +406,7 @@ export declare type LogicalOperator = "and" | "or";
 
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
-    builder: InitialBuilder<T>;
+    builder: FullBuilder<T>;
     protected pathname: string;
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
@@ -587,10 +584,6 @@ export declare interface ToggleRelationDefinition<T> extends BaseRelationDefinit
 export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
     operation: "update";
     key: string | number;
-}
-
-declare interface UpdateOnlyBuilder<TModel> extends CommonBuilderMethods<TModel> {
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): UpdateOnlyBuilder<TModel>;
 }
 
 declare interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition {
