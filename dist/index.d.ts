@@ -50,12 +50,6 @@ export declare interface AttachRelationDefinition extends BaseRelationDefinition
     key: string | number;
 }
 
-declare type AttachRelationOperation = {
-    operation: "attach";
-    key: string | number;
-    __relationDefinition?: true;
-};
-
 export declare abstract class Auth<UserType extends object = {}, CredentialsType extends object = {}, RegisterDataType extends object = {}, TokenType extends object = {}> implements IAuth<UserType, CredentialsType, RegisterDataType, TokenType> {
     protected http: HttpClient;
     protected pathname: string;
@@ -96,6 +90,7 @@ export declare abstract class Auth<UserType extends object = {}, CredentialsType
 
 declare interface BaseRelationDefinition {
     operation: RelationDefinitionType;
+    __relationDefinition?: true;
 }
 
 declare interface BuildOnly<TModel, TRelations = {}> {
@@ -109,15 +104,10 @@ declare type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
     [K in keyof T]: K extends RelationKeys ? IsRelationOperation<T[K]> extends true ? IsValidCreateOperation<T[K]> extends true ? T[K] : never : T[K] : T[K];
 };
 
-export declare interface CreateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, true> {
-    operation: "create";
-}
-
-declare type CreateRelationOperation<T> = {
+declare interface CreateRelationOperation<T> extends BaseRelationDefinition {
     operation: "create";
     attributes: T;
-    __relationDefinition?: true;
-};
+}
 
 export declare interface DeleteRequest {
     resources: Array<number | string>;
@@ -134,12 +124,6 @@ export declare interface DetachRelationDefinition extends BaseRelationDefinition
     operation: "detach";
     key: string | number;
 }
-
-declare type DetachRelationOperation = {
-    operation: "detach";
-    key: string | number;
-    __relationDefinition?: true;
-};
 
 export declare interface DetailsAction {
     name: string;
@@ -285,21 +269,6 @@ declare interface IEntityBuilder<TModel> {
     setMutationFunction(fn: MutationFunction): void;
 }
 
-declare interface IEntityBuilder<TModel> {
-    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: {
-        [K in keyof T]: K extends RelationKeys ? T[K] extends {
-            operation: string;
-        } ? T[K] extends {
-            operation: "update";
-        } | {
-            operation: "detach";
-        } ? never : T[K] : T[K] : T[K];
-    }): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IEntityBuilder<TModel>;
-    build(): MutationRequest<TModel>;
-    setMutationFunction(fn: MutationFunction): void;
-}
-
 export declare interface IHttpClient {
     request: <TResponse>(config: RequestConfig, options?: Partial<RequestConfig>) => Promise<TResponse>;
 }
@@ -329,14 +298,14 @@ export declare interface IQuery<T> {
 }
 
 declare interface IRelationBuilder {
-    createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & CreateRelationOperation<T> & {
-        relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+    createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T, relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>): T & CreateRelationOperation<T> & {
+        relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
     };
-    updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & UpdateRelationOperation<T> & {
-        relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+    updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T, relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>): T & UpdateRelationOperation<T> & {
+        relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
     };
-    attach(key: string | number): AttachRelationOperation;
-    detach(key: string | number): DetachRelationOperation;
+    attach(key: string | number): AttachRelationDefinition;
+    detach(key: string | number): DetachRelationDefinition;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
     toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
 }
@@ -369,22 +338,8 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     restore(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
 }
 
-declare interface MutationData<TAttributes, TRelations, InCreateContext extends boolean> {
-    attributes: TAttributes;
-    relations?: {
-        [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any> ? RelationDefinition<T, InCreateContext> : never;
-    };
-}
-
 declare interface MutationFunction {
     (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
-}
-
-export declare interface MutationOperation<TAttributes> {
-    operation: "create" | "update";
-    attributes: TAttributes;
-    relations?: Record<string, any>;
-    key?: string | number;
 }
 
 declare type MutationRequest<TModel, TRelations = {}> = {
@@ -399,8 +354,6 @@ export declare interface MutationResponse {
 export declare interface NestedFilterCriteria {
     nested: Array<FilterCriteria>;
 }
-
-declare type NestedRelationOperation<T> = CreateRelationOperation<T> | AttachRelationOperation;
 
 export declare interface PaginatedSearchRequest extends SearchRequest {
     page?: number;
@@ -433,18 +386,7 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
-export declare type RelationDefinition<T = unknown, R = unknown> = {
-    operation: "create";
-    attributes: T;
-    relations?: Record<string, RelationDefinition<R, unknown>>;
-    __relationDefinition?: true;
-} | {
-    operation: "update";
-    key: string | number;
-    attributes: T;
-    relations?: Record<string, RelationDefinition<R, unknown>>;
-    __relationDefinition?: true;
-} | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
+export declare type RelationDefinition<T = unknown, InCreateContext extends boolean = false> = InCreateContext extends true ? ValidCreateNestedRelation<T> : ValidUpdateNestedRelation<T>;
 
 export declare type RelationDefinitionType = "create" | "update" | "attach" | "detach" | "sync" | "toggle";
 
@@ -535,16 +477,20 @@ declare type TypedMutationOperation<TModel, TRelations = {}> = {
     relations: TRelations;
 };
 
-export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
-    operation: "update";
-    key: string | number;
-}
-
-declare type UpdateRelationOperation<T> = {
+declare interface UpdateRelationOperation<T> extends BaseRelationDefinition {
     operation: "update";
     key: string | number;
     attributes: T;
-    __relationDefinition?: true;
-};
+}
+
+declare type ValidCreateNestedRelation<T> = (CreateRelationOperation<T> & {
+    relations?: Record<string, ValidCreateNestedRelation<any>>;
+}) | AttachRelationDefinition;
+
+declare type ValidUpdateNestedRelation<T> = (CreateRelationOperation<T> & {
+    relations?: Record<string, ValidCreateNestedRelation<any>>;
+}) | (UpdateRelationOperation<T> & {
+    relations?: Record<string, ValidUpdateNestedRelation<any>>;
+}) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
 export { }

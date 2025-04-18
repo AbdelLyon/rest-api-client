@@ -33,14 +33,11 @@ export type {
 export type {
   AttachRelationDefinition,
   RelationDefinition,
-  CreateMutationOperation,
   DetachRelationDefinition,
   SyncRelationDefinition,
-  MutationOperation,
   MutationResponse,
   RelationDefinitionType,
   ToggleRelationDefinition,
-  UpdateMutationOperation,
 
 } from "@/types/mutate";
 

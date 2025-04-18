@@ -1,5 +1,7 @@
 import { RequestConfig } from "./common";
 
+// ------------- Types de base pour les relations -------------
+
 export type RelationDefinitionType =
   | "create"
   | "update"
@@ -8,10 +10,13 @@ export type RelationDefinitionType =
   | "sync"
   | "toggle";
 
+// Base pour toutes les définitions de relation
 interface BaseRelationDefinition {
   operation: RelationDefinitionType;
+  __relationDefinition?: true; // Marqueur interne, défini comme non-énumérable
 }
 
+// Types spécifiques pour chaque opération de relation
 export interface AttachRelationDefinition extends BaseRelationDefinition {
   operation: "attach";
   key: string | number;
@@ -22,15 +27,17 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
   key: string | number;
 }
 
-export interface CreateRelationDefinitionBase<T> extends BaseRelationDefinition {
+export interface CreateRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
+  // relations sera défini séparément selon le contexte
 }
 
-export interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition {
+export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
   operation: "update";
   key: string | number;
   attributes: T;
+  // relations sera défini séparément selon le contexte
 }
 
 export interface SyncRelationDefinition<T> extends BaseRelationDefinition {
@@ -48,62 +55,33 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: Record<string, string | number>;
 }
 
+// ------------- Types pour les relations selon le contexte -------------
 
+// Relations valides dans un contexte de création
+export type ValidCreateNestedRelation<T> =
+  | (CreateRelationOperation<T> & { relations?: Record<string, ValidCreateNestedRelation<any>>; })
+  | AttachRelationDefinition;
 
-export interface MutationData<
-  TAttributes,
-  TRelations,
-  InCreateContext extends boolean
-> {
-  attributes: TAttributes;
-  relations?: {
-    [K in keyof TRelations]: TRelations[K] extends RelationDefinition<infer T, any>
-    ? RelationDefinition<T, InCreateContext>
-    : never
-  };
-};
-
-export interface CreateMutationOperation<
-  TAttributes,
-  TRelations
-> extends MutationData<TAttributes, TRelations, true> {
-  operation: "create";
-};
-
-export interface UpdateMutationOperation<
-  TAttributes,
-  TRelations
-> extends MutationData<TAttributes, TRelations, false> {
-  operation: "update";
-  key: string | number;
-};
-
-export interface MutationOperation<TAttributes> {
-  operation: "create" | "update";
-  attributes: TAttributes;
-  relations?: Record<string, any>;
-  key?: string | number;
-}
-
-
-
-export interface MutationResponse {
-  created: Array<string | number>;
-  updated: Array<string | number>;
-}
-
-
-export type ExtractModelAttributes<T> = Omit<T, 'relations'>;
-
-export type RelationDefinition<T = unknown, R = unknown> =
-  | { operation: "create"; attributes: T; relations?: Record<string, RelationDefinition<R, unknown>>; __relationDefinition?: true; }
-  | { operation: "update"; key: string | number; attributes: T; relations?: Record<string, RelationDefinition<R, unknown>>; __relationDefinition?: true; }
+// Relations valides dans un contexte de mise à jour
+export type ValidUpdateNestedRelation<T> =
+  | (CreateRelationOperation<T> & { relations?: Record<string, ValidCreateNestedRelation<any>>; })
+  | (UpdateRelationOperation<T> & { relations?: Record<string, ValidUpdateNestedRelation<any>>; })
   | AttachRelationDefinition
   | DetachRelationDefinition
   | SyncRelationDefinition<T>
   | ToggleRelationDefinition<T>;
 
-// Type plus précis pour les opérations de mutation avec relations typées
+// Type général pour une définition de relation (utilisé principalement pour la rétrocompatibilité)
+export type RelationDefinition<T = unknown, InCreateContext extends boolean = false> =
+  InCreateContext extends true
+  ? ValidCreateNestedRelation<T>
+  : ValidUpdateNestedRelation<T>;
+
+// ------------- Types pour les opérations de mutation -------------
+
+export type ExtractModelAttributes<T> = Omit<T, 'relations'>;
+
+// Type précis pour les opérations de mutation
 export type TypedMutationOperation<TModel, TRelations = {}> = {
   operation: "create" | "update";
   key?: string | number;
@@ -111,7 +89,7 @@ export type TypedMutationOperation<TModel, TRelations = {}> = {
   relations: TRelations;
 };
 
-// Type pour le format final de la requête de mutation
+// Format de la requête de mutation
 export type MutationRequest<TModel, TRelations = {}> = {
   mutate: Array<TypedMutationOperation<TModel, TRelations>>;
 };
@@ -121,57 +99,52 @@ export interface MutationFunction {
   (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
+// Réponse à une opération de mutation
+export interface MutationResponse {
+  created: Array<string | number>;
+  updated: Array<string | number>;
+}
 
-export type CreateRelationOperation<T> = {
-  operation: "create";
-  attributes: T;
-  __relationDefinition?: true;
+// ------------- Types utilitaires pour les validations -------------
+
+// Vérifie si un type est une opération de relation
+export type IsRelationOperation<T> = T extends { operation: string; } ? true : false;
+
+// Vérifie si une opération est valide dans un contexte de création
+export type IsValidCreateOperation<T> = T extends { operation: "update" | "detach"; } ? false : true;
+
+// Transforme les attributs pour valider les opérations dans un contexte de création
+export type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
+  [K in keyof T]: K extends RelationKeys
+  ? IsRelationOperation<T[K]> extends true
+  ? IsValidCreateOperation<T[K]> extends true
+  ? T[K]
+  : never // Interdit les opérations "update" et "detach"
+  : T[K]
+  : T[K]
 };
 
-export type UpdateRelationOperation<T> = {
-  operation: "update";
-  key: string | number;
-  attributes: T;
-  __relationDefinition?: true;
-};
+// ------------- Interfaces pour les builders -------------
 
-export type AttachRelationOperation = {
-  operation: "attach";
-  key: string | number;
-  __relationDefinition?: true;
-};
-
-export type DetachRelationOperation = {
-  operation: "detach";
-  key: string | number;
-  __relationDefinition?: true;
-};
-
-// Les types d'opérations valides pour des relations imbriquées
-export type NestedRelationOperation<T> =
-  | CreateRelationOperation<T>
-  | AttachRelationOperation;
-
-
-// Interface pour les méthodes de relation uniquement
+// Interface pour les méthodes de relation
 export interface IRelationBuilder {
   createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
     attributes: T,
-    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+    relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
   ): T & CreateRelationOperation<T> & {
-    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+    relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
   };
 
   updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
     key: string | number,
     attributes: T,
-    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+    relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
   ): T & UpdateRelationOperation<T> & {
-    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+    relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
   };
-  // Ces opérations ne peuvent pas contenir de relations imbriquées
-  attach(key: string | number): AttachRelationOperation;
-  detach(key: string | number): DetachRelationOperation;
+
+  attach(key: string | number): AttachRelationDefinition;
+  detach(key: string | number): DetachRelationDefinition;
 
   sync<T>(
     key: string | number | Array<string | number>,
@@ -187,28 +160,13 @@ export interface IRelationBuilder {
   ): ToggleRelationDefinition<T>;
 }
 
-// Interface qui expose uniquement build() et mutate() avec relations typées
+// Interface qui expose uniquement build() et mutate()
 export interface BuildOnly<TModel, TRelations = {}> {
   build(): MutationRequest<TModel, TRelations>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
-// Définir un type pour vérifier si un objet est une opération de relation
-type IsRelationOperation<T> = T extends { operation: string; } ? true : false;
-
-// Définir un type pour vérifier si une opération est valide pour une création d'entité
-type IsValidCreateOperation<T> = T extends { operation: "update" | "detach"; } ? false : true;
-type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
-  [K in keyof T]: K extends RelationKeys
-  ? IsRelationOperation<T[K]> extends true
-  ? IsValidCreateOperation<T[K]> extends true
-  ? T[K]
-  : never
-  : T[K]
-  : T[K]
-};
-
-
+// Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
     attributes: CreateEntityAttributes<T, RelationKeys>
@@ -224,30 +182,8 @@ export interface IEntityBuilder<TModel> {
   setMutationFunction(fn: MutationFunction): void;
 }
 
-// Interface pour les méthodes d'entité
-export interface IEntityBuilder<TModel> {
-  createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-    attributes: {
-      [K in keyof T]: K extends RelationKeys
-      ? T[K] extends { operation: string; }
-      ? T[K] extends { operation: "update"; } | { operation: "detach"; }
-      ? never
-      : T[K]
-      : T[K]
-      : T[K]
-    }
-  ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-
-  updateEntity<T extends Record<string, unknown>>(
-    key: string | number,
-    attributes: T
-  ): IEntityBuilder<TModel>;
-
-  build(): MutationRequest<TModel>;
-
-  setMutationFunction(fn: MutationFunction): void;
-}
-
+// Type utilitaire pour simplifier les signatures de retour
 export type RelationResult<T, Op extends string> = T & {
   operation: Op;
+  // Autres propriétés selon le type d'opération
 };

@@ -1,28 +1,26 @@
-
 import {
+   AttachRelationDefinition,
+   DetachRelationDefinition,
    SyncRelationDefinition,
    ToggleRelationDefinition,
    IRelationBuilder,
-   DetachRelationOperation,
-   AttachRelationOperation,
-   NestedRelationOperation,
+   ValidCreateNestedRelation,
+   ValidUpdateNestedRelation,
    CreateRelationOperation,
    UpdateRelationOperation
 } from "@/types/mutate";
 
-
 export class BaseBuilder implements IRelationBuilder {
-
    public createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T,
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
    ): T & CreateRelationOperation<T> & {
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
       const nestedRelations: Record<string, unknown> = {};
 
-      // Extraire les relations des attributs - style plus simple comme dans createEntity
+      // Extraire les relations des attributs
       for (const [key, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
             nestedRelations[key] = value;
@@ -44,7 +42,7 @@ export class BaseBuilder implements IRelationBuilder {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & CreateRelationOperation<T> & {
-         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+         relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
       };
 
       // Définir __relationDefinition comme propriété non-énumérable
@@ -69,14 +67,14 @@ export class BaseBuilder implements IRelationBuilder {
    public updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
    ): T & UpdateRelationOperation<T> & {
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
       const nestedRelations: Record<string, unknown> = {};
 
-      // Extraire les relations des attributs - style plus simple comme dans createEntity
+      // Extraire les relations des attributs
       for (const [attrKey, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
             nestedRelations[attrKey] = value;
@@ -99,7 +97,7 @@ export class BaseBuilder implements IRelationBuilder {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & UpdateRelationOperation<T> & {
-         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
+         relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
       };
 
       // Définir __relationDefinition comme propriété non-énumérable
@@ -121,8 +119,7 @@ export class BaseBuilder implements IRelationBuilder {
       return relationDefinition;
    }
 
-   // Les autres méthodes restent inchangées
-   public attach(key: string | number): AttachRelationOperation {
+   public attach(key: string | number): AttachRelationDefinition {
       const result = {
          operation: "attach" as const,
          key
@@ -139,7 +136,7 @@ export class BaseBuilder implements IRelationBuilder {
       return result;
    }
 
-   public detach(key: string | number): DetachRelationOperation {
+   public detach(key: string | number): DetachRelationDefinition {
       const result = {
          operation: "detach" as const,
          key
@@ -156,20 +153,27 @@ export class BaseBuilder implements IRelationBuilder {
       return result;
    }
 
-
    public sync<T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>,
       withoutDetaching?: boolean
    ): SyncRelationDefinition<T> {
-      return {
-         operation: "sync",
+      const result = {
+         operation: "sync" as const,
          key,
          without_detaching: withoutDetaching,
          ...(attributes && { attributes }),
          ...(pivot && { pivot })
       };
+
+      // Définir __relationDefinition comme propriété non-énumérable
+      Object.defineProperty(result, '__relationDefinition', {
+         value: true,
+         enumerable: false
+      });
+
+      return result;
    }
 
    public toggle<T>(
@@ -177,14 +181,19 @@ export class BaseBuilder implements IRelationBuilder {
       attributes?: T,
       pivot?: Record<string, string | number>
    ): ToggleRelationDefinition<T> {
-      return {
-         operation: "toggle",
+      const result = {
+         operation: "toggle" as const,
          key,
          ...(attributes && { attributes }),
          ...(pivot && { pivot })
       };
+
+      // Définir __relationDefinition comme propriété non-énumérable
+      Object.defineProperty(result, '__relationDefinition', {
+         value: true,
+         enumerable: false
+      });
+
+      return result;
    }
 }
-
-
-

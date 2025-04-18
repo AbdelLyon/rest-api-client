@@ -260,7 +260,6 @@ class E {
       });
     return o;
   }
-  // Les autres méthodes restent inchangées
   attach(e) {
     const t = {
       operation: "attach",
@@ -286,21 +285,29 @@ class E {
     }), t;
   }
   sync(e, t, r, s) {
-    return {
+    const a = {
       operation: "sync",
       key: e,
       without_detaching: s,
       ...t && { attributes: t },
       ...r && { pivot: r }
     };
+    return Object.defineProperty(a, "__relationDefinition", {
+      value: !0,
+      enumerable: !1
+    }), a;
   }
   toggle(e, t, r) {
-    return {
+    const s = {
       operation: "toggle",
       key: e,
       ...t && { attributes: t },
       ...r && { pivot: r }
     };
+    return Object.defineProperty(s, "__relationDefinition", {
+      value: !0,
+      enumerable: !1
+    }), s;
   }
 }
 class O extends E {
@@ -347,6 +354,7 @@ class O extends E {
     const r = this.build();
     return this.mutationFn(r, t);
   }
+  // Méthodes de relation avec signatures mises à jour
   createRelation(t, r) {
     return this.relationBuilder.createRelation(t, r);
   }

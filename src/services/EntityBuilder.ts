@@ -1,7 +1,17 @@
 import { MutationResponse, RequestConfig } from "@/types";
 import { BaseBuilder } from "./BaseBuilder";
-import { BuildOnly, ExtractModelAttributes, IEntityBuilder, IRelationBuilder, MutationFunction, MutationRequest, NestedRelationOperation, TypedMutationOperation } from "@/types/mutate";
-
+import {
+   BuildOnly,
+   ExtractModelAttributes,
+   IEntityBuilder,
+   IRelationBuilder,
+   MutationFunction,
+   MutationRequest,
+   TypedMutationOperation,
+   ValidCreateNestedRelation,
+   ValidUpdateNestedRelation,
+   CreateEntityAttributes
+} from "@/types/mutate";
 
 export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder<TModel>, BuildOnly<TModel> {
    private operations: Array<TypedMutationOperation<TModel, any>> = [];
@@ -18,7 +28,7 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
    }
 
    public createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-      attributes: T
+      attributes: CreateEntityAttributes<T, RelationKeys>
    ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, unknown> = {};
@@ -82,19 +92,22 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
       return this.mutationFn(data, options);
    }
 
+   // Méthodes de relation avec signatures mises à jour
    public override createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T,
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
    ) {
       return this.relationBuilder.createRelation<T, RelationKeys>(attributes, relations);
    }
+
    public override updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
+      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
    ) {
       return this.relationBuilder.updateRelation<T, RelationKeys>(key, attributes, relations);
    }
+
    public override attach(key: string | number) {
       return this.relationBuilder.attach(key);
    }
