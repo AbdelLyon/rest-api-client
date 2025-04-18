@@ -189,38 +189,43 @@ export interface IRelationBuilder {
   ): ToggleRelationDefinition<T>;
 }
 
+// Interface qui expose uniquement build() et mutate() avec relations typées
 export interface BuildOnly<TModel, TRelations = {}> {
   build(): MutationRequest<TModel, TRelations>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
+// Définir un type pour vérifier si un objet est une opération de relation
+type IsRelationOperation<T> = T extends { operation: string; } ? true : false;
 
+// Définir un type pour vérifier si une opération est valide pour une création d'entité
+type IsValidCreateOperation<T> = T extends { operation: "update" | "detach"; } ? false : true;
+type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
+  [K in keyof T]: K extends RelationKeys
+  ? IsRelationOperation<T[K]> extends true
+  ? IsValidCreateOperation<T[K]> extends true
+  ? T[K]
+  : never
+  : T[K]
+  : T[K]
+};
 
 
 export interface IEntityBuilder<TModel> {
-  createEntity<
-    T extends Record<string, unknown>,
-    R extends Record<string, unknown> = {}
-  >(options: {
-    attributes: T;
-    relations?: R;
-  }): BuildOnly<TModel, R>;
+  createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+    attributes: CreateEntityAttributes<T, RelationKeys>
+  ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
-  updateEntity<
-    T extends Record<string, unknown>,
-    R extends Record<string, unknown> = {}
-  >(
+  updateEntity<T extends Record<string, unknown>>(
     key: string | number,
-    options: {
-      attributes?: T;
-      relations?: R;
-    }
+    attributes: T
   ): IEntityBuilder<TModel>;
 
   build(): MutationRequest<TModel>;
 
   setMutationFunction(fn: MutationFunction): void;
 }
+
 // Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(

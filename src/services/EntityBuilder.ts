@@ -17,38 +17,50 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
       this.mutationFn = fn;
    }
 
-   public createEntity<
-      T extends Record<string, unknown>,
-      R extends Record<string, unknown> = {}
-   >(options: {
-      attributes: T;
-      relations?: R;
-   }): BuildOnly<TModel, R> {
-      const operation: TypedMutationOperation<TModel, R> = {
+   public createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+      attributes: T
+   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
+      const normalAttributes: Record<string, unknown> = {};
+      const relations: Record<string, unknown> = {};
+
+      for (const [key, value] of Object.entries(attributes)) {
+         if (value && typeof value === 'object' && 'operation' in value) {
+            relations[key] = value;
+         } else {
+            normalAttributes[key] = value;
+         }
+      }
+
+      const operation: TypedMutationOperation<TModel, typeof relations> = {
          operation: "create",
-         attributes: options.attributes as ExtractModelAttributes<TModel>,
-         relations: options.relations || {} as R
+         attributes: normalAttributes as ExtractModelAttributes<TModel>,
+         relations
       };
 
       this.operations.push(operation);
-      return this as unknown as BuildOnly<TModel, R>;
+      return this as unknown as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
    }
 
-   public updateEntity<
-      T extends Record<string, unknown>,
-      R extends Record<string, unknown> = {}
-   >(
+   public updateEntity<T extends Record<string, unknown>>(
       key: string | number,
-      options: {
-         attributes?: T;
-         relations?: R;
-      }
+      attributes: T
    ): IEntityBuilder<TModel> {
-      const operation: TypedMutationOperation<TModel, R> = {
+      const normalAttributes: Record<string, unknown> = {};
+      const relations: Record<string, unknown> = {};
+
+      for (const [attrKey, value] of Object.entries(attributes)) {
+         if (value && typeof value === 'object' && 'operation' in value) {
+            relations[attrKey] = value;
+         } else {
+            normalAttributes[attrKey] = value;
+         }
+      }
+
+      const operation: TypedMutationOperation<TModel, typeof relations> = {
          operation: "update",
          key,
-         attributes: (options.attributes || {}) as ExtractModelAttributes<TModel>,
-         relations: options.relations || {} as R
+         attributes: normalAttributes as ExtractModelAttributes<TModel>,
+         relations
       };
 
       this.operations.push(operation);

@@ -22,49 +22,35 @@ export class BaseBuilder implements IRelationBuilder {
       const normalAttributes: Record<string, unknown> = {};
       const nestedRelations: Record<string, NestedRelationOperation<R>> = {};
 
-      if (!relations && attributes && typeof attributes === 'object') {
-         for (const [key, value] of Object.entries(attributes as Record<string, unknown>)) {
-            if (value && typeof value === 'object' && 'operation' in value &&
-               (value.operation === 'create' || value.operation === 'attach')) {
-               nestedRelations[key] = value as NestedRelationOperation<R>;
-            } else {
-               normalAttributes[key] = value;
-            }
-         }
-      } else if (attributes && typeof attributes === 'object') {
-         for (const [key, value] of Object.entries(attributes as Record<string, unknown>)) {
-            if (!(value && typeof value === 'object' && 'operation' in value)) {
-               normalAttributes[key] = value;
-            }
-         }
-      }
+      Object.entries(attributes as Record<string, unknown>)
+         .forEach(([key, value]) => {
+            const isNestedRelation =
+               value !== null &&
+               typeof value === 'object' &&
+               'operation' in value &&
+               (value as { operation: string; }).operation === 'create' ||
+               (value as { operation: string; }).operation === 'attach';
+
+            isNestedRelation
+               ? nestedRelations[key] = value as NestedRelationOperation<R>
+               : normalAttributes[key] = value;
+         });
 
       const relationDefinition = {
          operation: "create" as const,
          attributes: normalAttributes as T,
-         ...(relations ? { relations } : (Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})),
+         ...(relations || Object.keys(nestedRelations).length ? { relations: relations || nestedRelations } : {})
       } as T & CreateRelationOperation<T> & {
          relations?: Record<string, NestedRelationOperation<R>>;
       };
 
-      // Définir __relationDefinition comme une propriété non-énumérable
-      Object.defineProperty(relationDefinition, '__relationDefinition', {
-         value: true,
-         enumerable: false,
-         writable: false,
-         configurable: true
-      });
-
-      if (attributes && typeof attributes === 'object') {
-         for (const key of Object.keys(normalAttributes)) {
-            Object.defineProperty(relationDefinition, key, {
-               get() {
-                  return normalAttributes[key];
-               },
-               enumerable: true
-            });
-         }
-      }
+      Object.defineProperty(relationDefinition, '__relationDefinition', { value: true, enumerable: false });
+      Object.keys(normalAttributes).forEach(key =>
+         Object.defineProperty(relationDefinition, key, {
+            get: () => normalAttributes[key],
+            enumerable: true
+         })
+      );
 
       return relationDefinition;
    }
@@ -76,58 +62,42 @@ export class BaseBuilder implements IRelationBuilder {
    ): T & UpdateRelationOperation<T> & {
       relations?: Record<string, NestedRelationOperation<R>>;
    } {
-
       const normalAttributes: Record<string, unknown> = {};
       const nestedRelations: Record<string, NestedRelationOperation<R>> = {};
 
-      if (!relations && attributes && typeof attributes === 'object') {
-         for (const [attrKey, value] of Object.entries(attributes as Record<string, unknown>)) {
-            if (value && typeof value === 'object' && 'operation' in value &&
-               (value.operation === 'create' || value.operation === 'attach')) {
-               nestedRelations[attrKey] = value as NestedRelationOperation<R>;
-            } else {
-               normalAttributes[attrKey] = value;
-            }
-         }
-      } else if (attributes && typeof attributes === 'object') {
-         for (const [attrKey, value] of Object.entries(attributes as Record<string, unknown>)) {
-            if (!(value && typeof value === 'object' && 'operation' in value)) {
-               normalAttributes[attrKey] = value;
-            }
-         }
-      }
+      Object.entries(attributes as Record<string, unknown>)
+         .forEach(([key, value]) => {
+            const isNestedRelation =
+               value !== null &&
+               typeof value === 'object' &&
+               'operation' in value &&
+               (value as { operation: string; }).operation === 'create' ||
+               (value as { operation: string; }).operation === 'attach';
+
+            isNestedRelation
+               ? nestedRelations[key] = value as NestedRelationOperation<R>
+               : normalAttributes[key] = value;
+         });
 
       const relationDefinition = {
          operation: "update" as const,
          key,
          attributes: normalAttributes as T,
-         ...(relations ? { relations } : (Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})),
+         ...(relations || Object.keys(nestedRelations).length ? { relations: relations || nestedRelations } : {})
       } as T & UpdateRelationOperation<T> & {
          relations?: Record<string, NestedRelationOperation<R>>;
       };
 
-      // Définir __relationDefinition comme propriété non-énumérable
-      Object.defineProperty(relationDefinition, '__relationDefinition', {
-         value: true,
-         enumerable: false,
-         writable: false,
-         configurable: true
-      });
-
-      if (attributes && typeof attributes === 'object') {
-         for (const key of Object.keys(normalAttributes)) {
-            Object.defineProperty(relationDefinition, key, {
-               get() {
-                  return normalAttributes[key];
-               },
-               enumerable: true
-            });
-         }
-      }
+      Object.defineProperty(relationDefinition, '__relationDefinition', { value: true, enumerable: false });
+      Object.keys(normalAttributes).forEach(key =>
+         Object.defineProperty(relationDefinition, key, {
+            get: () => normalAttributes[key],
+            enumerable: true
+         })
+      );
 
       return relationDefinition;
    }
-
    // Les autres méthodes restent inchangées
    public attach(key: string | number): AttachRelationOperation {
       const result = {
