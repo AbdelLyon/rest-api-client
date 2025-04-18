@@ -16,26 +16,31 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-// Type plus précis pour les opérations de mutation
-type TypedMutationOperation<TModel, TRelations = Record<string, unknown>> = {
+// Type extraction pour obtenir seulement les relations d'un objet
+type ExtractRelations<T> = {
+   [K in keyof T as T[K] extends { operation: string; } ? K : never]: T[K]
+};
+
+// Type plus précis pour les opérations de mutation avec relations typées
+type TypedMutationOperation<TModel, TRelations = {}> = {
    operation: "create" | "update";
    key?: string | number;
    attributes: ExtractModelAttributes<TModel>;
-   relations?: TRelations;
+   relations: TRelations;
 };
 
-// Interface qui expose uniquement build()
-interface BuildOnly<TModel> {
-   build(): Array<TypedMutationOperation<TModel>>;
+// Interface qui expose uniquement build() avec relations typées
+interface BuildOnly<TModel, TRelations = {}> {
+   build(): Array<TypedMutationOperation<TModel, TRelations>>;
 }
 
 // Interface complète pour le builder initial
 export interface IBuilder<TModel> {
-   build(): Array<TypedMutationOperation<TModel>>;
+   build(): Array<TypedMutationOperation<TModel, {}>>;
 
    createEntity<T extends Record<string, unknown>>(
       attributes: T
-   ): BuildOnly<TModel>;
+   ): BuildOnly<TModel, ExtractRelations<T>>;
 
    updateEntity<T extends Record<string, unknown>>(
       key: string | number,
@@ -83,7 +88,7 @@ export interface IBuilder<TModel> {
 
 export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
    private static instance: Builder<unknown>;
-   private mutate: Array<TypedMutationOperation<TModel>> = [];
+   private mutate: Array<TypedMutationOperation<TModel, any>> = [];
 
    public static createBuilder<T>(): IBuilder<T> {
       if (!Builder.instance) {
@@ -96,31 +101,31 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     * Crée une entité avec les attributs donnés, y compris des relations imbriquées
     * @param attributes Les attributs de l'entité, pouvant contenir des relations
     */
-   public createEntity<T extends Record<string, unknown>, R = unknown>(
+   public createEntity<T extends Record<string, unknown>>(
       attributes: T
-   ): BuildOnly<TModel> {
+   ): BuildOnly<TModel, ExtractRelations<T>> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition<R, unknown>> = {};
+      const relations: Record<string, unknown> = {};
 
       // Parcourir tous les attributs pour identifier les relations
       for (const [key, value] of Object.entries(attributes)) {
          // Vérifier si l'attribut est une relation (a une propriété 'operation')
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[key] = value as RelationDefinition<R, unknown>;
+            relations[key] = value;
          } else {
             normalAttributes[key] = value;
          }
       }
 
-      const operation: TypedMutationOperation<TModel> = {
+      const operation: TypedMutationOperation<TModel, typeof relations> = {
          operation: "create",
          attributes: normalAttributes as ExtractModelAttributes<TModel>,
-         ...(Object.keys(relations).length > 0 && { relations })
+         relations
       };
 
       this.mutate.push(operation);
-      return this as unknown as BuildOnly<TModel>;
+      return this as unknown as BuildOnly<TModel, ExtractRelations<T>>;
    }
 
    /**
@@ -128,27 +133,27 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     * @param key La clé de l'entité à mettre à jour
     * @param attributes Les attributs de l'entité, pouvant contenir des relations
     */
-   public updateEntity<T extends Record<string, unknown>, R = unknown>(
+   public updateEntity<T extends Record<string, unknown>>(
       key: string | number,
       attributes: T
    ): IBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
-      const relations: Record<string, RelationDefinition<R, unknown>> = {};
+      const relations: Record<string, unknown> = {};
 
       for (const [attrKey, value] of Object.entries(attributes)) {
          if (value && typeof value === 'object' && 'operation' in value) {
-            relations[attrKey] = value as RelationDefinition<R, unknown>;
+            relations[attrKey] = value;
          } else {
             normalAttributes[attrKey] = value;
          }
       }
 
-      const operation: TypedMutationOperation<TModel> = {
+      const operation: TypedMutationOperation<TModel, typeof relations> = {
          operation: "update",
          key,
          attributes: normalAttributes as ExtractModelAttributes<TModel>,
-         ...(Object.keys(relations).length > 0 && { relations })
+         relations
       };
 
       this.mutate.push(operation);
@@ -332,7 +337,7 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
       };
    }
 
-   public build(): Array<TypedMutationOperation<TModel>> {
+   public build(): Array<TypedMutationOperation<TModel, any>> {
       const result = [...this.mutate];
       this.mutate = []; // Réinitialiser le builder pour une utilisation future
       return result;

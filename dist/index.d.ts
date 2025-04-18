@@ -100,13 +100,13 @@ declare class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
      * Crée une entité avec les attributs donnés, y compris des relations imbriquées
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    createEntity<T extends Record<string, unknown>, R = unknown>(attributes: T): BuildOnly<TModel>;
+    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel, ExtractRelations<T>>;
     /**
      * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
      * @param key La clé de l'entité à mettre à jour
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    updateEntity<T extends Record<string, unknown>, R = unknown>(key: string | number, attributes: T): IBuilder<TModel>;
+    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
     /**
      * Crée une relation avec des attributs donnés et des relations optionnelles.
      * @param attributes Les attributs de la relation
@@ -135,11 +135,11 @@ declare class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     detach(key: string | number): DetachRelationDefinition;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
     toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
-    build(): Array<TypedMutationOperation<TModel>>;
+    build(): Array<TypedMutationOperation<TModel, any>>;
 }
 
-declare interface BuildOnly<TModel> {
-    build(): Array<TypedMutationOperation<TModel>>;
+declare interface BuildOnly<TModel, TRelations = {}> {
+    build(): Array<TypedMutationOperation<TModel, TRelations>>;
 }
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
@@ -227,6 +227,12 @@ export declare interface DetailsValidationRules {
 }
 
 declare type ExtractModelAttributes<T> = Omit<T, 'relations'>;
+
+declare type ExtractRelations<T> = {
+    [K in keyof T as T[K] extends {
+        operation: string;
+    } ? K : never]: T[K];
+};
 
 export declare interface FieldSelection {
     field: string;
@@ -352,8 +358,8 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 }
 
 declare interface IBuilder<TModel> {
-    build(): Array<TypedMutationOperation<TModel>>;
-    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel>;
+    build(): Array<TypedMutationOperation<TModel, {}>>;
+    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel, ExtractRelations<T>>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
     createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "create";
@@ -581,11 +587,11 @@ export declare interface ToggleRelationDefinition<T> extends BaseRelationDefinit
     pivot?: Record<string, string | number>;
 }
 
-declare type TypedMutationOperation<TModel, TRelations = Record<string, unknown>> = {
+declare type TypedMutationOperation<TModel, TRelations = {}> = {
     operation: "create" | "update";
     key?: string | number;
     attributes: ExtractModelAttributes<TModel>;
-    relations?: TRelations;
+    relations: TRelations;
 };
 
 export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
