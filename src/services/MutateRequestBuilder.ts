@@ -3,7 +3,6 @@ import {
    DetachRelationDefinition,
    SyncRelationDefinition,
    ToggleRelationDefinition,
-   MutationOperation,
 } from "@/types/mutate";
 
 type ExtractModelAttributes<T> = Omit<T, 'relations'>;
@@ -17,14 +16,22 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
+// Type plus précis pour les opérations de mutation
+type TypedMutationOperation<TModel, TRelations = Record<string, unknown>> = {
+   operation: "create" | "update";
+   key?: string | number;
+   attributes: ExtractModelAttributes<TModel>;
+   relations?: TRelations;
+};
+
 // Interface qui expose uniquement build()
 interface BuildOnly<TModel> {
-   build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+   build(): Array<TypedMutationOperation<TModel>>;
 }
 
 // Interface complète pour le builder initial
-export interface FullBuilder<TModel> {
-   build(): Array<MutationOperation<ExtractModelAttributes<TModel>>>;
+export interface IBuilder<TModel> {
+   build(): Array<TypedMutationOperation<TModel>>;
 
    createEntity<T extends Record<string, unknown>>(
       attributes: T
@@ -33,7 +40,7 @@ export interface FullBuilder<TModel> {
    updateEntity<T extends Record<string, unknown>>(
       key: string | number,
       attributes: T
-   ): FullBuilder<TModel>;
+   ): IBuilder<TModel>;
 
    createRelation<T, R = unknown>(
       attributes: T,
@@ -74,15 +81,15 @@ export interface FullBuilder<TModel> {
    ): ToggleRelationDefinition<T>;
 }
 
-export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
+export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
    private static instance: Builder<unknown>;
-   private mutate: Array<MutationOperation<ExtractModelAttributes<TModel>>> = [];
+   private mutate: Array<TypedMutationOperation<TModel>> = [];
 
-   public static createBuilder<T>(): FullBuilder<T> {
+   public static createBuilder<T>(): IBuilder<T> {
       if (!Builder.instance) {
          Builder.instance = new Builder<T>();
       }
-      return Builder.instance as FullBuilder<T>;
+      return Builder.instance as IBuilder<T>;
    }
 
    /**
@@ -106,7 +113,7 @@ export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
          }
       }
 
-      const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
+      const operation: TypedMutationOperation<TModel> = {
          operation: "create",
          attributes: normalAttributes as ExtractModelAttributes<TModel>,
          ...(Object.keys(relations).length > 0 && { relations })
@@ -124,7 +131,7 @@ export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
    public updateEntity<T extends Record<string, unknown>, R = unknown>(
       key: string | number,
       attributes: T
-   ): FullBuilder<TModel> {
+   ): IBuilder<TModel> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, RelationDefinition<R, unknown>> = {};
@@ -137,7 +144,7 @@ export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
          }
       }
 
-      const operation: MutationOperation<ExtractModelAttributes<TModel>> = {
+      const operation: TypedMutationOperation<TModel> = {
          operation: "update",
          key,
          attributes: normalAttributes as ExtractModelAttributes<TModel>,
@@ -325,7 +332,7 @@ export class Builder<TModel> implements FullBuilder<TModel>, BuildOnly<TModel> {
       };
    }
 
-   public build(): Array<MutationOperation<ExtractModelAttributes<TModel>>> {
+   public build(): Array<TypedMutationOperation<TModel>> {
       const result = [...this.mutate];
       this.mutate = []; // Réinitialiser le builder pour une utilisation future
       return result;

@@ -5,11 +5,11 @@ import type { ActionRequest, ActionResponse } from "@/types/action";
 import type { MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
-import { Builder, FullBuilder } from "./MutateRequestBuilder";
+import { Builder, IBuilder } from "./MutateRequestBuilder";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
-  public builder: FullBuilder<T>;
+  public builder: IBuilder<T>;
 
   protected pathname: string;
   protected schema: z.ZodType<T>;
