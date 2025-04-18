@@ -106,7 +106,7 @@ declare class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
      * @param key La clé de l'entité à mettre à jour
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
+    updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     /**
      * Crée une relation avec des attributs donnés et des relations optionnelles.
      * @param attributes Les attributs de la relation
@@ -354,7 +354,7 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 declare interface IBuilder<TModel> {
     build(): Array<TypedMutationOperation<TModel, {}>>;
     createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
+    updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(key: string | number, attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "create";
         attributes: T;
@@ -411,7 +411,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
     private validateData;
-    mutate(mutateRequest: Builder<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;

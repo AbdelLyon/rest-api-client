@@ -27,7 +27,7 @@ type TypedMutationOperation<TModel, TRelations = {}> = {
 };
 
 // Interface qui expose uniquement build() avec relations typées
-interface BuildOnly<TModel, TRelations = {}> {
+export interface BuildOnly<TModel, TRelations = {}> {
    build(): Array<TypedMutationOperation<TModel, TRelations>>;
 }
 
@@ -39,10 +39,10 @@ export interface IBuilder<TModel> {
       attributes: T
    ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
-   updateEntity<T extends Record<string, unknown>>(
+   updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T
-   ): IBuilder<TModel>;
+   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
    createRelation<T, R = unknown>(
       attributes: T,
@@ -130,10 +130,10 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     * @param key La clé de l'entité à mettre à jour
     * @param attributes Les attributs de l'entité, pouvant contenir des relations
     */
-   public updateEntity<T extends Record<string, unknown>>(
+   public updateEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T
-   ): IBuilder<TModel> {
+   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, unknown> = {};
@@ -154,7 +154,7 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
       };
 
       this.mutate.push(operation);
-      return this;
+      return this as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
    }
 
    /**

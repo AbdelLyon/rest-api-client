@@ -5,7 +5,7 @@ import type { ActionRequest, ActionResponse } from "@/types/action";
 import type { MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
-import { Builder, IBuilder } from "./MutateRequestBuilder";
+import { Builder, BuildOnly, IBuilder } from "./MutateRequestBuilder";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
@@ -37,7 +37,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   public async mutate
     (
-      mutateRequest: Builder<T>,
+      mutateRequest: BuildOnly<T>,
       options?: Partial<RequestConfig>
     ): Promise<MutationResponse> {
     const response = await this.http.request<MutationResponse>(
@@ -51,6 +51,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
     return response;
   }
+
 
   public executeAction(
     actionRequest: ActionRequest,
