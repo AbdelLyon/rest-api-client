@@ -3,29 +3,37 @@ import { z } from "zod";
 import { HttpClient } from "./HttpClient";
 import type { DeleteRequest, DeleteResponse } from "@/types/delete";
 import type { ActionRequest, ActionResponse } from "@/types/action";
-import type { MutationResponse } from "@/types/mutate";
+import type { BuildOnly, IEntityBuilder, IRelationBuilder, MutationResponse } from "@/types/mutate";
 import type { IMutation } from "@/interfaces";
 import type { RequestConfig } from "@/types/common";
-import { Builder, BuildOnly, IBuilder } from "./MutateRequestBuilder";
+import { Builder } from "./Builder";
+
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
+  private readonly relation: IRelationBuilder;
+
   constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
-
-
     this.pathname = pathname;
     this.schema = schema;
+
+    this.relation = Builder.getRelationBuilder();
   }
 
-  public builder(): IBuilder<T> {
-    const builder = Builder.createBuilder<T>();
+  public entityBuilder(): IEntityBuilder<T> {
+    const builder = Builder.createEntityBuilder<T>(this.relation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
+
+  public relationBuilder(): IRelationBuilder {
+    return this.relation;
+  }
+
 
   private validateData(data: unknown[]): T[] {
     return data.map((item) => {
@@ -41,9 +49,10 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate(
-    mutateRequest: BuildOnly<T>,
+    mutateRequest: BuildOnly<T> | { mutate: Array<any>; },
     options?: Partial<RequestConfig>
   ): Promise<MutationResponse> {
+
     const data = 'build' in mutateRequest ? mutateRequest.build() : mutateRequest;
 
     const response = await this.http.request<MutationResponse>(

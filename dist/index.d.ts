@@ -103,11 +103,6 @@ export declare interface CreateMutationOperation<TAttributes, TRelations> extend
     operation: "create";
 }
 
-declare interface CreateRelationDefinitionBase<T> extends BaseRelationDefinition {
-    operation: "create";
-    attributes: T;
-}
-
 export declare interface DeleteRequest {
     resources: Array<number | string>;
 }
@@ -208,68 +203,23 @@ export declare class HttpClient implements IHttpClient {
     private withCredentials;
     private maxRetries;
     private constructor();
-    /**
-     * Initialise une nouvelle instance HTTP avec intercepteurs
-     */
     static init(config: {
         httpConfig: HttpConfig;
         instanceName: string;
     }): HttpClient;
-    /**
-     * Récupère une instance existante
-     */
     static getInstance(instanceName?: string): HttpClient;
-    /**
-     * Définit l'instance par défaut
-     */
     static setDefaultInstance(instanceName: string): void;
-    /**
-     * Récupère la liste des instances disponibles
-     */
     static getAvailableInstances(): string[];
-    /**
-     * Réinitialise une instance ou toutes les instances
-     */
     static resetInstance(instanceName?: string): void;
-    /**
-     * Configure l'instance HTTP
-     */
     private configure;
-    /**
-     * Construit l'URL de base complète
-     */
     private getFullBaseUrl;
-    /**
-     * Configure les intercepteurs par défaut
-     */
     private setupDefaultInterceptors;
-    /**
-     * Journalise les erreurs de requête
-     */
     private logError;
-    /**
-     * Applique les intercepteurs de requête
-     */
     private applyRequestInterceptors;
-    /**
-     * Applique les intercepteurs de réponse réussie
-     */
     private applyResponseSuccessInterceptors;
-    /**
-     * Applique les intercepteurs d'erreur de réponse
-     */
     private applyResponseErrorInterceptors;
-    /**
-     * Détermine si une erreur est susceptible d'être réessayée
-     */
     private isRetryableError;
-    /**
-     * Effectue une requête avec gestion des tentatives
-     */
     private fetchWithRetry;
-    /**
-     * Méthode principale pour effectuer une requête
-     */
     request<TResponse = any>(config: Partial<RequestConfig> & {
         url: string;
     }, options?: Partial<RequestConfig>): Promise<TResponse>;
@@ -306,27 +256,10 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
     getCurrentUser(options?: Partial<RequestConfig>): Promise<UserType>;
 }
 
-declare interface IBuilder<TModel> {
-    build(): MutationRequest<TModel, {}>;
+declare interface IEntityBuilder<TModel> {
     createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "create";
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
-        operation: "update";
-        key: string | number;
-        attributes: T;
-        relations?: Record<string, RelationDefinition_2<R, unknown>>;
-        __relationDefinition?: true;
-    };
-    attach(key: string | number): AttachRelationDefinition;
-    detach(key: string | number): DetachRelationDefinition;
-    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
-    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
+    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IEntityBuilder<TModel>;
+    build(): MutationRequest<TModel>;
     setMutationFunction(fn: MutationFunction): void;
 }
 
@@ -358,16 +291,40 @@ export declare interface IQuery<T> {
     getdetails: (options?: Partial<RequestConfig>) => Promise<DetailsResponse>;
 }
 
+declare interface IRelationBuilder {
+    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition<R, unknown>>): T & {
+        operation: "create";
+        attributes: T;
+        relations?: Record<string, RelationDefinition<R, unknown>>;
+        __relationDefinition?: true;
+    };
+    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition<R, unknown>>): T & {
+        operation: "update";
+        key: string | number;
+        attributes: T;
+        relations?: Record<string, RelationDefinition<R, unknown>>;
+        __relationDefinition?: true;
+    };
+    attach(key: string | number): AttachRelationDefinition;
+    detach(key: string | number): DetachRelationDefinition;
+    sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
+    toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
+}
+
 export declare type LogicalOperator = "and" | "or";
 
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
     protected pathname: string;
     protected schema: z.ZodType<T>;
+    private readonly relation;
     constructor(pathname: string, schema: z.ZodType<T>);
-    builder(): IBuilder<T>;
+    entityBuilder(): IEntityBuilder<T>;
+    relationBuilder(): IRelationBuilder;
     private validateData;
-    mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+    mutate(mutateRequest: BuildOnly<T> | {
+        mutate: Array<any>;
+    }, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
     delete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
     forceDelete(request: DeleteRequest, options?: Partial<RequestConfig>): Promise<DeleteResponse<T>>;
@@ -436,30 +393,16 @@ export declare abstract class Query<T> implements IQuery<T> {
     getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }
 
-export declare type RelationDefinition<T, InCreateContext extends boolean = false> = InCreateContext extends true ? (CreateRelationDefinitionBase<T> & {
-    relations?: {
-        [key: string]: RelationDefinition<any, true>;
-    };
-}) | AttachRelationDefinition : (CreateRelationDefinitionBase<T> & {
-    relations?: {
-        [key: string]: RelationDefinition<any, false>;
-    };
-}) | (UpdateRelationDefinitionBase<T> & {
-    relations?: {
-        [key: string]: RelationDefinition<any, false>;
-    };
-}) | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
-
-declare type RelationDefinition_2<T = unknown, R = unknown> = {
+export declare type RelationDefinition<T = unknown, R = unknown> = {
     operation: "create";
     attributes: T;
-    relations?: Record<string, RelationDefinition_2<R, unknown>>;
+    relations?: Record<string, RelationDefinition<R, unknown>>;
     __relationDefinition?: true;
 } | {
     operation: "update";
     key: string | number;
     attributes: T;
-    relations?: Record<string, RelationDefinition_2<R, unknown>>;
+    relations?: Record<string, RelationDefinition<R, unknown>>;
     __relationDefinition?: true;
 } | AttachRelationDefinition | DetachRelationDefinition | SyncRelationDefinition<T> | ToggleRelationDefinition<T>;
 
@@ -555,12 +498,6 @@ declare type TypedMutationOperation<TModel, TRelations = {}> = {
 export declare interface UpdateMutationOperation<TAttributes, TRelations> extends MutationData<TAttributes, TRelations, false> {
     operation: "update";
     key: string | number;
-}
-
-declare interface UpdateRelationDefinitionBase<T> extends BaseRelationDefinition {
-    operation: "update";
-    key: string | number;
-    attributes: T;
 }
 
 export { }

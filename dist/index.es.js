@@ -1,23 +1,23 @@
-var S = Object.defineProperty;
-var I = (u, t, e) => t in u ? S(u, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[t] = e;
-var o = (u, t, e) => I(u, typeof t != "symbol" ? t + "" : t, e);
-class d extends Error {
-  constructor(e, s) {
-    const r = e instanceof Error ? e.message : "API Service Request Failed";
-    super(r);
-    o(this, "status");
-    o(this, "statusText");
-    o(this, "data");
-    o(this, "originalError");
-    o(this, "requestConfig");
-    if (this.name = "ApiRequestError", this.originalError = e, this.requestConfig = s, e && typeof e == "object") {
-      const a = e;
+var b = Object.defineProperty;
+var T = (u, e, t) => e in u ? b(u, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : u[e] = t;
+var i = (u, e, t) => T(u, typeof e != "symbol" ? e + "" : e, t);
+class f extends Error {
+  constructor(t, r) {
+    const s = t instanceof Error ? t.message : "API Service Request Failed";
+    super(s);
+    i(this, "status");
+    i(this, "statusText");
+    i(this, "data");
+    i(this, "originalError");
+    i(this, "requestConfig");
+    if (this.name = "ApiRequestError", this.originalError = t, this.requestConfig = r, t && typeof t == "object") {
+      const a = t;
       if ("status" in a && (this.status = a.status), "statusText" in a && (this.statusText = a.statusText), "data" in a && (this.data = a.data), "response" in a && a.response instanceof Response) {
-        const n = a.response;
-        this.status = n.status, this.statusText = n.statusText;
+        const o = a.response;
+        this.status = o.status, this.statusText = o.statusText;
       }
     }
-    Error.captureStackTrace && Error.captureStackTrace(this, d);
+    Error.captureStackTrace && Error.captureStackTrace(this, f);
   }
   // Méthodes utilitaires pour vérifier le type d'erreur
   isNotFound() {
@@ -36,360 +36,291 @@ class d extends Error {
     return this.status === void 0 || this.status === 0;
   }
 }
-const c = class c {
+const h = class h {
   constructor() {
-    o(this, "baseURL");
-    o(this, "defaultTimeout");
-    o(this, "defaultHeaders");
-    o(this, "withCredentials");
-    o(this, "maxRetries");
+    i(this, "baseURL");
+    i(this, "defaultTimeout");
+    i(this, "defaultHeaders");
+    i(this, "withCredentials");
+    i(this, "maxRetries");
     this.baseURL = "", this.defaultTimeout = 1e4, this.defaultHeaders = {}, this.withCredentials = !0, this.maxRetries = 3;
   }
-  /**
-   * Initialise une nouvelle instance HTTP avec intercepteurs
-   */
-  static init(t) {
-    var r, a;
-    const { httpConfig: e, instanceName: s } = t;
-    if (c.requestInterceptors = [
-      ...c.requestInterceptors,
-      ...((r = e.interceptors) == null ? void 0 : r.request) ?? []
-    ], (a = e.interceptors) != null && a.response && (c.responseSuccessInterceptors = [
-      ...c.responseSuccessInterceptors,
-      ...e.interceptors.response.success ?? []
-    ], c.responseErrorInterceptors = [
-      ...c.responseErrorInterceptors,
-      ...e.interceptors.response.error ?? []
-    ]), !this.instances.has(s)) {
-      const n = new c();
-      n.configure(e), this.instances.set(s, n), this.instances.size === 1 && (this.defaultInstanceName = s);
+  static init(e) {
+    var s, a;
+    const { httpConfig: t, instanceName: r } = e;
+    if (h.requestInterceptors = [
+      ...h.requestInterceptors,
+      ...((s = t.interceptors) == null ? void 0 : s.request) ?? []
+    ], (a = t.interceptors) != null && a.response && (h.responseSuccessInterceptors = [
+      ...h.responseSuccessInterceptors,
+      ...t.interceptors.response.success ?? []
+    ], h.responseErrorInterceptors = [
+      ...h.responseErrorInterceptors,
+      ...t.interceptors.response.error ?? []
+    ]), !this.instances.has(r)) {
+      const o = new h();
+      o.configure(t), this.instances.set(r, o), this.instances.size === 1 && (this.defaultInstanceName = r);
     }
-    return this.instances.get(s);
+    return this.instances.get(r);
   }
-  /**
-   * Récupère une instance existante
-   */
-  static getInstance(t) {
-    const e = t || this.defaultInstanceName;
-    if (!this.instances.has(e))
-      throw new Error(
-        `Http instance '${e}' not initialized. Call Http.init() first.`
-      );
-    return this.instances.get(e);
-  }
-  /**
-   * Définit l'instance par défaut
-   */
-  static setDefaultInstance(t) {
+  static getInstance(e) {
+    const t = e || this.defaultInstanceName;
     if (!this.instances.has(t))
       throw new Error(
-        `Cannot set default: Http instance '${t}' not initialized.`
+        `Http instance '${t}' not initialized. Call Http.init() first.`
       );
-    this.defaultInstanceName = t;
+    return this.instances.get(t);
   }
-  /**
-   * Récupère la liste des instances disponibles
-   */
+  static setDefaultInstance(e) {
+    if (!this.instances.has(e))
+      throw new Error(
+        `Cannot set default: Http instance '${e}' not initialized.`
+      );
+    this.defaultInstanceName = e;
+  }
   static getAvailableInstances() {
     return Array.from(this.instances.keys());
   }
-  /**
-   * Réinitialise une instance ou toutes les instances
-   */
-  static resetInstance(t) {
-    t ? (this.instances.delete(t), t === this.defaultInstanceName && this.instances.size > 0 && (this.defaultInstanceName = this.instances.keys().next().value ?? "default")) : (this.instances.clear(), this.defaultInstanceName = "default");
+  static resetInstance(e) {
+    e ? (this.instances.delete(e), e === this.defaultInstanceName && this.instances.size > 0 && (this.defaultInstanceName = this.instances.keys().next().value ?? "default")) : (this.instances.clear(), this.defaultInstanceName = "default");
   }
-  /**
-   * Configure l'instance HTTP
-   */
-  configure(t) {
-    this.baseURL = this.getFullBaseUrl(t), this.defaultTimeout = t.timeout ?? 1e4, this.maxRetries = t.maxRetries ?? 3, this.withCredentials = t.withCredentials ?? !0, this.defaultHeaders = {
+  configure(e) {
+    this.baseURL = this.getFullBaseUrl(e), this.defaultTimeout = e.timeout ?? 1e4, this.maxRetries = e.maxRetries ?? 3, this.withCredentials = e.withCredentials ?? !0, this.defaultHeaders = {
       "Content-Type": "application/json",
       Accept: "application/json",
-      ...t.headers
+      ...e.headers
     }, this.setupDefaultInterceptors();
   }
-  /**
-   * Construit l'URL de base complète
-   */
-  getFullBaseUrl(t) {
-    if (!t.baseURL)
+  getFullBaseUrl(e) {
+    if (!e.baseURL)
       throw new Error("baseURL is required in HttpConfigOptions");
-    let e = t.baseURL.trim();
-    if (e.endsWith("/") && (e = e.slice(0, -1)), t.apiPrefix) {
-      let s = t.apiPrefix.trim();
-      return s.startsWith("/") || (s = "/" + s), s.endsWith("/") && (s = s.slice(0, -1)), e + s;
+    let t = e.baseURL.trim();
+    if (t.endsWith("/") && (t = t.slice(0, -1)), e.apiPrefix) {
+      let r = e.apiPrefix.trim();
+      return r.startsWith("/") || (r = "/" + r), r.endsWith("/") && (r = r.slice(0, -1)), t + r;
     }
-    return t.apiVersion ? `${e}/v${t.apiVersion}` : e;
+    return e.apiVersion ? `${t}/v${e.apiVersion}` : t;
   }
-  /**
-   * Configure les intercepteurs par défaut
-   */
   setupDefaultInterceptors() {
-    c.responseErrorInterceptors.length === 0 && c.responseErrorInterceptors.push((t) => (this.logError(t), Promise.reject(t)));
+    h.responseErrorInterceptors.length === 0 && h.responseErrorInterceptors.push((e) => (this.logError(e), Promise.reject(e)));
   }
-  /**
-   * Journalise les erreurs de requête
-   */
-  logError(t) {
-    var s, r;
-    const e = {
-      url: (s = t.config) == null ? void 0 : s.url,
-      method: (r = t.config) == null ? void 0 : r.method,
-      status: t.status,
-      data: t.data,
-      message: t.message
+  logError(e) {
+    var r, s;
+    const t = {
+      url: (r = e.config) == null ? void 0 : r.url,
+      method: (s = e.config) == null ? void 0 : s.method,
+      status: e.status,
+      data: e.data,
+      message: e.message
     };
-    console.error("API Request Error", e);
+    console.error("API Request Error", t);
   }
-  /**
-   * Applique les intercepteurs de requête
-   */
-  async applyRequestInterceptors(t) {
-    let e = { ...t };
-    for (const s of c.requestInterceptors)
-      e = await Promise.resolve(s(e));
-    return e;
+  async applyRequestInterceptors(e) {
+    let t = { ...e };
+    for (const r of h.requestInterceptors)
+      t = await Promise.resolve(r(t));
+    return t;
   }
-  /**
-   * Applique les intercepteurs de réponse réussie
-   */
-  async applyResponseSuccessInterceptors(t) {
-    let e = t;
-    for (const s of c.responseSuccessInterceptors)
-      e = await Promise.resolve(s(e.clone()));
-    return e;
+  async applyResponseSuccessInterceptors(e) {
+    let t = e;
+    for (const r of h.responseSuccessInterceptors)
+      t = await Promise.resolve(r(t.clone()));
+    return t;
   }
-  /**
-   * Applique les intercepteurs d'erreur de réponse
-   */
-  async applyResponseErrorInterceptors(t) {
-    let e = t;
-    for (const s of c.responseErrorInterceptors)
+  async applyResponseErrorInterceptors(e) {
+    let t = e;
+    for (const r of h.responseErrorInterceptors)
       try {
-        if (e = await Promise.resolve(s(e)), !(e instanceof Error))
-          return e;
-      } catch (r) {
-        e = r;
+        if (t = await Promise.resolve(r(t)), !(t instanceof Error))
+          return t;
+      } catch (s) {
+        t = s;
       }
-    return Promise.reject(e);
+    return Promise.reject(t);
   }
-  /**
-   * Détermine si une erreur est susceptible d'être réessayée
-   */
-  isRetryableError(t, e) {
-    return (!e || ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"].includes(e.toUpperCase())) && (t === 0 || // Erreur réseau
-    t === 429 || // Trop de requêtes
-    t >= 500 && t < 600);
+  isRetryableError(e, t) {
+    return (!t || ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"].includes(t.toUpperCase())) && (e === 0 || e === 429 || e >= 500 && e < 600);
   }
-  /**
-   * Effectue une requête avec gestion des tentatives
-   */
-  async fetchWithRetry(t, e, s = 1) {
+  async fetchWithRetry(e, t, r = 1) {
     try {
-      const { timeout: r = this.defaultTimeout, params: a, data: n, ...i } = e;
-      let h = t;
+      const { timeout: s = this.defaultTimeout, params: a, data: o, ...n } = t;
+      let c = e;
       if (a && Object.keys(a).length > 0) {
-        const l = new URLSearchParams();
-        for (const [m, b] of Object.entries(a))
-          l.append(m, b);
-        h += `?${l.toString()}`;
+        const d = new URLSearchParams();
+        for (const [g, S] of Object.entries(a))
+          d.append(g, S);
+        c += `?${d.toString()}`;
       }
-      const w = new AbortController(), E = setTimeout(() => w.abort("Request timeout"), r);
-      let g;
-      n !== void 0 && (g = typeof n == "string" ? n : JSON.stringify(n));
-      const f = await fetch(h, {
-        ...i,
-        body: g,
+      const w = new AbortController(), I = setTimeout(() => w.abort("Request timeout"), s);
+      let E;
+      o !== void 0 && (E = typeof o == "string" ? o : JSON.stringify(o));
+      const y = await fetch(c, {
+        ...n,
+        body: E,
         signal: w.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(E), !f.ok && s < this.maxRetries && this.isRetryableError(f.status, e.method)) {
-        const l = Math.pow(2, s) * 100;
-        return await new Promise((m) => setTimeout(m, l)), this.fetchWithRetry(t, e, s + 1);
+      if (clearTimeout(I), !y.ok && r < this.maxRetries && this.isRetryableError(y.status, t.method)) {
+        const d = Math.pow(2, r) * 100;
+        return await new Promise((g) => setTimeout(g, d)), this.fetchWithRetry(e, t, r + 1);
       }
-      return f;
-    } catch (r) {
-      if (r instanceof DOMException && r.name === "AbortError")
-        throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
-      if (s < this.maxRetries && this.isRetryableError(0, e.method)) {
-        const a = Math.pow(2, s) * 100;
-        return await new Promise((n) => setTimeout(n, a)), this.fetchWithRetry(t, e, s + 1);
+      return y;
+    } catch (s) {
+      if (s instanceof DOMException && s.name === "AbortError")
+        throw new Error(`Request timeout after ${t.timeout || this.defaultTimeout}ms`);
+      if (r < this.maxRetries && this.isRetryableError(0, t.method)) {
+        const a = Math.pow(2, r) * 100;
+        return await new Promise((o) => setTimeout(o, a)), this.fetchWithRetry(e, t, r + 1);
       }
-      throw r;
+      throw s;
     }
   }
-  /**
-   * Méthode principale pour effectuer une requête
-   */
-  async request(t, e = {}) {
-    var s;
+  async request(e, t = {}) {
+    var r;
     try {
-      const r = {
+      const s = {
         method: "GET",
         timeout: this.defaultTimeout,
-        ...t,
         ...e,
+        ...t,
         headers: {
           ...this.defaultHeaders,
-          ...t.headers || {},
-          ...e.headers || {}
+          ...e.headers || {},
+          ...t.headers || {}
         }
       }, a = new URL(
-        r.url.startsWith("http") ? r.url : `${this.baseURL}${r.url.startsWith("/") ? "" : "/"}${r.url}`
-      ).toString(), n = await this.applyRequestInterceptors({
-        ...r,
+        s.url.startsWith("http") ? s.url : `${this.baseURL}${s.url.startsWith("/") ? "" : "/"}${s.url}`
+      ).toString(), o = await this.applyRequestInterceptors({
+        ...s,
         url: a
       });
-      let i = await this.fetchWithRetry(a, n);
-      return i = await this.applyResponseSuccessInterceptors(i), (s = i.headers.get("content-type")) != null && s.includes("application/json") ? await i.json() : await i.text();
-    } catch (r) {
-      const a = r instanceof d ? r : new d(r, {
-        ...t,
+      let n = await this.fetchWithRetry(a, o);
+      return n = await this.applyResponseSuccessInterceptors(n), (r = n.headers.get("content-type")) != null && r.includes("application/json") ? await n.json() : await n.text();
+    } catch (s) {
+      const a = s instanceof f ? s : new f(s, {
         ...e,
-        url: t.url
+        ...t,
+        url: e.url
       });
       return this.applyResponseErrorInterceptors(a);
     }
   }
 };
-o(c, "instances", /* @__PURE__ */ new Map()), o(c, "defaultInstanceName"), // Intercepteurs statiques
-o(c, "requestInterceptors", []), o(c, "responseSuccessInterceptors", []), o(c, "responseErrorInterceptors", []);
-let p = c;
-class y {
-  constructor() {
-    o(this, "operations", []);
-    o(this, "mutationFn", null);
-  }
-  static createBuilder() {
-    return new y();
-  }
-  // Méthode pour définir la fonction de mutation
-  setMutationFunction(t) {
-    this.mutationFn = t;
-  }
-  /**
-   * Crée une entité avec les attributs donnés, y compris des relations imbriquées
-   * @param attributes Les attributs de l'entité, pouvant contenir des relations
-   */
-  createEntity(t) {
-    const e = {}, s = {};
-    for (const [a, n] of Object.entries(t))
-      n && typeof n == "object" && "operation" in n ? s[a] = n : e[a] = n;
-    const r = {
-      operation: "create",
-      attributes: e,
-      relations: s
-    };
-    return this.operations.push(r), this;
-  }
-  /**
-   * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
-   * @param key La clé de l'entité à mettre à jour
-   * @param attributes Les attributs de l'entité, pouvant contenir des relations
-   */
-  updateEntity(t, e) {
-    const s = {}, r = {};
-    for (const [n, i] of Object.entries(e))
-      i && typeof i == "object" && "operation" in i ? r[n] = i : s[n] = i;
-    const a = {
-      operation: "update",
-      key: t,
-      attributes: s,
-      relations: r
-    };
-    return this.operations.push(a), this;
-  }
-  /**
-   * Crée une relation avec des attributs donnés et des relations optionnelles.
-   * @param attributes Les attributs de la relation
-   * @param relations Les relations imbriquées explicites (optionnel)
-   */
-  createRelation(t, e) {
-    const s = {}, r = {};
-    if (!e && t && typeof t == "object")
-      for (const [n, i] of Object.entries(t))
-        i && typeof i == "object" && "operation" in i ? r[n] = i : s[n] = i;
-    else if (t && typeof t == "object")
-      for (const [n, i] of Object.entries(t))
-        i && typeof i == "object" && "operation" in i || (s[n] = i);
+i(h, "instances", /* @__PURE__ */ new Map()), i(h, "defaultInstanceName"), i(h, "requestInterceptors", []), i(h, "responseSuccessInterceptors", []), i(h, "responseErrorInterceptors", []);
+let p = h;
+class R {
+  createRelation(e, t) {
+    const r = {}, s = {};
+    if (!t && e && typeof e == "object")
+      for (const [o, n] of Object.entries(e))
+        n && typeof n == "object" && "operation" in n ? s[o] = n : r[o] = n;
+    else if (e && typeof e == "object")
+      for (const [o, n] of Object.entries(e))
+        n && typeof n == "object" && "operation" in n || (r[o] = n);
     const a = {
       operation: "create",
-      attributes: s,
-      // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
-      ...e ? { relations: e } : Object.keys(r).length > 0 ? { relations: r } : {},
+      attributes: r,
+      ...t ? { relations: t } : Object.keys(s).length > 0 ? { relations: s } : {},
       __relationDefinition: !0
     };
-    if (t && typeof t == "object")
-      for (const n of Object.keys(s))
-        Object.defineProperty(a, n, {
+    if (e && typeof e == "object")
+      for (const o of Object.keys(r))
+        Object.defineProperty(a, o, {
           get() {
-            return s[n];
+            return r[o];
           },
           enumerable: !0
         });
     return a;
   }
-  /**
-   * Met à jour une relation avec des attributs donnés et des relations optionnelles.
-   * @param key La clé de la relation à mettre à jour
-   * @param attributes Les attributs de la relation
-   * @param relations Les relations imbriquées explicites (optionnel)
-   */
-  updateRelation(t, e, s) {
-    const r = {}, a = {};
-    if (!s && e && typeof e == "object")
-      for (const [i, h] of Object.entries(e))
-        h && typeof h == "object" && "operation" in h ? a[i] = h : r[i] = h;
-    else if (e && typeof e == "object")
-      for (const [i, h] of Object.entries(e))
-        h && typeof h == "object" && "operation" in h || (r[i] = h);
-    const n = {
+  updateRelation(e, t, r) {
+    const s = {}, a = {};
+    if (!r && t && typeof t == "object")
+      for (const [n, c] of Object.entries(t))
+        c && typeof c == "object" && "operation" in c ? a[n] = c : s[n] = c;
+    else if (t && typeof t == "object")
+      for (const [n, c] of Object.entries(t))
+        c && typeof c == "object" && "operation" in c || (s[n] = c);
+    const o = {
       operation: "update",
-      key: t,
-      attributes: r,
-      // Utiliser les relations explicites si fournies, sinon utiliser celles extraites des attributs
-      ...s ? { relations: s } : Object.keys(a).length > 0 ? { relations: a } : {},
+      key: e,
+      attributes: s,
+      ...r ? { relations: r } : Object.keys(a).length > 0 ? { relations: a } : {},
       __relationDefinition: !0
     };
-    if (e && typeof e == "object")
-      for (const i of Object.keys(r))
-        Object.defineProperty(n, i, {
+    if (t && typeof t == "object")
+      for (const n of Object.keys(s))
+        Object.defineProperty(o, n, {
           get() {
-            return r[i];
+            return s[n];
           },
           enumerable: !0
         });
-    return n;
+    return o;
   }
-  attach(t) {
+  attach(e) {
     return {
       operation: "attach",
-      key: t
+      key: e
     };
   }
-  detach(t) {
+  detach(e) {
     return {
       operation: "detach",
-      key: t
+      key: e
     };
   }
-  sync(t, e, s, r) {
+  sync(e, t, r, s) {
     return {
       operation: "sync",
-      key: t,
-      without_detaching: r,
-      ...e && { attributes: e },
-      ...s && { pivot: s }
+      key: e,
+      without_detaching: s,
+      ...t && { attributes: t },
+      ...r && { pivot: r }
     };
   }
-  toggle(t, e, s) {
+  toggle(e, t, r) {
     return {
       operation: "toggle",
-      key: t,
-      ...e && { attributes: e },
-      ...s && { pivot: s }
+      key: e,
+      ...t && { attributes: t },
+      ...r && { pivot: r }
     };
+  }
+}
+class j extends R {
+  constructor(t) {
+    super();
+    i(this, "operations", []);
+    i(this, "mutationFn", null);
+    i(this, "relationBuilder");
+    this.relationBuilder = t;
+  }
+  setMutationFunction(t) {
+    this.mutationFn = t;
+  }
+  createEntity(t) {
+    const r = {}, s = {};
+    for (const [o, n] of Object.entries(t))
+      n && typeof n == "object" && "operation" in n ? s[o] = n : r[o] = n;
+    const a = {
+      operation: "create",
+      attributes: r,
+      relations: s
+    };
+    return this.operations.push(a), this;
+  }
+  updateEntity(t, r) {
+    const s = {}, a = {};
+    for (const [n, c] of Object.entries(r))
+      c && typeof c == "object" && "operation" in c ? a[n] = c : s[n] = c;
+    const o = {
+      operation: "update",
+      key: t,
+      attributes: s,
+      relations: a
+    };
+    return this.operations.push(o), this;
   }
   build() {
     const t = [...this.operations];
@@ -398,232 +329,264 @@ class y {
   async mutate(t) {
     if (!this.mutationFn)
       throw new Error("Mutation function not provided to builder");
-    const e = this.build();
-    return this.mutationFn(e, t);
+    const r = this.build();
+    return this.mutationFn(r, t);
+  }
+  createRelation(t, r) {
+    return this.relationBuilder.createRelation(t, r);
+  }
+  updateRelation(t, r, s) {
+    return this.relationBuilder.updateRelation(t, r, s);
+  }
+  attach(t) {
+    return this.relationBuilder.attach(t);
+  }
+  detach(t) {
+    return this.relationBuilder.detach(t);
+  }
+  sync(t, r, s, a) {
+    return this.relationBuilder.sync(t, r, s, a);
+  }
+  toggle(t, r, s) {
+    return this.relationBuilder.toggle(t, r, s);
   }
 }
-class R {
-  constructor(t, e) {
-    o(this, "http");
-    o(this, "pathname");
-    o(this, "schema");
-    this.http = p.getInstance(), this.pathname = t, this.schema = e;
+const l = class l {
+  static getRelationBuilder() {
+    return l.relationInstance || (l.relationInstance = new R()), l.relationInstance;
   }
-  builder() {
-    const t = y.createBuilder();
-    return t.setMutationFunction((e, s) => this.mutate(e, s)), t;
+  static createEntityBuilder(e) {
+    return new j(e || l.getRelationBuilder());
   }
-  validateData(t) {
-    return t.map((e) => {
-      const s = this.schema.safeParse(e);
-      if (!s.success)
-        throw console.error("Type validation failed:", s.error.errors), new Error(
-          `Type validation failed: ${JSON.stringify(s.error.errors)}`
+};
+i(l, "relationInstance");
+let m = l;
+class O {
+  constructor(e, t) {
+    i(this, "http");
+    i(this, "pathname");
+    i(this, "schema");
+    i(this, "relation");
+    this.http = p.getInstance(), this.pathname = e, this.schema = t, this.relation = m.getRelationBuilder();
+  }
+  entityBuilder() {
+    const e = m.createEntityBuilder(this.relation);
+    return e.setMutationFunction((t, r) => this.mutate(t, r)), e;
+  }
+  relationBuilder() {
+    return this.relation;
+  }
+  validateData(e) {
+    return e.map((t) => {
+      const r = this.schema.safeParse(t);
+      if (!r.success)
+        throw console.error("Type validation failed:", r.error.errors), new Error(
+          `Type validation failed: ${JSON.stringify(r.error.errors)}`
         );
-      return s.data;
+      return r.data;
     });
   }
-  async mutate(t, e) {
-    const s = "build" in t ? t.build() : t;
+  async mutate(e, t) {
+    const r = "build" in e ? e.build() : e;
     return await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
-        data: s
+        data: r
       },
-      e
+      t
     );
   }
-  executeAction(t, e = {}) {
+  executeAction(e, t = {}) {
     return this.http.request(
       {
         method: "POST",
-        url: `${this.pathname}/actions/${t.action}`,
-        data: t.payload
+        url: `${this.pathname}/actions/${e.action}`,
+        data: e.payload
       },
-      e
+      t
     );
   }
-  async delete(t, e = {}) {
-    const s = await this.http.request(
+  async delete(e, t = {}) {
+    const r = await this.http.request(
       {
         method: "DELETE",
         url: this.pathname,
-        data: t
+        data: e
       },
-      e
+      t
     );
     return {
-      ...s,
-      data: this.validateData(s.data)
+      ...r,
+      data: this.validateData(r.data)
     };
   }
-  async forceDelete(t, e = {}) {
-    const s = await this.http.request(
+  async forceDelete(e, t = {}) {
+    const r = await this.http.request(
       {
         method: "DELETE",
         url: `${this.pathname}/force`,
-        data: t
+        data: e
       },
-      e
+      t
     );
     return {
-      ...s,
-      data: this.validateData(s.data)
+      ...r,
+      data: this.validateData(r.data)
     };
   }
-  async restore(t, e = {}) {
-    const s = await this.http.request(
+  async restore(e, t = {}) {
+    const r = await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/restore`,
-        data: t
+        data: e
       },
-      e
+      t
     );
     return {
-      ...s,
-      data: this.validateData(s.data)
+      ...r,
+      data: this.validateData(r.data)
     };
   }
 }
-class j {
-  constructor(t, e) {
-    o(this, "http");
-    o(this, "pathname");
-    o(this, "schema");
-    this.http = p.getInstance(), this.pathname = t, this.schema = e;
+class q {
+  constructor(e, t) {
+    i(this, "http");
+    i(this, "pathname");
+    i(this, "schema");
+    this.http = p.getInstance(), this.pathname = e, this.schema = t;
   }
-  validateData(t) {
-    return t.map((e) => {
-      const s = this.schema.safeParse(e);
-      if (!s.success)
-        throw console.error("Type validation failed:", s.error.errors), new Error(
-          `Type validation failed: ${JSON.stringify(s.error.errors)}`
+  validateData(e) {
+    return e.map((t) => {
+      const r = this.schema.safeParse(t);
+      if (!r.success)
+        throw console.error("Type validation failed:", r.error.errors), new Error(
+          `Type validation failed: ${JSON.stringify(r.error.errors)}`
         );
-      return s.data;
+      return r.data;
     });
   }
-  searchRequest(t, e = {}) {
+  searchRequest(e, t = {}) {
     return this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/search`,
-        data: { search: t }
+        data: { search: e }
       },
-      e
+      t
     );
   }
-  async search(t, e = {}) {
-    const s = await this.searchRequest(t, e);
-    return this.validateData(s.data);
+  async search(e, t = {}) {
+    const r = await this.searchRequest(e, t);
+    return this.validateData(r.data);
   }
-  async searchPaginate(t, e = {}) {
-    const s = await this.searchRequest(t, e);
+  async searchPaginate(e, t = {}) {
+    const r = await this.searchRequest(e, t);
     return {
-      ...s,
-      data: this.validateData(s.data)
+      ...r,
+      data: this.validateData(r.data)
     };
   }
-  getdetails(t = {}) {
+  getdetails(e = {}) {
     return this.http.request(
       {
         method: "GET",
         url: this.pathname
       },
-      t
+      e
     );
   }
 }
-class k {
-  constructor(t, e) {
-    o(this, "http");
-    o(this, "pathname");
-    o(this, "userSchema");
-    o(this, "credentialsSchema");
-    o(this, "registerDataSchema");
-    o(this, "tokenSchema");
-    this.http = p.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
+class P {
+  constructor(e, t) {
+    i(this, "http");
+    i(this, "pathname");
+    i(this, "userSchema");
+    i(this, "credentialsSchema");
+    i(this, "registerDataSchema");
+    i(this, "tokenSchema");
+    this.http = p.getInstance(), this.pathname = e, this.userSchema = t.user, this.credentialsSchema = t.credentials, this.registerDataSchema = t.registerData, this.tokenSchema = t.tokens;
   }
   /**
    * Inscription
    */
-  async register(t, e = {}) {
-    this.registerDataSchema && this.registerDataSchema.parse(t);
+  async register(e, t = {}) {
+    this.registerDataSchema && this.registerDataSchema.parse(e);
     try {
-      const s = await this.http.request({
+      const r = await this.http.request({
         method: "POST",
         url: `${this.pathname}/register`,
-        data: t
-      }, e), r = this.userSchema.parse(s.user);
-      return this.tokenSchema && this.tokenSchema.parse(s.tokens), r;
-    } catch (s) {
-      throw console.error("Registration error", s), s;
+        data: e
+      }, t), s = this.userSchema.parse(r.user);
+      return this.tokenSchema && this.tokenSchema.parse(r.tokens), s;
+    } catch (r) {
+      throw console.error("Registration error", r), r;
     }
   }
   /**
    * Connexion
    */
-  async login(t, e = {}) {
-    this.credentialsSchema && this.credentialsSchema.parse(t);
+  async login(e, t = {}) {
+    this.credentialsSchema && this.credentialsSchema.parse(e);
     try {
-      const s = await this.http.request({
+      const r = await this.http.request({
         method: "POST",
         url: `${this.pathname}/login`,
-        data: t
-      }, e), r = this.userSchema.parse(s.user), a = this.tokenSchema ? this.tokenSchema.parse(s.tokens) : s.tokens;
-      return { user: r, tokens: a };
-    } catch (s) {
-      throw console.error("Login error", s), s;
+        data: e
+      }, t), s = this.userSchema.parse(r.user), a = this.tokenSchema ? this.tokenSchema.parse(r.tokens) : r.tokens;
+      return { user: s, tokens: a };
+    } catch (r) {
+      throw console.error("Login error", r), r;
     }
   }
   /**
    * Déconnexion
    */
-  async logout(t = {}) {
+  async logout(e = {}) {
     try {
       await this.http.request({
         method: "POST",
         url: `${this.pathname}/logout`
-      }, t);
-    } catch (e) {
-      throw console.error("Logout error", e), e;
+      }, e);
+    } catch (t) {
+      throw console.error("Logout error", t), t;
     }
   }
   /**
    * Rafraîchissement du token
    */
-  async refreshToken(t, e = {}) {
+  async refreshToken(e, t = {}) {
     try {
-      const s = await this.http.request({
+      const r = await this.http.request({
         method: "POST",
         url: `${this.pathname}/refresh-token`,
-        data: { refreshToken: t }
-      }, e);
-      return this.tokenSchema ? this.tokenSchema.parse(s) : s;
-    } catch (s) {
-      throw console.error("Token refresh error", s), s;
+        data: { refreshToken: e }
+      }, t);
+      return this.tokenSchema ? this.tokenSchema.parse(r) : r;
+    } catch (r) {
+      throw console.error("Token refresh error", r), r;
     }
   }
   /**
    * Récupération de l'utilisateur courant
    */
-  async getCurrentUser(t = {}) {
+  async getCurrentUser(e = {}) {
     try {
-      const e = await this.http.request({
+      const t = await this.http.request({
         method: "GET",
         url: `${this.pathname}/me`
-      }, t);
-      return this.userSchema.parse(e);
-    } catch (e) {
-      throw console.error("Get current user error", e), e;
+      }, e);
+      return this.userSchema.parse(t);
+    } catch (t) {
+      throw console.error("Get current user error", t), t;
     }
   }
 }
 export {
-  k as Auth,
+  P as Auth,
   p as HttpClient,
-  R as Mutation,
-  j as Query
+  O as Mutation,
+  q as Query
 };
 //# sourceMappingURL=index.es.js.map

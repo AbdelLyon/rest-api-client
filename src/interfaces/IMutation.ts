@@ -1,10 +1,9 @@
 import {
 } from "@/types";
 import { RequestConfig } from "@/types/common";
-import type { MutationResponse } from '@/types/mutate';
+import type { BuildOnly, MutationResponse } from '@/types/mutate';
 import type { ActionRequest, ActionResponse } from '@/types/action';
 import type { DeleteRequest, DeleteResponse } from '@/types/delete';
-import { BuildOnly } from "@/services/MutateRequestBuilder";
 
 
 export interface IMutation<T> {
