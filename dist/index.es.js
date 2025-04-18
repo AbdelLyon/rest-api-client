@@ -230,15 +230,15 @@ class E {
     ), a;
   }
   updateRelation(e, t, r) {
-    const s = {}, a = {};
+    const s = {}, a = r ? { ...r } : {};
     Object.entries(t).forEach(([o, h]) => {
-      h !== null && typeof h == "object" && "operation" in h && h.operation === "create" || h.operation === "attach" ? a[o] = h : s[o] = h;
+      h !== null && typeof h == "object" && "operation" in h && ["create", "attach"].includes(h.operation) ? a[o] = h : s[o] = h;
     });
     const i = {
       operation: "update",
       key: e,
       attributes: s,
-      ...r || Object.keys(a).length ? { relations: r || a } : {}
+      ...Object.keys(a).length ? { relations: a } : {}
     };
     return Object.defineProperty(i, "__relationDefinition", { value: !0, enumerable: !1 }), Object.keys(s).forEach(
       (o) => Object.defineProperty(i, o, {

@@ -58,37 +58,39 @@ export class BaseBuilder implements IRelationBuilder {
 
       return relationDefinition;
    }
-   public updateRelation<T, R = unknown>(
+
+
+   public updateRelation<T, RelationKeys extends string = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<string, NestedRelationOperation<R>>
+      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
    ): T & UpdateRelationOperation<T> & {
-      relations?: Record<string, NestedRelationOperation<R>>;
+      relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
-      const nestedRelations: Record<string, NestedRelationOperation<R>> = {};
+      const nestedRelations: Record<RelationKeys, NestedRelationOperation<unknown>> =
+         (relations ? { ...relations } : {}) as Record<RelationKeys, NestedRelationOperation<unknown>>;
 
       Object.entries(attributes as Record<string, unknown>)
-         .forEach(([key, value]) => {
+         .forEach(([attrKey, value]) => {
             const isNestedRelation =
                value !== null &&
                typeof value === 'object' &&
                'operation' in value &&
-               (value as { operation: string; }).operation === 'create' ||
-               (value as { operation: string; }).operation === 'attach';
+               ['create', 'attach'].includes((value as { operation: string; }).operation);
 
             isNestedRelation
-               ? nestedRelations[key] = value as NestedRelationOperation<R>
-               : normalAttributes[key] = value;
+               ? nestedRelations[attrKey as RelationKeys] = value as NestedRelationOperation<unknown>
+               : normalAttributes[attrKey] = value;
          });
 
       const relationDefinition = {
          operation: "update" as const,
          key,
          attributes: normalAttributes as T,
-         ...(relations || Object.keys(nestedRelations).length ? { relations: relations || nestedRelations } : {})
+         ...(Object.keys(nestedRelations).length ? { relations: nestedRelations } : {})
       } as T & UpdateRelationOperation<T> & {
-         relations?: Record<string, NestedRelationOperation<R>>;
+         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
       };
 
       Object.defineProperty(relationDefinition, '__relationDefinition', { value: true, enumerable: false });
@@ -101,6 +103,7 @@ export class BaseBuilder implements IRelationBuilder {
 
       return relationDefinition;
    }
+
    // Les autres méthodes restent inchangées
    public attach(key: string | number): AttachRelationOperation {
       const result = {

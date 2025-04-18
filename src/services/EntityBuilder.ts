@@ -88,12 +88,12 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
    ) {
       return this.relationBuilder.createRelation<T, RelationKeys>(attributes, relations);
    }
-   public override updateRelation<T, R = unknown>(
+   public override updateRelation<T, RelationKeys extends string = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<string, NestedRelationOperation<R>>
+      relations?: Record<string, NestedRelationOperation<RelationKeys>>
    ) {
-      return this.relationBuilder.updateRelation<T, R>(key, attributes, relations);
+      return this.relationBuilder.updateRelation<T, RelationKeys>(key, attributes, relations);
    }
    public override attach(key: string | number) {
       return this.relationBuilder.attach(key);

@@ -332,8 +332,8 @@ declare interface IRelationBuilder {
     createRelation<T, RelationKeys extends string = never>(attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & CreateRelationOperation<T> & {
         relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
     };
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, NestedRelationOperation<R>>): T & UpdateRelationOperation<T> & {
-        relations?: Record<string, NestedRelationOperation<R>>;
+    updateRelation<T, RelationKeys extends string = never>(key: string | number, attributes: T, relations?: Record<RelationKeys, NestedRelationOperation<unknown>>): T & UpdateRelationOperation<T> & {
+        relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
     };
     attach(key: string | number): AttachRelationOperation;
     detach(key: string | number): DetachRelationOperation;

@@ -162,15 +162,13 @@ export interface IRelationBuilder {
     relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
   };
 
-  // Pour mettre à jour une relation (de premier niveau)
-  updateRelation<T, R = unknown>(
+  updateRelation<T, RelationKeys extends string = never>(
     key: string | number,
     attributes: T,
-    relations?: Record<string, NestedRelationOperation<R>>
+    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>
   ): T & UpdateRelationOperation<T> & {
-    relations?: Record<string, NestedRelationOperation<R>>;
+    relations?: Record<RelationKeys, NestedRelationOperation<unknown>>;
   };
-
   // Ces opérations ne peuvent pas contenir de relations imbriquées
   attach(key: string | number): AttachRelationOperation;
   detach(key: string | number): DetachRelationOperation;
