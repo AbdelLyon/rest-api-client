@@ -100,10 +100,6 @@ declare interface BuildOnly<TModel, TRelations = {}> {
 
 export declare type ComparisonOperator = "=" | ">" | "<" | "in";
 
-declare type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
-    [K in keyof T]: K extends RelationKeys ? IsRelationOperation<T[K]> extends true ? IsValidCreateOperation<T[K]> extends true ? T[K] : never : T[K] : T[K];
-};
-
 declare interface CreateRelationOperation<T> extends BaseRelationDefinition {
     operation: "create";
     attributes: T;
@@ -263,7 +259,9 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 }
 
 declare interface IEntityBuilder<TModel> {
-    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: CreateEntityAttributes<T, RelationKeys>): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: {
+        [K in keyof T]: K extends RelationKeys ? ValidCreateRelationOnly<T[K]> : T[K];
+    }): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IEntityBuilder<TModel>;
     build(): MutationRequest<TModel>;
     setMutationFunction(fn: MutationFunction): void;
@@ -309,14 +307,6 @@ declare interface IRelationBuilder {
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
     toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
 }
-
-declare type IsRelationOperation<T> = T extends {
-    operation: string;
-} ? true : false;
-
-declare type IsValidCreateOperation<T> = T extends {
-    operation: "update" | "detach";
-} ? false : true;
 
 export declare type LogicalOperator = "and" | "or";
 
@@ -486,6 +476,10 @@ declare interface UpdateRelationOperation<T> extends BaseRelationDefinition {
 declare type ValidCreateNestedRelation<T> = (CreateRelationOperation<T> & {
     relations?: Record<string, ValidCreateNestedRelation<any>>;
 }) | AttachRelationDefinition;
+
+declare type ValidCreateRelationOnly<T> = T extends {
+    operation: "update" | "detach";
+} ? never : T;
 
 declare type ValidUpdateNestedRelation<T> = (CreateRelationOperation<T> & {
     relations?: Record<string, ValidCreateNestedRelation<any>>;

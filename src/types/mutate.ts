@@ -114,16 +114,18 @@ export type IsRelationOperation<T> = T extends { operation: string; } ? true : f
 export type IsValidCreateOperation<T> = T extends { operation: "update" | "detach"; } ? false : true;
 
 // Transforme les attributs pour valider les opérations dans un contexte de création
+export type ValidCreateRelationOnly<T> = T extends { operation: "update" | "detach"; }
+  ? never  // Rejeter toute opération "update" ou "detach"
+  : T;
+
+// Modifier le type CreateEntityAttributes pour qu'il vérifie récursivement
 export type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
   [K in keyof T]: K extends RelationKeys
   ? IsRelationOperation<T[K]> extends true
-  ? IsValidCreateOperation<T[K]> extends true
-  ? T[K]
-  : never // Interdit les opérations "update" et "detach"
+  ? ValidCreateRelationOnly<T[K]>  // Rejeter les opérations update/detach
   : T[K]
   : T[K]
 };
-
 // ------------- Interfaces pour les builders -------------
 
 // Interface pour les méthodes de relation
@@ -169,7 +171,7 @@ export interface BuildOnly<TModel, TRelations = {}> {
 // Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-    attributes: CreateEntityAttributes<T, RelationKeys>
+    attributes: { [K in keyof T]: K extends RelationKeys ? ValidCreateRelationOnly<T[K]> : T[K] }
   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
   updateEntity<T extends Record<string, unknown>>(

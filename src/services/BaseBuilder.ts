@@ -69,6 +69,7 @@ export class BaseBuilder implements IRelationBuilder {
       attributes: T,
       relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
    ): T & UpdateRelationOperation<T> & {
+      operation: "update";
       relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
    } {
       const normalAttributes: Record<string, unknown> = {};
