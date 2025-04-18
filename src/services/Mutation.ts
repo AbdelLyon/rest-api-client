@@ -10,20 +10,21 @@ import { Builder, BuildOnly, IBuilder } from "./MutateRequestBuilder";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
-  public builder: IBuilder<T>;
-
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
   constructor (pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
-    this.builder = Builder.createBuilder<T>();
 
-    // Injecter la fonction de mutation sans créer de référence circulaire
-    this.builder.setMutationFunction((data, options) => this.mutate(data, options));
 
     this.pathname = pathname;
     this.schema = schema;
+  }
+
+  public builder(): IBuilder<T> {
+    const builder = Builder.createBuilder<T>();
+    builder.setMutationFunction((data, options) => this.mutate(data, options));
+    return builder;
   }
 
   private validateData(data: unknown[]): T[] {

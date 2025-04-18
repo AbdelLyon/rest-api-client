@@ -99,17 +99,12 @@ export interface IBuilder<TModel> {
 }
 
 export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
-   private static instance: Builder<unknown>;
    private operations: Array<TypedMutationOperation<TModel, any>> = [];
    private mutationFn: MutationFunction | null = null;
 
    private constructor () { }
-
    public static createBuilder<T>(): IBuilder<T> {
-      if (!Builder.instance) {
-         Builder.instance = new Builder<T>();
-      }
-      return Builder.instance as IBuilder<T>;
+      return new Builder<T>();
    }
 
    // Méthode pour définir la fonction de mutation

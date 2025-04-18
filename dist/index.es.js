@@ -1,7 +1,7 @@
-var I = Object.defineProperty;
-var T = (u, t, e) => t in u ? I(u, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[t] = e;
-var o = (u, t, e) => T(u, typeof t != "symbol" ? t + "" : t, e);
-class f extends Error {
+var S = Object.defineProperty;
+var I = (u, t, e) => t in u ? S(u, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : u[t] = e;
+var o = (u, t, e) => I(u, typeof t != "symbol" ? t + "" : t, e);
+class d extends Error {
   constructor(e, s) {
     const r = e instanceof Error ? e.message : "API Service Request Failed";
     super(r);
@@ -17,7 +17,7 @@ class f extends Error {
         this.status = n.status, this.statusText = n.statusText;
       }
     }
-    Error.captureStackTrace && Error.captureStackTrace(this, f);
+    Error.captureStackTrace && Error.captureStackTrace(this, d);
   }
   // Méthodes utilitaires pour vérifier le type d'erreur
   isNotFound() {
@@ -190,25 +190,25 @@ const c = class c {
       const { timeout: r = this.defaultTimeout, params: a, data: n, ...i } = e;
       let h = t;
       if (a && Object.keys(a).length > 0) {
-        const d = new URLSearchParams();
-        for (const [y, S] of Object.entries(a))
-          d.append(y, S);
-        h += `?${d.toString()}`;
+        const l = new URLSearchParams();
+        for (const [m, b] of Object.entries(a))
+          l.append(m, b);
+        h += `?${l.toString()}`;
       }
-      const g = new AbortController(), b = setTimeout(() => g.abort("Request timeout"), r);
-      let E;
-      n !== void 0 && (E = typeof n == "string" ? n : JSON.stringify(n));
-      const m = await fetch(h, {
+      const w = new AbortController(), E = setTimeout(() => w.abort("Request timeout"), r);
+      let g;
+      n !== void 0 && (g = typeof n == "string" ? n : JSON.stringify(n));
+      const f = await fetch(h, {
         ...i,
-        body: E,
-        signal: g.signal,
+        body: g,
+        signal: w.signal,
         credentials: this.withCredentials ? "include" : "same-origin"
       });
-      if (clearTimeout(b), !m.ok && s < this.maxRetries && this.isRetryableError(m.status, e.method)) {
-        const d = Math.pow(2, s) * 100;
-        return await new Promise((y) => setTimeout(y, d)), this.fetchWithRetry(t, e, s + 1);
+      if (clearTimeout(E), !f.ok && s < this.maxRetries && this.isRetryableError(f.status, e.method)) {
+        const l = Math.pow(2, s) * 100;
+        return await new Promise((m) => setTimeout(m, l)), this.fetchWithRetry(t, e, s + 1);
       }
-      return m;
+      return f;
     } catch (r) {
       if (r instanceof DOMException && r.name === "AbortError")
         throw new Error(`Request timeout after ${e.timeout || this.defaultTimeout}ms`);
@@ -244,7 +244,7 @@ const c = class c {
       let i = await this.fetchWithRetry(a, n);
       return i = await this.applyResponseSuccessInterceptors(i), (s = i.headers.get("content-type")) != null && s.includes("application/json") ? await i.json() : await i.text();
     } catch (r) {
-      const a = r instanceof f ? r : new f(r, {
+      const a = r instanceof d ? r : new d(r, {
         ...t,
         ...e,
         url: t.url
@@ -255,14 +255,14 @@ const c = class c {
 };
 o(c, "instances", /* @__PURE__ */ new Map()), o(c, "defaultInstanceName"), // Intercepteurs statiques
 o(c, "requestInterceptors", []), o(c, "responseSuccessInterceptors", []), o(c, "responseErrorInterceptors", []);
-let l = c;
-const p = class p {
+let p = c;
+class y {
   constructor() {
     o(this, "operations", []);
     o(this, "mutationFn", null);
   }
   static createBuilder() {
-    return p.instance || (p.instance = new p()), p.instance;
+    return new y();
   }
   // Méthode pour définir la fonction de mutation
   setMutationFunction(t) {
@@ -401,16 +401,17 @@ const p = class p {
     const e = this.build();
     return this.mutationFn(e, t);
   }
-};
-o(p, "instance");
-let w = p;
-class j {
+}
+class R {
   constructor(t, e) {
     o(this, "http");
-    o(this, "builder");
     o(this, "pathname");
     o(this, "schema");
-    this.http = l.getInstance(), this.builder = w.createBuilder(), this.builder.setMutationFunction((s, r) => this.mutate(s, r)), this.pathname = t, this.schema = e;
+    this.http = p.getInstance(), this.pathname = t, this.schema = e;
+  }
+  builder() {
+    const t = y.createBuilder();
+    return t.setMutationFunction((e, s) => this.mutate(e, s)), t;
   }
   validateData(t) {
     return t.map((e) => {
@@ -486,12 +487,12 @@ class j {
     };
   }
 }
-class k {
+class j {
   constructor(t, e) {
     o(this, "http");
     o(this, "pathname");
     o(this, "schema");
-    this.http = l.getInstance(), this.pathname = t, this.schema = e;
+    this.http = p.getInstance(), this.pathname = t, this.schema = e;
   }
   validateData(t) {
     return t.map((e) => {
@@ -534,7 +535,7 @@ class k {
     );
   }
 }
-class O {
+class k {
   constructor(t, e) {
     o(this, "http");
     o(this, "pathname");
@@ -542,7 +543,7 @@ class O {
     o(this, "credentialsSchema");
     o(this, "registerDataSchema");
     o(this, "tokenSchema");
-    this.http = l.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
+    this.http = p.getInstance(), this.pathname = t, this.userSchema = e.user, this.credentialsSchema = e.credentials, this.registerDataSchema = e.registerData, this.tokenSchema = e.tokens;
   }
   /**
    * Inscription
@@ -620,9 +621,9 @@ class O {
   }
 }
 export {
-  O as Auth,
-  l as HttpClient,
-  j as Mutation,
-  k as Query
+  k as Auth,
+  p as HttpClient,
+  R as Mutation,
+  j as Query
 };
 //# sourceMappingURL=index.es.js.map

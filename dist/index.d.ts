@@ -362,10 +362,10 @@ export declare type LogicalOperator = "and" | "or";
 
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpClient;
-    builder: IBuilder<T>;
     protected pathname: string;
     protected schema: z.ZodType<T>;
     constructor(pathname: string, schema: z.ZodType<T>);
+    builder(): IBuilder<T>;
     private validateData;
     mutate(mutateRequest: BuildOnly<T>, options?: Partial<RequestConfig>): Promise<MutationResponse>;
     executeAction(actionRequest: ActionRequest, options?: Partial<RequestConfig>): Promise<ActionResponse>;
