@@ -121,32 +121,59 @@ export interface MutationFunction {
   (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
+
+export type CreateRelationOperation<T> = {
+  operation: "create";
+  attributes: T;
+  __relationDefinition?: true;
+};
+
+export type UpdateRelationOperation<T> = {
+  operation: "update";
+  key: string | number;
+  attributes: T;
+  __relationDefinition?: true;
+};
+
+export type AttachRelationOperation = {
+  operation: "attach";
+  key: string | number;
+  __relationDefinition?: true;
+};
+
+export type DetachRelationOperation = {
+  operation: "detach";
+  key: string | number;
+  __relationDefinition?: true;
+};
+
+// Les types d'opérations valides pour des relations imbriquées
+export type NestedRelationOperation<T> =
+  | CreateRelationOperation<T>
+  | AttachRelationOperation;
+
+
 // Interface pour les méthodes de relation uniquement
 export interface IRelationBuilder {
   createRelation<T, R = unknown>(
     attributes: T,
-    relations?: Record<string, RelationDefinition<R, unknown>>
-  ): T & {
-    operation: "create";
-    attributes: T;
-    relations?: Record<string, RelationDefinition<R, unknown>>;
-    __relationDefinition?: true;
+    relations?: Record<string, NestedRelationOperation<R>>
+  ): T & CreateRelationOperation<T> & {
+    relations?: Record<string, NestedRelationOperation<R>>;
   };
 
+  // Pour mettre à jour une relation (de premier niveau)
   updateRelation<T, R = unknown>(
     key: string | number,
     attributes: T,
-    relations?: Record<string, RelationDefinition<R, unknown>>
-  ): T & {
-    operation: "update";
-    key: string | number;
-    attributes: T;
-    relations?: Record<string, RelationDefinition<R, unknown>>;
-    __relationDefinition?: true;
+    relations?: Record<string, NestedRelationOperation<R>>
+  ): T & UpdateRelationOperation<T> & {
+    relations?: Record<string, NestedRelationOperation<R>>;
   };
 
-  attach(key: string | number): AttachRelationDefinition;
-  detach(key: string | number): DetachRelationDefinition;
+  // Ces opérations ne peuvent pas contenir de relations imbriquées
+  attach(key: string | number): AttachRelationOperation;
+  detach(key: string | number): DetachRelationOperation;
 
   sync<T>(
     key: string | number | Array<string | number>,

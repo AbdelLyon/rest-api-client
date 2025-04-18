@@ -50,6 +50,12 @@ export declare interface AttachRelationDefinition extends BaseRelationDefinition
     key: string | number;
 }
 
+declare type AttachRelationOperation = {
+    operation: "attach";
+    key: string | number;
+    __relationDefinition?: true;
+};
+
 export declare abstract class Auth<UserType extends object = {}, CredentialsType extends object = {}, RegisterDataType extends object = {}, TokenType extends object = {}> implements IAuth<UserType, CredentialsType, RegisterDataType, TokenType> {
     protected http: HttpClient;
     protected pathname: string;
@@ -103,6 +109,12 @@ export declare interface CreateMutationOperation<TAttributes, TRelations> extend
     operation: "create";
 }
 
+declare type CreateRelationOperation<T> = {
+    operation: "create";
+    attributes: T;
+    __relationDefinition?: true;
+};
+
 export declare interface DeleteRequest {
     resources: Array<number | string>;
 }
@@ -118,6 +130,12 @@ export declare interface DetachRelationDefinition extends BaseRelationDefinition
     operation: "detach";
     key: string | number;
 }
+
+declare type DetachRelationOperation = {
+    operation: "detach";
+    key: string | number;
+    __relationDefinition?: true;
+};
 
 export declare interface DetailsAction {
     name: string;
@@ -292,21 +310,14 @@ export declare interface IQuery<T> {
 }
 
 declare interface IRelationBuilder {
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition<R, unknown>>): T & {
-        operation: "create";
-        attributes: T;
-        relations?: Record<string, RelationDefinition<R, unknown>>;
-        __relationDefinition?: true;
+    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, NestedRelationOperation<R>>): T & CreateRelationOperation<T> & {
+        relations?: Record<string, NestedRelationOperation<R>>;
     };
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition<R, unknown>>): T & {
-        operation: "update";
-        key: string | number;
-        attributes: T;
-        relations?: Record<string, RelationDefinition<R, unknown>>;
-        __relationDefinition?: true;
+    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, NestedRelationOperation<R>>): T & UpdateRelationOperation<T> & {
+        relations?: Record<string, NestedRelationOperation<R>>;
     };
-    attach(key: string | number): AttachRelationDefinition;
-    detach(key: string | number): DetachRelationDefinition;
+    attach(key: string | number): AttachRelationOperation;
+    detach(key: string | number): DetachRelationOperation;
     sync<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>, withoutDetaching?: boolean): SyncRelationDefinition<T>;
     toggle<T>(key: string | number | Array<string | number>, attributes?: T, pivot?: Record<string, string | number>): ToggleRelationDefinition<T>;
 }
@@ -361,6 +372,8 @@ export declare interface MutationResponse {
 export declare interface NestedFilterCriteria {
     nested: Array<FilterCriteria>;
 }
+
+declare type NestedRelationOperation<T> = CreateRelationOperation<T> | AttachRelationOperation;
 
 export declare interface PaginatedSearchRequest extends SearchRequest {
     page?: number;
@@ -499,5 +512,12 @@ export declare interface UpdateMutationOperation<TAttributes, TRelations> extend
     operation: "update";
     key: string | number;
 }
+
+declare type UpdateRelationOperation<T> = {
+    operation: "update";
+    key: string | number;
+    attributes: T;
+    __relationDefinition?: true;
+};
 
 export { }

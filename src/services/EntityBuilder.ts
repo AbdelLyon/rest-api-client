@@ -1,6 +1,6 @@
 import { MutationResponse, RequestConfig } from "@/types";
 import { BaseBuilder } from "./BaseBuilder";
-import { BuildOnly, ExtractModelAttributes, IEntityBuilder, IRelationBuilder, MutationFunction, MutationRequest, RelationDefinition, TypedMutationOperation } from "@/types/mutate";
+import { BuildOnly, ExtractModelAttributes, IEntityBuilder, IRelationBuilder, MutationFunction, MutationRequest, NestedRelationOperation, TypedMutationOperation } from "@/types/mutate";
 
 
 export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder<TModel>, BuildOnly<TModel> {
@@ -84,7 +84,7 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
 
    public override createRelation<T, R = unknown>(
       attributes: T,
-      relations?: Record<string, RelationDefinition<R, unknown>>
+      relations?: Record<string, NestedRelationOperation<R>>
    ) {
       return this.relationBuilder.createRelation<T, R>(attributes, relations);
    }
@@ -92,11 +92,10 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
    public override updateRelation<T, R = unknown>(
       key: string | number,
       attributes: T,
-      relations?: Record<string, RelationDefinition<R, unknown>>
+      relations?: Record<string, NestedRelationOperation<R>>
    ) {
       return this.relationBuilder.updateRelation<T, R>(key, attributes, relations);
    }
-
    public override attach(key: string | number) {
       return this.relationBuilder.attach(key);
    }
