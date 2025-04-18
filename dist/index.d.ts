@@ -259,9 +259,12 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 }
 
 declare interface IEntityBuilder<TModel> {
-    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: {
-        [K in keyof T]: K extends RelationKeys ? ValidCreateRelationOnly<T[K]> : T[K];
-    }): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+    createEntity<TAttributes extends Record<string, unknown>, TRelations extends Record<string, any> = {}>(options: {
+        attributes: TAttributes;
+        relations?: {
+            [K in keyof TRelations]: ReturnType<IRelationBuilder['createRelation']> | ReturnType<IRelationBuilder['attach']>;
+        };
+    }): BuildOnly<TModel, TRelations>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IEntityBuilder<TModel>;
     build(): MutationRequest<TModel>;
     setMutationFunction(fn: MutationFunction): void;
@@ -476,10 +479,6 @@ declare interface UpdateRelationOperation<T> extends BaseRelationDefinition {
 declare type ValidCreateNestedRelation<T> = (CreateRelationOperation<T> & {
     relations?: Record<string, ValidCreateNestedRelation<any>>;
 }) | AttachRelationDefinition;
-
-declare type ValidCreateRelationOnly<T> = T extends {
-    operation: "update" | "detach";
-} ? never : T;
 
 declare type ValidUpdateNestedRelation<T> = (CreateRelationOperation<T> & {
     relations?: Record<string, ValidCreateNestedRelation<any>>;

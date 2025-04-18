@@ -168,11 +168,30 @@ export interface BuildOnly<TModel, TRelations = {}> {
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
 }
 
+export type CreateOperationOnly = { operation: "create"; };
+export type UpdateOperationOnly = { operation: "update"; };
+export type AttachOperationOnly = { operation: "attach"; };
+export type DetachOperationOnly = { operation: "detach"; };
+
+// Type utilitaire qui exclut strictement les opérations update/detach
+export type ExcludeUpdateOperations<T> = T extends UpdateOperationOnly | DetachOperationOnly ? never : T;
+
+
 // Interface pour les méthodes d'entité
 export interface IEntityBuilder<TModel> {
-  createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-    attributes: { [K in keyof T]: K extends RelationKeys ? ValidCreateRelationOnly<T[K]> : T[K] }
-  ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+  createEntity<
+    TAttributes extends Record<string, unknown>,
+    TRelations extends Record<string, any> = {}
+  >(
+    options: {
+      attributes: TAttributes;
+      relations?: {
+        [K in keyof TRelations]:
+        | ReturnType<IRelationBuilder['createRelation']>
+        | ReturnType<IRelationBuilder['attach']>;
+      };
+    }
+  ): BuildOnly<TModel, TRelations>;
 
   updateEntity<T extends Record<string, unknown>>(
     key: string | number,

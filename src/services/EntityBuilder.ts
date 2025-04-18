@@ -10,7 +10,6 @@ import {
    TypedMutationOperation,
    ValidCreateNestedRelation,
    ValidUpdateNestedRelation,
-   CreateEntityAttributes
 } from "@/types/mutate";
 
 export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder<TModel>, BuildOnly<TModel> {
@@ -27,17 +26,26 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
       this.mutationFn = fn;
    }
 
-   public createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-      attributes: CreateEntityAttributes<T, RelationKeys>
-   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
-      const normalAttributes: Record<string, unknown> = {};
+   public createEntity<
+      TAttributes extends Record<string, unknown>,
+      TRelations extends Record<string, any> = {}
+   >(
+      options: {
+         attributes: TAttributes;
+         relations?: {
+            [K in keyof TRelations]:
+            | ReturnType<IRelationBuilder['createRelation']>
+            | ReturnType<IRelationBuilder['attach']>;
+         };
+      }
+   ): BuildOnly<TModel, TRelations> {
+      const normalAttributes: Record<string, unknown> = { ...options.attributes };
       const relations: Record<string, unknown> = {};
 
-      for (const [key, value] of Object.entries(attributes)) {
-         if (value && typeof value === 'object' && 'operation' in value) {
+      // Traiter les relations explicites si fournies
+      if (options.relations) {
+         for (const [key, value] of Object.entries(options.relations)) {
             relations[key] = value;
-         } else {
-            normalAttributes[key] = value;
          }
       }
 
@@ -48,7 +56,7 @@ export class EntityBuilder<TModel> extends BaseBuilder implements IEntityBuilder
       };
 
       this.operations.push(operation);
-      return this as unknown as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+      return this as unknown as BuildOnly<TModel, TRelations>;
    }
 
    public updateEntity<T extends Record<string, unknown>>(
