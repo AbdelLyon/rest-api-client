@@ -100,7 +100,7 @@ declare class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
      * Crée une entité avec les attributs donnés, y compris des relations imbriquées
      * @param attributes Les attributs de l'entité, pouvant contenir des relations
      */
-    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel, ExtractRelations<T>>;
+    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     /**
      * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
      * @param key La clé de l'entité à mettre à jour
@@ -228,8 +228,6 @@ export declare interface DetailsValidationRules {
 
 declare type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
-declare type ExtractRelations<T> = Pick<T, RelationKeys<T>>;
-
 export declare interface FieldSelection {
     field: string;
 }
@@ -355,7 +353,7 @@ export declare interface IAuth<UserType extends object, CredentialsType extends 
 
 declare interface IBuilder<TModel> {
     build(): Array<TypedMutationOperation<TModel, {}>>;
-    createEntity<T extends Record<string, unknown>>(attributes: T): BuildOnly<TModel, ExtractRelations<T>>;
+    createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(attributes: T): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
     updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): IBuilder<TModel>;
     createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "create";
@@ -511,12 +509,6 @@ export declare interface RelationInclude {
     scopes?: Array<ScopeDefinition>;
     limit?: number;
 }
-
-declare type RelationKeys<T> = {
-    [K in keyof T]: T[K] extends {
-        operation: string;
-    } ? K : never;
-}[keyof T];
 
 export declare interface RequestConfig extends RequestInit {
     url: string;

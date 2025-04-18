@@ -16,11 +16,8 @@ type RelationDefinition<T = unknown, R = unknown> =
    | SyncRelationDefinition<T>
    | ToggleRelationDefinition<T>;
 
-type RelationKeys<T> = {
-   [K in keyof T]: T[K] extends { operation: string; } ? K : never
-}[keyof T];
 
-type ExtractRelations<T> = Pick<T, RelationKeys<T>>;
+
 // Type plus précis pour les opérations de mutation avec relations typées
 type TypedMutationOperation<TModel, TRelations = {}> = {
    operation: "create" | "update";
@@ -38,9 +35,9 @@ interface BuildOnly<TModel, TRelations = {}> {
 export interface IBuilder<TModel> {
    build(): Array<TypedMutationOperation<TModel, {}>>;
 
-   createEntity<T extends Record<string, unknown>>(
+   createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T
-   ): BuildOnly<TModel, ExtractRelations<T>>;
+   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
 
    updateEntity<T extends Record<string, unknown>>(
       key: string | number,
@@ -101,9 +98,9 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
     * Crée une entité avec les attributs donnés, y compris des relations imbriquées
     * @param attributes Les attributs de l'entité, pouvant contenir des relations
     */
-   public createEntity<T extends Record<string, unknown>>(
+   public createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
       attributes: T
-   ): BuildOnly<TModel, ExtractRelations<T>> {
+   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
       // Séparer les attributs normaux des attributs de relation
       const normalAttributes: Record<string, unknown> = {};
       const relations: Record<string, unknown> = {};
@@ -125,7 +122,7 @@ export class Builder<TModel> implements IBuilder<TModel>, BuildOnly<TModel> {
       };
 
       this.mutate.push(operation);
-      return this as unknown as BuildOnly<TModel, ExtractRelations<T>>;
+      return this as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
    }
 
    /**
