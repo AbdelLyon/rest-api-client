@@ -263,6 +263,10 @@ const p = class p {
   static createBuilder() {
     return p.instance || (p.instance = new p()), p.instance;
   }
+  /**
+   * Crée une entité avec les attributs donnés, y compris des relations imbriquées
+   * @param attributes Les attributs de l'entité, pouvant contenir des relations
+   */
   createEntity(e) {
     const t = {}, s = {};
     for (const [a, n] of Object.entries(e))
@@ -274,6 +278,11 @@ const p = class p {
     };
     return this.mutate.push(r), this;
   }
+  /**
+   * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
+   * @param key La clé de l'entité à mettre à jour
+   * @param attributes Les attributs de l'entité, pouvant contenir des relations
+   */
   updateEntity(e, t) {
     const s = {}, r = {};
     for (const [n, i] of Object.entries(t))

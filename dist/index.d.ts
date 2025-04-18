@@ -96,17 +96,26 @@ declare class Builder<TModel> {
     private static instance;
     private mutate;
     static createBuilder<T>(): Builder<T>;
-    createEntity<T extends Record<string, unknown>>(attributes: T): this;
-    updateEntity<T extends Record<string, unknown>>(key: string | number, attributes: T): this;
+    /**
+     * Crée une entité avec les attributs donnés, y compris des relations imbriquées
+     * @param attributes Les attributs de l'entité, pouvant contenir des relations
+     */
+    createEntity<T extends Record<string, unknown>, R = unknown>(attributes: T): this;
+    /**
+     * Met à jour une entité avec les attributs donnés, y compris des relations imbriquées
+     * @param key La clé de l'entité à mettre à jour
+     * @param attributes Les attributs de l'entité, pouvant contenir des relations
+     */
+    updateEntity<T extends Record<string, unknown>, R = unknown>(key: string | number, attributes: T): this;
     /**
      * Crée une relation avec des attributs donnés et des relations optionnelles.
      * @param attributes Les attributs de la relation
      * @param relations Les relations imbriquées explicites (optionnel)
      */
-    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<unknown, R>>): T & {
+    createRelation<T, R = unknown>(attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "create";
         attributes: T;
-        relations?: Record<string, RelationDefinition_2<unknown, R>>;
+        relations?: Record<string, RelationDefinition_2<R, unknown>>;
         __relationDefinition?: true;
     };
     /**
@@ -115,11 +124,11 @@ declare class Builder<TModel> {
      * @param attributes Les attributs de la relation
      * @param relations Les relations imbriquées explicites (optionnel)
      */
-    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<unknown, R>>): T & {
+    updateRelation<T, R = unknown>(key: string | number, attributes: T, relations?: Record<string, RelationDefinition_2<R, unknown>>): T & {
         operation: "update";
         key: string | number;
         attributes: T;
-        relations?: Record<string, RelationDefinition_2<unknown, R>>;
+        relations?: Record<string, RelationDefinition_2<R, unknown>>;
         __relationDefinition?: true;
     };
     attach(key: string | number): AttachRelationDefinition;
