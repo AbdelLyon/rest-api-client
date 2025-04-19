@@ -7,7 +7,7 @@ const modules = ["auth", "http", "mutation", "query"];
 export default defineConfig({
   plugins: [
     dts({
-      exclude: ["src/tests/**/*"],
+      exclude: ["src/tests/**/*", "src/error/**/*"],
     }),
   ],
   resolve: {
@@ -39,6 +39,7 @@ export default defineConfig({
         /^node_modules\/.*/,
       ],
       output: {
+        preserveModules: false,
         exports: "named",
         entryFileNames: (chunkInfo) => {
           return `${chunkInfo.name}/index.es.js`;
