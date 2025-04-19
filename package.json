@@ -45,7 +45,7 @@
       "types": "./dist/esm/auth/inex.d.ts"
     },
     "./http": {
-      "import": "./dist/esm/http/Http.js",
+      "import": "./dist/esm/http/HttpClients.js",
       "types": "./dist/esm/http/index.d.ts"
     },
     "./mutation": {
