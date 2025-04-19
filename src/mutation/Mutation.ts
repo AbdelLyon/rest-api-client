@@ -16,7 +16,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   private readonly relation: IRelationBuilder;
 
-  constructor (pathname: string, schema: z.ZodType<T>) {
+  constructor(pathname: string, schema: z.ZodType<T>) {
     this.http = HttpClient.getInstance();
     this.pathname = pathname;
     this.schema = schema;
@@ -34,7 +34,6 @@ export abstract class Mutation<T> implements IMutation<T> {
     return this.relation;
   }
 
-
   private validateData(data: Array<unknown>): Array<T> {
     return data.map((item) => {
       const result = this.schema.safeParse(item);
@@ -49,11 +48,11 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate(
-    mutateRequest: BuildOnly<T> | { mutate: Array<any>; },
-    options?: Partial<RequestConfig>
+    mutateRequest: BuildOnly<T> | { mutate: Array<any> },
+    options?: Partial<RequestConfig>,
   ): Promise<MutationResponse> {
-
-    const data = 'build' in mutateRequest ? mutateRequest.build() : mutateRequest;
+    const data =
+      "build" in mutateRequest ? mutateRequest.build() : mutateRequest;
 
     const response = await this.http.request<MutationResponse>(
       {

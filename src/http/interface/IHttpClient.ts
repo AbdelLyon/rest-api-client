@@ -5,5 +5,4 @@ export interface IHttpClient {
     config: RequestConfig,
     options?: Partial<RequestConfig>,
   ) => Promise<TResponse>;
-
 }

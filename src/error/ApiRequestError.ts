@@ -7,10 +7,9 @@ export class ApiRequestError extends Error {
   originalError: unknown;
   requestConfig: RequestConfig;
 
-  constructor (error: unknown, requestConfig: RequestConfig) {
-    const message = error instanceof Error
-      ? error.message
-      : "API Service Request Failed";
+  constructor(error: unknown, requestConfig: RequestConfig) {
+    const message =
+      error instanceof Error ? error.message : "API Service Request Failed";
 
     super(message);
     this.name = "ApiRequestError";
@@ -36,7 +35,6 @@ export class ApiRequestError extends Error {
         this.statusText = response.statusText;
       }
     }
-
   }
 
   // Méthodes utilitaires pour vérifier le type d'erreur

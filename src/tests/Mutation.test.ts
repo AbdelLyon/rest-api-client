@@ -21,13 +21,12 @@ const TestResourceSchema = z.object({
 
 type TestResource = z.infer<typeof TestResourceSchema>;
 
-
 // interface TestRelations extends Record<string, unknown> {
 //   // Aucune relation définie pour ce test
 // }
 
 class TestMutation extends Mutation<TestResource> {
-  constructor (pathname: string) {
+  constructor(pathname: string) {
     super(pathname, TestResourceSchema);
   }
 
@@ -47,7 +46,7 @@ describe("Mutation avec Zod", () => {
       httpConfig: {
         baseURL: "https://api.test.com",
       },
-      instanceName: "main"
+      instanceName: "main",
     });
   });
 
@@ -55,7 +54,7 @@ describe("Mutation avec Zod", () => {
     vi.clearAllMocks();
 
     vi.spyOn(HttpClient, "getInstance");
-    vi.spyOn(console, "error").mockImplementation(() => { });
+    vi.spyOn(console, "error").mockImplementation(() => {});
 
     const httpInstance = HttpClient.getInstance();
     vi.spyOn(httpInstance, "request").mockImplementation(mockRequest);
@@ -73,10 +72,8 @@ describe("Mutation avec Zod", () => {
     it("devrait initialiser avec le pathname et le schéma fournis", () => {
       // Espionner la méthode getInstance
       // const getInstanceSpy = vi.spyOn(HttpClient, "getInstance");
-
       // // Créer une nouvelle instance
       // const testMutation = new TestMutation(pathname);
-
       // expect(getInstanceSpy).toHaveBeenCalled();
       // expect(testMutation["pathname"]).toBe(pathname);
       // expect(testMutation["schema"]).toBe(TestResourceSchema);

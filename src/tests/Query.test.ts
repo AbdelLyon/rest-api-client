@@ -11,7 +11,12 @@ import {
 
 import { z } from "zod";
 
-import type { DetailsResponse, PaginatedSearchRequest, SearchRequest, SearchResponse } from "@/query";
+import type {
+  DetailsResponse,
+  PaginatedSearchRequest,
+  SearchRequest,
+  SearchResponse,
+} from "@/query";
 import { ApiRequestError } from "@/error/ApiRequestError";
 import { Query } from "@/query";
 import { HttpClient } from "@/http";
@@ -26,7 +31,7 @@ const TestResourceSchema = z.object({
 type TestResource = z.infer<typeof TestResourceSchema>;
 
 class TestQuery extends Query<TestResource> {
-  constructor (pathname: string) {
+  constructor(pathname: string) {
     super(pathname, TestResourceSchema);
   }
 }
@@ -41,7 +46,7 @@ describe("Query avec Zod", () => {
       httpConfig: {
         baseURL: "https://api.test.com",
       },
-      instanceName: "main"
+      instanceName: "main",
     });
   });
 
@@ -50,7 +55,7 @@ describe("Query avec Zod", () => {
 
     // Espionner les méthodes que nous voulons tester
     vi.spyOn(HttpClient, "getInstance");
-    vi.spyOn(console, "error").mockImplementation(() => { });
+    vi.spyOn(console, "error").mockImplementation(() => {});
 
     // Remplacer la méthode request par un mock
     const httpInstance = HttpClient.getInstance();
@@ -157,7 +162,7 @@ describe("Query avec Zod", () => {
       class ConversionQuery extends Query<
         z.infer<typeof schemaWithConversion>
       > {
-        constructor () {
+        constructor() {
           super("/api/convert", schemaWithConversion);
         }
       }
@@ -601,19 +606,17 @@ describe("Query avec Zod", () => {
         meta: { page: 1, perPage: 10, total: 1 },
       };
 
-      mockRequest
-        .mockResolvedValueOnce(mockResponse)
-        .mockResolvedValueOnce({
-          data: {
-            actions: [],
-            instructions: [],
-            fields: ["id", "name", "status", "createdAt"],
-            limits: [10],
-            scopes: [],
-            relations: [],
-            rules: {},
-          },
-        });
+      mockRequest.mockResolvedValueOnce(mockResponse).mockResolvedValueOnce({
+        data: {
+          actions: [],
+          instructions: [],
+          fields: ["id", "name", "status", "createdAt"],
+          limits: [10],
+          scopes: [],
+          relations: [],
+          rules: {},
+        },
+      });
 
       const searchResult = await query.search({
         filters: [{ field: "status", operator: "=", value: "active" }],

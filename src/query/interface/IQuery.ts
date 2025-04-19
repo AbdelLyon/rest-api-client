@@ -11,7 +11,5 @@ export interface IQuery<T> {
     searchRequest: SearchRequest,
     options?: Partial<RequestConfig>,
   ) => Promise<SearchResponse<T>>;
-  getdetails: (
-    options?: Partial<RequestConfig>,
-  ) => Promise<DetailsResponse>;
+  getdetails: (options?: Partial<RequestConfig>) => Promise<DetailsResponse>;
 }

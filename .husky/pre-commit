@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lint les fichiers modifiés
+pnpm lint-staged
+
+# Vérification des types TypeScript
+# Limité aux fichiers modifiés pour être plus rapide
+pnpm tsc --noEmit
+
+# Exécuter les tests unitaires
+# Option 1: Tous les tests (plus sûr mais plus lent)
+# pnpm test
+# Option 2: Seulement les tests liés aux fichiers modifiés (plus rapide)
+# pnpm test

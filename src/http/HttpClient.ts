@@ -1,4 +1,11 @@
-import type { HttpConfig, HttpConfigOptions, RequestConfig, RequestInterceptor, ResponseErrorInterceptor, ResponseSuccessInterceptor } from "@/http/types/http";
+import type {
+  HttpConfig,
+  HttpConfigOptions,
+  RequestConfig,
+  RequestInterceptor,
+  ResponseErrorInterceptor,
+  ResponseSuccessInterceptor,
+} from "@/http/types/http";
 import type { IHttpClient } from "@/http/interface/IHttpClient";
 import { ApiRequestError } from "@/error/ApiRequestError";
 
@@ -7,8 +14,10 @@ export class HttpClient implements IHttpClient {
   private static defaultInstanceName: string;
 
   private static requestInterceptors: Array<RequestInterceptor> = [];
-  private static responseSuccessInterceptors: Array<ResponseSuccessInterceptor> = [];
-  private static responseErrorInterceptors: Array<ResponseErrorInterceptor> = [];
+  private static responseSuccessInterceptors: Array<ResponseSuccessInterceptor> =
+    [];
+  private static responseErrorInterceptors: Array<ResponseErrorInterceptor> =
+    [];
 
   private baseURL: string;
   private defaultTimeout: number;
@@ -16,14 +25,13 @@ export class HttpClient implements IHttpClient {
   private withCredentials: boolean;
   private maxRetries: number;
 
-  private constructor () {
+  private constructor() {
     this.baseURL = "";
     this.defaultTimeout = 10000;
     this.defaultHeaders = {};
     this.withCredentials = true;
     this.maxRetries = 3;
   }
-
 
   static init(config: {
     httpConfig: HttpConfig;
@@ -33,18 +41,18 @@ export class HttpClient implements IHttpClient {
 
     HttpClient.requestInterceptors = [
       ...HttpClient.requestInterceptors,
-      ...(httpConfig.interceptors?.request ?? [])
+      ...(httpConfig.interceptors?.request ?? []),
     ];
 
     if (httpConfig.interceptors?.response) {
       HttpClient.responseSuccessInterceptors = [
         ...HttpClient.responseSuccessInterceptors,
-        ...(httpConfig.interceptors.response.success ?? [])
+        ...(httpConfig.interceptors.response.success ?? []),
       ];
 
       HttpClient.responseErrorInterceptors = [
         ...HttpClient.responseErrorInterceptors,
-        ...(httpConfig.interceptors.response.error ?? [])
+        ...(httpConfig.interceptors.response.error ?? []),
       ];
     }
 
@@ -70,7 +78,6 @@ export class HttpClient implements IHttpClient {
     }
     return this.instances.get(name)!;
   }
-
 
   static setDefaultInstance(instanceName: string): void {
     if (!this.instances.has(instanceName)) {
@@ -103,7 +110,6 @@ export class HttpClient implements IHttpClient {
   }
 
   private configure(options: HttpConfigOptions): void {
-
     this.baseURL = this.getFullBaseUrl(options);
     this.defaultTimeout = options.timeout ?? 10000;
     this.maxRetries = options.maxRetries ?? 3;
@@ -111,7 +117,7 @@ export class HttpClient implements IHttpClient {
 
     this.defaultHeaders = {
       "Content-Type": "application/json",
-      "Accept": "application/json",
+      Accept: "application/json",
       ...options.headers,
     };
 
@@ -148,7 +154,6 @@ export class HttpClient implements IHttpClient {
   }
 
   private setupDefaultInterceptors(): void {
-
     if (HttpClient.responseErrorInterceptors.length === 0) {
       HttpClient.responseErrorInterceptors.push((error) => {
         this.logError(error);
@@ -169,7 +174,9 @@ export class HttpClient implements IHttpClient {
     console.error("API Request Error", errorDetails);
   }
 
-  private async applyRequestInterceptors(config: RequestConfig): Promise<RequestConfig> {
+  private async applyRequestInterceptors(
+    config: RequestConfig,
+  ): Promise<RequestConfig> {
     let interceptedConfig = { ...config };
 
     for (const interceptor of HttpClient.requestInterceptors) {
@@ -179,11 +186,15 @@ export class HttpClient implements IHttpClient {
     return interceptedConfig;
   }
 
-  private async applyResponseSuccessInterceptors(response: Response): Promise<Response> {
+  private async applyResponseSuccessInterceptors(
+    response: Response,
+  ): Promise<Response> {
     let interceptedResponse = response;
 
     for (const interceptor of HttpClient.responseSuccessInterceptors) {
-      interceptedResponse = await Promise.resolve(interceptor(interceptedResponse.clone()));
+      interceptedResponse = await Promise.resolve(
+        interceptor(interceptedResponse.clone()),
+      );
     }
 
     return interceptedResponse;
@@ -208,25 +219,28 @@ export class HttpClient implements IHttpClient {
   }
 
   private isRetryableError(status: number, method?: string): boolean {
-    const idempotentMethods = ['GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'];
-    const isIdempotent = !method || idempotentMethods.includes(method.toUpperCase());
+    const idempotentMethods = ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"];
+    const isIdempotent =
+      !method || idempotentMethods.includes(method.toUpperCase());
 
     return (
-      isIdempotent && (
-        status === 0 ||
-        status === 429 ||
-        (status >= 500 && status < 600)
-      )
+      isIdempotent &&
+      (status === 0 || status === 429 || (status >= 500 && status < 600))
     );
   }
 
   private async fetchWithRetry(
     url: string,
     config: RequestConfig,
-    attempt: number = 1
+    attempt: number = 1,
   ): Promise<Response> {
     try {
-      const { timeout = this.defaultTimeout, params, data, ...fetchOptions } = config;
+      const {
+        timeout = this.defaultTimeout,
+        params,
+        data,
+        ...fetchOptions
+      } = config;
       let fullUrl = url;
 
       if (params && Object.keys(params).length > 0) {
@@ -238,18 +252,21 @@ export class HttpClient implements IHttpClient {
       }
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort('Request timeout'), timeout);
+      const timeoutId = setTimeout(
+        () => controller.abort("Request timeout"),
+        timeout,
+      );
 
       let body: any = undefined;
       if (data !== undefined) {
-        body = typeof data === 'string' ? data : JSON.stringify(data);
+        body = typeof data === "string" ? data : JSON.stringify(data);
       }
 
       const response = await fetch(fullUrl, {
         ...fetchOptions,
         body,
         signal: controller.signal,
-        credentials: this.withCredentials ? 'include' : 'same-origin',
+        credentials: this.withCredentials ? "include" : "same-origin",
       });
 
       clearTimeout(timeoutId);
@@ -260,21 +277,25 @@ export class HttpClient implements IHttpClient {
           this.isRetryableError(response.status, config.method)
         ) {
           const delay = Math.pow(2, attempt) * 100;
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
           return this.fetchWithRetry(url, config, attempt + 1);
         }
       }
 
       return response;
-
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        throw new Error(`Request timeout after ${config.timeout || this.defaultTimeout}ms`);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw new Error(
+          `Request timeout after ${config.timeout || this.defaultTimeout}ms`,
+        );
       }
 
-      if (attempt < this.maxRetries && this.isRetryableError(0, config.method)) {
+      if (
+        attempt < this.maxRetries &&
+        this.isRetryableError(0, config.method)
+      ) {
         const delay = Math.pow(2, attempt) * 100;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         return this.fetchWithRetry(url, config, attempt + 1);
       }
 
@@ -283,51 +304,51 @@ export class HttpClient implements IHttpClient {
   }
 
   public async request<TResponse = any>(
-    config: Partial<RequestConfig> & { url: string; },
+    config: Partial<RequestConfig> & { url: string },
     options: Partial<RequestConfig> = {},
   ): Promise<TResponse> {
     try {
       const mergedConfig: RequestConfig = {
-        method: 'GET',
+        method: "GET",
         timeout: this.defaultTimeout,
         ...config,
         ...options,
         headers: {
           ...this.defaultHeaders,
           ...(config.headers || {}),
-          ...(options.headers || {})
-        }
+          ...(options.headers || {}),
+        },
       };
 
       const url = new URL(
-        mergedConfig.url.startsWith('http')
+        mergedConfig.url.startsWith("http")
           ? mergedConfig.url
-          : `${this.baseURL}${mergedConfig.url.startsWith('/') ? '' : '/'}${mergedConfig.url}`
+          : `${this.baseURL}${mergedConfig.url.startsWith("/") ? "" : "/"}${mergedConfig.url}`,
       ).toString();
 
       const interceptedConfig = await this.applyRequestInterceptors({
         ...mergedConfig,
-        url
+        url,
       });
 
       let response = await this.fetchWithRetry(url, interceptedConfig);
 
       response = await this.applyResponseSuccessInterceptors(response);
 
-      if (response.headers.get('content-type')?.includes('application/json')) {
-        return await response.json() as TResponse;
+      if (response.headers.get("content-type")?.includes("application/json")) {
+        return (await response.json()) as TResponse;
       } else {
-        return await response.text() as TResponse;
+        return (await response.text()) as TResponse;
       }
-
     } catch (error) {
-      const apiError = error instanceof ApiRequestError
-        ? error
-        : new ApiRequestError(error, {
-          ...config,
-          ...options,
-          url: config.url
-        });
+      const apiError =
+        error instanceof ApiRequestError
+          ? error
+          : new ApiRequestError(error, {
+              ...config,
+              ...options,
+              url: config.url,
+            });
 
       return this.applyResponseErrorInterceptors(apiError);
     }

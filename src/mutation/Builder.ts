@@ -4,14 +4,17 @@ import { EntityBuilder } from "@/mutation/EntityBuilder";
 import { RelationBuilder } from "@/mutation/RelationBuilder";
 
 export class Builder {
+  private static relationInstance: IRelationBuilder = new RelationBuilder();
 
-   private static relationInstance: IRelationBuilder = new RelationBuilder();
+  public static getRelationBuilder(): IRelationBuilder {
+    return Builder.relationInstance;
+  }
 
-   public static getRelationBuilder(): IRelationBuilder {
-      return Builder.relationInstance;
-   }
-
-   public static createEntityBuilder<T>(relationBuilder?: IRelationBuilder): IEntityBuilder<T> {
-      return new EntityBuilder<T>(relationBuilder || Builder.getRelationBuilder());
-   }
+  public static createEntityBuilder<T>(
+    relationBuilder?: IRelationBuilder,
+  ): IEntityBuilder<T> {
+    return new EntityBuilder<T>(
+      relationBuilder || Builder.getRelationBuilder(),
+    );
+  }
 }

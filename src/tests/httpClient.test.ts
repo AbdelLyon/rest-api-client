@@ -1,16 +1,8 @@
 import { fail } from "node:assert";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HttpClient } from "../http/HttpClient";
 import { ApiRequestError } from "../error/ApiRequestError";
-import type {
-  Mock} from "vitest";
+import type { Mock } from "vitest";
 import type { HttpConfig } from "@/http/types/http";
 
 describe("HttpClient", () => {
@@ -38,15 +30,17 @@ describe("HttpClient", () => {
       }),
       json: vi.fn().mockResolvedValue(mockResponseBody),
       text: vi.fn().mockResolvedValue(JSON.stringify(mockResponseBody)),
-      clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+      clone: vi.fn().mockImplementation(function (this: Response) {
+        return this;
+      }),
     } as unknown as Response;
 
     (global.fetch as Mock).mockResolvedValue(mockResponse);
-    vi.spyOn(console, "error").mockImplementation(() => { });
+    vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(global, "setTimeout").mockImplementation(() => {
       return 123 as any;
     });
-    vi.spyOn(global, "clearTimeout").mockImplementation(() => { });
+    vi.spyOn(global, "clearTimeout").mockImplementation(() => {});
 
     HttpClient.resetInstance();
   });
@@ -80,9 +74,7 @@ describe("HttpClient", () => {
           apiPrefix: "api",
           apiVersion: "2",
           interceptors: {
-            request: [
-              (config) => config,
-            ],
+            request: [(config) => config],
             response: {
               success: [(response) => response],
               error: [(error) => Promise.reject(error)],
@@ -100,7 +92,6 @@ describe("HttpClient", () => {
       });
 
       it("applique les valeurs par défaut quand les options sont minimales", () => {
-
         const httpConfig = { baseURL: "https://api.example.com" };
 
         httpClient = HttpClient.init({
@@ -155,14 +146,13 @@ describe("HttpClient", () => {
 
         expect(global.fetch).toHaveBeenCalledWith(
           expect.stringContaining("https://api.example.com/v2/resources"),
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
 
     describe("Gestion des instances", () => {
       it("retourne l'instance par défaut après initialisation", () => {
-
         const instance = HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "default",
@@ -172,7 +162,6 @@ describe("HttpClient", () => {
       });
 
       it("accède à une instance spécifique par son nom", () => {
-
         const mainInstance = HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "main",
@@ -193,7 +182,6 @@ describe("HttpClient", () => {
       });
 
       it("signale une erreur quand l'instance demandée n'existe pas", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "main",
@@ -205,7 +193,6 @@ describe("HttpClient", () => {
       });
 
       it("change l'instance par défaut sur demande", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -227,7 +214,6 @@ describe("HttpClient", () => {
       });
 
       it("énumère toutes les instances disponibles", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -249,7 +235,6 @@ describe("HttpClient", () => {
       });
 
       it("supprime toutes les instances lors de la réinitialisation globale", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -266,7 +251,6 @@ describe("HttpClient", () => {
       });
 
       it("supprime seulement l'instance spécifiée lors d'une réinitialisation ciblée", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -284,7 +268,6 @@ describe("HttpClient", () => {
       });
 
       it("change l'instance par défaut si celle-ci est supprimée", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -301,7 +284,6 @@ describe("HttpClient", () => {
       });
 
       it("gère correctement la suppression de la dernière instance", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "unique",
@@ -321,7 +303,6 @@ describe("HttpClient", () => {
     });
 
     it("effectue une requête avec succès et retourne les données", async () => {
-
       const config = { url: "/endpoint", method: "GET" };
 
       const result = await httpClient.request(config);
@@ -331,13 +312,12 @@ describe("HttpClient", () => {
           method: "GET",
           credentials: "include",
           signal: "test-signal",
-        })
+        }),
       );
       expect(result).toEqual(mockResponseBody);
     });
 
     it("fusionne les options avec la configuration", async () => {
-
       const config = { url: "/endpoint", method: "POST" };
       const options = {
         headers: { Authorization: "Bearer token" },
@@ -353,13 +333,12 @@ describe("HttpClient", () => {
             Authorization: "Bearer token",
           }),
           credentials: "include",
-        })
+        }),
       );
       expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 15000);
     });
 
     it("gère le remplacement de propriétés par les options", async () => {
-
       const config = {
         url: "/endpoint",
         method: "GET",
@@ -377,36 +356,34 @@ describe("HttpClient", () => {
           headers: expect.objectContaining({
             "X-API-Key": "xyz789",
           }),
-        })
+        }),
       );
     });
 
     it("ajoute correctement les paramètres de requête", async () => {
-
       const config = {
         url: "/endpoint",
         method: "GET",
-        params: { filter: "active", sort: "name" }
+        params: { filter: "active", sort: "name" },
       };
 
       await httpClient.request(config);
       expect(global.fetch).toHaveBeenCalledWith(
         "https://api.example.com/endpoint?filter=active&sort=name",
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
     it("construit correctement les URLs absolues", async () => {
-
       const config = {
         url: "https://other-api.com/endpoint",
-        method: "GET"
+        method: "GET",
       };
 
       await httpClient.request(config);
       expect(global.fetch).toHaveBeenCalledWith(
         "https://other-api.com/endpoint",
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -417,17 +394,15 @@ describe("HttpClient", () => {
     });
 
     it("transforme les erreurs fetch en ApiRequestError", async () => {
-
       const fetchError = new Error("Network error");
       (global.fetch as Mock).mockRejectedValueOnce(fetchError);
-      await expect(httpClient.request({ url: "/endpoint" })).rejects.toBeInstanceOf(
-        ApiRequestError
-      );
+      await expect(
+        httpClient.request({ url: "/endpoint" }),
+      ).rejects.toBeInstanceOf(ApiRequestError);
       expect(console.error).toHaveBeenCalled();
     });
 
     it("gère correctement les réponses HTTP non-ok", async () => {
-
       const errorResponse = {
         ok: false,
         status: 404,
@@ -436,11 +411,12 @@ describe("HttpClient", () => {
           "content-type": "application/json",
         }),
         json: vi.fn().mockResolvedValue({ message: "Resource not found" }),
-        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+        clone: vi.fn().mockImplementation(function (this: Response) {
+          return this;
+        }),
       } as unknown as Response;
 
       (global.fetch as Mock).mockResolvedValueOnce(errorResponse);
-
 
       try {
         await httpClient.request({ url: "/nonexistent" });
@@ -451,10 +427,11 @@ describe("HttpClient", () => {
     });
 
     it("gère correctement les timeouts", async () => {
-
-      const abortError = new DOMException("The operation was aborted", "AbortError");
+      const abortError = new DOMException(
+        "The operation was aborted",
+        "AbortError",
+      );
       (global.fetch as Mock).mockRejectedValueOnce(abortError);
-
 
       try {
         await httpClient.request({ url: "/slow-endpoint", timeout: 5000 });
@@ -472,7 +449,6 @@ describe("HttpClient", () => {
     });
 
     it("réessaie les requêtes après une erreur réseau", async () => {
-
       const networkError = new Error("Network error");
       (global.fetch as Mock)
         .mockRejectedValueOnce(networkError)
@@ -484,7 +460,6 @@ describe("HttpClient", () => {
     });
 
     it("respecte le nombre maximum de tentatives", async () => {
-
       const networkError = new Error("Network error");
       (global.fetch as Mock)
         .mockRejectedValueOnce(networkError)
@@ -496,7 +471,6 @@ describe("HttpClient", () => {
     });
 
     it("utilise un délai exponentiel entre les tentatives", async () => {
-
       const networkError = new Error("Network error");
       (global.fetch as Mock)
         .mockRejectedValueOnce(networkError)
@@ -509,7 +483,6 @@ describe("HttpClient", () => {
     });
 
     it("réessaie les requêtes après une erreur 429", async () => {
-
       const rateLimitResponse = {
         ok: false,
         status: 429,
@@ -518,7 +491,9 @@ describe("HttpClient", () => {
           "content-type": "application/json",
         }),
         json: vi.fn().mockResolvedValue({ message: "Rate limited" }),
-        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+        clone: vi.fn().mockImplementation(function (this: Response) {
+          return this;
+        }),
       } as unknown as Response;
 
       (global.fetch as Mock)
@@ -531,7 +506,6 @@ describe("HttpClient", () => {
     });
 
     it("réessaie les requêtes après une erreur 500", async () => {
-
       const serverErrorResponse = {
         ok: false,
         status: 500,
@@ -540,7 +514,9 @@ describe("HttpClient", () => {
           "content-type": "application/json",
         }),
         json: vi.fn().mockResolvedValue({ message: "Server error" }),
-        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+        clone: vi.fn().mockImplementation(function (this: Response) {
+          return this;
+        }),
       } as unknown as Response;
 
       (global.fetch as Mock)
@@ -553,7 +529,6 @@ describe("HttpClient", () => {
     });
 
     it("ne réessaie pas les méthodes non idempotentes après un 500", async () => {
-
       const serverErrorResponse = {
         ok: false,
         status: 500,
@@ -562,14 +537,19 @@ describe("HttpClient", () => {
           "content-type": "application/json",
         }),
         json: vi.fn().mockResolvedValue({ message: "Server error" }),
-        clone: vi.fn().mockImplementation(function (this: Response) { return this; }),
+        clone: vi.fn().mockImplementation(function (this: Response) {
+          return this;
+        }),
       } as unknown as Response;
 
       (global.fetch as Mock).mockResolvedValueOnce(serverErrorResponse);
 
-
       try {
-        await httpClient.request({ url: "/endpoint", method: "POST", data: { test: true } });
+        await httpClient.request({
+          url: "/endpoint",
+          method: "POST",
+          data: { test: true },
+        });
         fail("La requête aurait dû échouer");
       } catch (error) {
         expect(error).toBeDefined();
@@ -581,7 +561,6 @@ describe("HttpClient", () => {
   describe("Scénarios d'utilisation avancés", () => {
     describe("Applications multi-domaines", () => {
       it("gère plusieurs instances pour différentes APIs", async () => {
-
         const mainApi = HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "main",
@@ -623,17 +602,16 @@ describe("HttpClient", () => {
         expect(global.fetch).toHaveBeenNthCalledWith(
           1,
           "https://api.example.com/resources",
-          expect.any(Object)
+          expect.any(Object),
         );
         expect(global.fetch).toHaveBeenNthCalledWith(
           2,
           "https://auth.example.com/token",
-          expect.any(Object)
+          expect.any(Object),
         );
       });
 
       it("permet d'accéder à la même instance depuis différents points du code", async () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api.example.com" },
           instanceName: "main",
@@ -648,12 +626,11 @@ describe("HttpClient", () => {
         expect(result).toEqual(mockResponseBody);
         expect(global.fetch).toHaveBeenCalledWith(
           "https://api.example.com/test",
-          expect.any(Object)
+          expect.any(Object),
         );
       });
 
       it("gère correctement un changement d'instance par défaut", async () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",
@@ -675,14 +652,13 @@ describe("HttpClient", () => {
         expect(defaultInstance).toBe(HttpClient.getInstance("api2"));
         expect(global.fetch).toHaveBeenCalledWith(
           "https://api2.example.com/test",
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
 
     describe("États spéciaux et cas limites", () => {
       it("préserve l'instance par défaut lors de la suppression d'une autre instance", () => {
-
         HttpClient.init({
           httpConfig: { baseURL: "https://api1.example.com" },
           instanceName: "api1",

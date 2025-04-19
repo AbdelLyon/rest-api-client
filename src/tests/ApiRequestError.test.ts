@@ -20,7 +20,7 @@ describe("ApiRequestError", () => {
     const originalError = {
       status: 500,
       statusText: "Internal Server Error",
-      data: { message: "Something went wrong" }
+      data: { message: "Something went wrong" },
     };
 
     const requestConfig: RequestConfig = { url: "/api/data", method: "POST" };
@@ -34,12 +34,12 @@ describe("ApiRequestError", () => {
   it("devrait gérer les erreurs de fetch Response", () => {
     const response = new Response(null, {
       status: 403,
-      statusText: "Forbidden"
+      statusText: "Forbidden",
     });
 
     const originalError = {
       message: "Forbidden request",
-      response
+      response,
     };
 
     const requestConfig: RequestConfig = { url: "/api/protected" };
@@ -67,15 +67,15 @@ describe("ApiRequestError", () => {
       const error = new ApiRequestError(originalError, requestConfig);
 
       // Vérifier si la méthode existe et est une fonction
-      if (typeof error[method] === 'function') {
+      if (typeof error[method] === "function") {
         // Appeler la méthode avec un type casting sécurisé
-        const result = (error[method])();
+        const result = error[method]();
         expect(result).toBe(true);
       } else {
         // Si la méthode n'existe pas, faire échouer le test
         expect(`La méthode ${method} n'existe pas`).toBe(false);
       }
-    }
+    },
   );
 
   // Tester également les cas négatifs
@@ -94,12 +94,12 @@ describe("ApiRequestError", () => {
       const requestConfig: RequestConfig = { url: "/test" };
       const error = new ApiRequestError(originalError, requestConfig);
 
-      if (typeof error[method] === 'function') {
-        const result = (error[method])();
+      if (typeof error[method] === "function") {
+        const result = error[method]();
         expect(result).toBe(false);
       } else {
         expect(`La méthode ${method} n'existe pas`).toBe(false);
       }
-    }
+    },
   );
 });

@@ -1,13 +1,12 @@
-import type { BuildOnly, MutationResponse } from '@/mutation/types/mutation';
-import type { ActionRequest, ActionResponse } from '@/mutation/types/action';
-import type { DeleteRequest, DeleteResponse } from '@/mutation/types/delete';
+import type { BuildOnly, MutationResponse } from "@/mutation/types/mutation";
+import type { ActionRequest, ActionResponse } from "@/mutation/types/action";
+import type { DeleteRequest, DeleteResponse } from "@/mutation/types/delete";
 import type { RequestConfig } from "@/http/types/http";
 
 export interface IMutation<T> {
-
   mutate: (
     mutateRequest: BuildOnly<T>,
-    options?: Partial<RequestConfig>
+    options?: Partial<RequestConfig>,
   ) => Promise<MutationResponse>;
 
   executeAction: (
