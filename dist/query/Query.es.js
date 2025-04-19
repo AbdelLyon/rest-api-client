@@ -53,4 +53,3 @@ class u {
 export {
   u as Query
 };
-//# sourceMappingURL=Query.es.js.map

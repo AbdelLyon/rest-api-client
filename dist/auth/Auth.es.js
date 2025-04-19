@@ -75,4 +75,3 @@ class p {
 export {
   p as Auth
 };
-//# sourceMappingURL=Auth.es.js.map

@@ -177,4 +177,3 @@ let w = i;
 export {
   w as HttpClient
 };
-//# sourceMappingURL=HttpClient.es.js.map

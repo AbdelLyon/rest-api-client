@@ -8,7 +8,7 @@ export default defineConfig({
       exclude: ["src/tests/**/*"],
       rollupTypes: true,
       entryRoot: "src",
-      outDir: "dist/types",
+      outputDir: "dist",
     }),
   ],
   resolve: {
@@ -38,6 +38,6 @@ export default defineConfig({
     },
     outDir: "dist",
     emptyOutDir: true,
-    sourcemap: true,
+    sourcemap: false,
   },
 });

@@ -68,4 +68,3 @@ class d extends c {
 export {
   d as EntityBuilder
 };
-//# sourceMappingURL=EntityBuilder.es.js.map

@@ -95,4 +95,3 @@ class p {
 export {
   p as Mutation
 };
-//# sourceMappingURL=Mutation.es.js.map

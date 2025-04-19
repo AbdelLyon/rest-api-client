@@ -39,4 +39,3 @@ class u extends Error {
 export {
   u as ApiRequestError
 };
-//# sourceMappingURL=ApiRequestError.es.js.map
