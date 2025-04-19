@@ -41,19 +41,19 @@
   },
   "exports": {
     "./auth": {
-      "import": "./dist/esm/auth/index.js",
+      "import": "./dist/esm/auth/Auth.js",
       "types": "./dist/esm/auth/inex.d.ts"
     },
     "./http": {
-      "import": "./dist/esm/http/index.js",
+      "import": "./dist/esm/http/Http.js",
       "types": "./dist/esm/http/index.d.ts"
     },
     "./mutation": {
-      "import": "./dist/esm/mutation/index.js",
+      "import": "./dist/esm/mutation/Mutation.js",
       "types": "./dist/esm/mutation/index.d.ts"
     },
     "./query": {
-      "import": "./dist/esm/query/index.js",
+      "import": "./dist/esm/query/Query.js",
       "types": "./dist/esm/query/index.d.ts"
     },
     "./package.json": "./package.json"
