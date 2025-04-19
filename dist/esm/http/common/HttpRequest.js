@@ -29,7 +29,10 @@ class HttpRequest {
     try {
       const mergedConfig = this.createMergedConfig(config, options);
       const url = this.buildRequestUrl(mergedConfig.url);
-      const interceptedConfig = await this.applyRequestInterceptors(mergedConfig, url);
+      const interceptedConfig = await this.applyRequestInterceptors(
+        mergedConfig,
+        url
+      );
       let response = await this.executeRequest(url, interceptedConfig);
       response = await Interceptor.applyResponseSuccessInterceptors(response);
       return await this.parseResponse(response);
@@ -94,32 +97,51 @@ class HttpRequest {
   }
   async fetchWithRetry(url, config, maxRetries, defaultTimeout, withCredentials, attempt = 1) {
     try {
-      const { response, timeoutId } = await this.performFetch(url, config, defaultTimeout, withCredentials);
+      const { response, timeoutId } = await this.performFetch(
+        url,
+        config,
+        defaultTimeout,
+        withCredentials
+      );
       clearTimeout(timeoutId);
       if (!response.ok && this.shouldRetry(response.status, config.method, attempt, maxRetries)) {
-        return this.retryWithBackoff(url, config, maxRetries, defaultTimeout, withCredentials, attempt);
+        return this.retryWithBackoff(
+          url,
+          config,
+          maxRetries,
+          defaultTimeout,
+          withCredentials,
+          attempt
+        );
       }
       return response;
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
-        throw new Error(`Request timeout after ${config.timeout || defaultTimeout}ms`);
+        throw new Error(
+          `Request timeout after ${config.timeout || defaultTimeout}ms`
+        );
       }
       if (attempt < maxRetries && this.isRetryableError(0, config.method)) {
-        return this.retryWithBackoff(url, config, maxRetries, defaultTimeout, withCredentials, attempt);
+        return this.retryWithBackoff(
+          url,
+          config,
+          maxRetries,
+          defaultTimeout,
+          withCredentials,
+          attempt
+        );
       }
       throw error;
     }
   }
   async performFetch(url, config, defaultTimeout, withCredentials) {
-    const {
-      timeout = defaultTimeout,
-      params,
-      data,
-      ...fetchOptions
-    } = config;
+    const { timeout = defaultTimeout, params, data, ...fetchOptions } = config;
     const fullUrl = this.appendQueryParams(url, params);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort("Request timeout"), timeout);
+    const timeoutId = setTimeout(
+      () => controller.abort("Request timeout"),
+      timeout
+    );
     const body = this.prepareRequestBody(data);
     const response = await fetch(fullUrl, {
       ...fetchOptions,

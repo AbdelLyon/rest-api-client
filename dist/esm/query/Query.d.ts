@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  PaginatedSearchRequest,
-  SearchRequest,
-  SearchResponse,
-} from "./types/search.js";
+import { PaginatedSearchRequest, SearchRequest } from "./types/search.js";
 import { DetailsResponse } from "./types/details.js";
 import { IQuery } from "./types/IQuery.js";
 import { RequestConfig } from "../http/types/http.js";
@@ -19,13 +15,9 @@ export declare abstract class Query<T> implements IQuery<T> {
   );
   private validateData;
   private searchRequest;
-  search(
-    search: SearchRequest,
+  search<TResponse = Array<T>>(
+    search: SearchRequest | PaginatedSearchRequest,
     options?: Partial<RequestConfig>,
-  ): Promise<Array<T>>;
-  searchPaginate(
-    search: PaginatedSearchRequest,
-    options?: Partial<RequestConfig>,
-  ): Promise<SearchResponse<T>>;
-  getdetails(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
+  ): Promise<TResponse>;
+  details(options?: Partial<RequestConfig>): Promise<DetailsResponse>;
 }

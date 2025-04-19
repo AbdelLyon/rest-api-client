@@ -35,16 +35,17 @@ class Query {
   }
   async search(search, options = {}) {
     const response = await this.searchRequest(search, options);
-    return this.validateData(response.data);
+    const validatedData = this.validateData(response.data);
+    const isPaginated = "page" in search || "limit" in search;
+    if (isPaginated) {
+      return {
+        ...response,
+        data: validatedData
+      };
+    }
+    return validatedData;
   }
-  async searchPaginate(search, options = {}) {
-    const response = await this.searchRequest(search, options);
-    return {
-      ...response,
-      data: this.validateData(response.data)
-    };
-  }
-  getdetails(options = {}) {
+  details(options = {}) {
     return this.http.request(
       {
         method: "GET",

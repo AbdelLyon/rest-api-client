@@ -52,27 +52,25 @@ export abstract class Query<T> implements IQuery<T> {
     );
   }
 
-  public async search(
-    search: SearchRequest,
+  public async search<TResponse = Array<T>>(
+    search: SearchRequest | PaginatedSearchRequest,
     options: Partial<RequestConfig> = {},
-  ): Promise<Array<T>> {
+  ): Promise<TResponse> {
     const response = await this.searchRequest(search, options);
-    return this.validateData(response.data);
+    const validatedData = this.validateData(response.data);
+
+    const isPaginated = "page" in search || "limit" in search;
+
+    if (isPaginated) {
+      return {
+        ...response,
+        data: validatedData,
+      } as TResponse;
+    }
+    return validatedData as TResponse;
   }
 
-  public async searchPaginate(
-    search: PaginatedSearchRequest,
-    options: Partial<RequestConfig> = {},
-  ): Promise<SearchResponse<T>> {
-    const response = await this.searchRequest(search, options);
-
-    return {
-      ...response,
-      data: this.validateData(response.data),
-    };
-  }
-
-  public getdetails(
+  public details(
     options: Partial<RequestConfig> = {},
   ): Promise<DetailsResponse> {
     return this.http.request<DetailsResponse>(
