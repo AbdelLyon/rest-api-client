@@ -1,15 +1,18 @@
-import { defineConfig, mergeConfig } from "vite";
 import { tanstackViteConfig } from "@tanstack/vite-config";
 
-const config = {};
-
-export default mergeConfig(
-  defineConfig(config),
-  tanstackViteConfig({
-    entry: "./src/index.ts",
-    srcDir: "./src",
-    exclude: ["src/tests/**/*"],
-    cjs: false
-
-  }),
-);
+export default tanstackViteConfig({
+  entry: "./src/index.ts",
+  srcDir: "./src",
+  exclude: ["src/tests/**/*", "src/error/**/*"],
+  cjs: false,
+  externalDeps: [
+    "axios",
+    "axios-retry",
+    "cookies-next",
+    "zod",
+    "@tanstack/.*",
+    "eslint",
+    "jiti"
+  ],
+  outDir: "dist",
+});
