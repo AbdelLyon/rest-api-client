@@ -1,7 +1,7 @@
 import type { IAuth } from "./interface/IAuth";
 import type { RequestConfig } from "@/http/types/http";
 import type { z } from "zod";
-import type { BaseHttp } from "@/http";
+import type { BaseHttp } from "@/http/shared/BaseHttp";
 import { HttpCLient } from "@/http/HttpClient";
 
 export abstract class Auth<
@@ -18,7 +18,6 @@ export abstract class Auth<
   protected registerDataSchema?: z.ZodType<TRegisterData>;
   protected tokenSchema?: z.ZodType<TTokens>;
 
-  // Optionnellement utiliser un nom d'instance spécifique
   protected httpInstanceName?: string;
 
   constructor(

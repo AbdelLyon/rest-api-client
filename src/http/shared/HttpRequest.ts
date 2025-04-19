@@ -1,4 +1,4 @@
-import type { RequestConfig } from "./types/http";
+import type { RequestConfig } from "@/http/types/http";
 
 export class HttpRequest {
   static isRetryableError(status: number, method?: string): boolean {

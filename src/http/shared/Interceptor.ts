@@ -4,7 +4,7 @@ import type {
   RequestInterceptor,
   ResponseErrorInterceptor,
   ResponseSuccessInterceptor,
-} from "./types/http";
+} from "@/http/types/http";
 
 export class Interceptor {
   private static requestInterceptors: Array<RequestInterceptor> = [];

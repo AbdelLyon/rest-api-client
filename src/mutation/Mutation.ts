@@ -6,7 +6,7 @@ import type { RequestConfig } from "@/http/types/http";
 import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
 import type { IMutation } from "@/mutation/interface/IMutation";
 import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
-import type { BaseHttp } from "@/http/BaseHttp";
+import type { BaseHttp } from "@/http/shared/BaseHttp";
 import { Builder } from "@/mutation/Builder";
 import { HttpCLient } from "@/http/HttpClient";
 

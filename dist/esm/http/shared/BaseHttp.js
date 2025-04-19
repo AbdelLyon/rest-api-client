@@ -4,7 +4,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
 import { HttpConfig } from "./HttpConfig.js";
 import { HttpRequest } from "./HttpRequest.js";
 import { Interceptor } from "./Interceptor.js";
-import { ApiRequestError } from "../error/ApiRequestError.js";
+import { ApiRequestError } from "./ApiRequestError.js";
 class BaseHttp {
   constructor() {
     __publicField(this, "baseURL");

@@ -1,4 +1,4 @@
-import { BaseHttp } from "./BaseHttp";
+import { BaseHttp } from "./shared/BaseHttp";
 import type { HttpConfig } from "./types/http";
 
 export class HttpCLient {

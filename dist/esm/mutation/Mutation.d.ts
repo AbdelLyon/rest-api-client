@@ -6,7 +6,7 @@ import { RequestConfig } from "../http/types/http.js";
 import { IRelationBuilder } from "./interface/IRelationBuilder.js";
 import { IMutation } from "./interface/IMutation.js";
 import { IEntityBuilder } from "./interface/IEntityBuilder.js";
-import { BaseHttp } from "../http/BaseHttp.js";
+import { BaseHttp } from "../http/shared/BaseHttp.js";
 export declare abstract class Mutation<T> implements IMutation<T> {
   protected http: BaseHttp;
   protected pathname: string;

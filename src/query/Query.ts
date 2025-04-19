@@ -1,4 +1,4 @@
-import type { BaseHttp } from "../http/BaseHttp";
+import type { BaseHttp } from "../http/shared/BaseHttp";
 import type { z } from "zod";
 import type {
   PaginatedSearchRequest,

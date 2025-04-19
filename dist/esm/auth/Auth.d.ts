@@ -1,7 +1,7 @@
 import { IAuth } from "./interface/IAuth.js";
 import { RequestConfig } from "../http/types/http.js";
 import { z } from "zod";
-import { BaseHttp } from "../http.js";
+import { BaseHttp } from "../http/shared/BaseHttp.js";
 export declare abstract class Auth<
   TUser extends object = {},
   TCredentials extends object = {},

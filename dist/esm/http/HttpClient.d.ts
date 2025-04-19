@@ -1,4 +1,4 @@
-import { BaseHttp } from "./BaseHttp.js";
+import { BaseHttp } from "./shared/BaseHttp.js";
 import { HttpConfig } from "./types/http.js";
 export declare class HttpCLient {
   private static instances;

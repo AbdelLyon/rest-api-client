@@ -1,3 +1,2 @@
-export * from "./BaseHttp";
-export type * from "./interface/IBaseHttp";
+export * from "./HttpClient";
 export type * from "./types/http";

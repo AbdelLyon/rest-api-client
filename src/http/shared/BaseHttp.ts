@@ -1,9 +1,9 @@
 import { HttpConfig } from "./HttpConfig";
 import { HttpRequest } from "./HttpRequest";
 import { Interceptor } from "./Interceptor";
-import type { IBaseHttp } from "./interface/IBaseHttp";
-import type { HttpConfigOptions, RequestConfig } from "./types/http";
-import { ApiRequestError } from "@/error/ApiRequestError";
+import type { IBaseHttp } from "../interface/IBaseHttp";
+import type { HttpConfigOptions, RequestConfig } from "../types/http";
+import { ApiRequestError } from "@/http/shared/ApiRequestError";
 
 export class BaseHttp implements IBaseHttp {
   private baseURL: string;

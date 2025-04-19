@@ -1,4 +1,4 @@
-import { HttpConfig, RequestConfig } from "./types/http.js";
+import { HttpConfig, RequestConfig } from "../types/http.js";
 export declare class Interceptor {
   private static requestInterceptors;
   private static responseSuccessInterceptors;

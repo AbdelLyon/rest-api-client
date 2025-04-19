@@ -1,6 +1,5 @@
-import type { HttpConfigOptions } from "./types/http";
+import type { HttpConfigOptions } from "@/http/types/http";
 
-// HttpConfigUtils.ts
 export class HttpConfig {
   static getFullBaseUrl(options: HttpConfigOptions): string {
     if (!options.baseURL) {

@@ -1,4 +1,4 @@
-import { BaseHttp } from "../http/BaseHttp.js";
+import { BaseHttp } from "../http/shared/BaseHttp.js";
 import { z } from "zod";
 import {
   PaginatedSearchRequest,

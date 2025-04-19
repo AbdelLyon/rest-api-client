@@ -1,5 +1,5 @@
-import { IBaseHttp } from "./interface/IBaseHttp.js";
-import { HttpConfigOptions, RequestConfig } from "./types/http.js";
+import { IBaseHttp } from "../interface/IBaseHttp.js";
+import { HttpConfigOptions, RequestConfig } from "../types/http.js";
 export declare class BaseHttp implements IBaseHttp {
   private baseURL;
   private defaultTimeout;

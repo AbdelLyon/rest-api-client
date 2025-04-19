@@ -10,7 +10,6 @@ class Auth {
     __publicField(this, "credentialsSchema");
     __publicField(this, "registerDataSchema");
     __publicField(this, "tokenSchema");
-    // Optionnellement utiliser un nom d'instance spécifique
     __publicField(this, "httpInstanceName");
     this.pathname = pathname;
     this.userSchema = schemas.user;
