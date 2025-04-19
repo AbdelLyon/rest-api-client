@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { HttpManager } from "../http/HttpManager.js";
+import { HttpCLient } from "../http/HttpClient.js";
 class Auth {
   constructor(pathname, schemas, httpInstanceName) {
     __publicField(this, "http");
@@ -19,10 +19,10 @@ class Auth {
     this.tokenSchema = schemas.tokens;
     this.httpInstanceName = httpInstanceName;
     this.initHttpClient();
-    this.http = HttpManager.getInstance(this.httpInstanceName);
+    this.http = HttpCLient.getInstance(this.httpInstanceName);
   }
   initHttpClient() {
-    this.http = HttpManager.getInstance(this.httpInstanceName);
+    this.http = HttpCLient.getInstance(this.httpInstanceName);
   }
   async register(userData, options = {}) {
     if (this.registerDataSchema) {

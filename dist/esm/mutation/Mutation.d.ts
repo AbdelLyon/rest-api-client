@@ -6,9 +6,9 @@ import { RequestConfig } from "../http/types/http.js";
 import { IRelationBuilder } from "./interface/IRelationBuilder.js";
 import { IMutation } from "./interface/IMutation.js";
 import { IEntityBuilder } from "./interface/IEntityBuilder.js";
-import { HttpClient } from "../http/HttpClient.js";
+import { BaseHttp } from "../http/BaseHttp.js";
 export declare abstract class Mutation<T> implements IMutation<T> {
-  protected http: HttpClient;
+  protected http: BaseHttp;
   protected pathname: string;
   protected schema: z.ZodType<T>;
   private readonly relation;

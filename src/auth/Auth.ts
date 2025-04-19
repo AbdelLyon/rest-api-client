@@ -1,8 +1,8 @@
 import type { IAuth } from "./interface/IAuth";
 import type { RequestConfig } from "@/http/types/http";
 import type { z } from "zod";
-import type { HttpClient } from "@/http";
-import { HttpManager } from "@/http/HttpManager";
+import type { BaseHttp } from "@/http";
+import { HttpCLient } from "@/http/HttpClient";
 
 export abstract class Auth<
   TUser extends object = {},
@@ -11,7 +11,7 @@ export abstract class Auth<
   TTokens extends object = {},
 > implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
 {
-  protected http: HttpClient;
+  protected http: BaseHttp;
   protected pathname: string;
   protected userSchema: z.ZodType<TUser>;
   protected credentialsSchema?: z.ZodType<TCredentials>;
@@ -39,11 +39,11 @@ export abstract class Auth<
     this.httpInstanceName = httpInstanceName;
 
     this.initHttpClient();
-    this.http = HttpManager.getInstance(this.httpInstanceName);
+    this.http = HttpCLient.getInstance(this.httpInstanceName);
   }
 
   private initHttpClient(): void {
-    this.http = HttpManager.getInstance(this.httpInstanceName);
+    this.http = HttpCLient.getInstance(this.httpInstanceName);
   }
 
   public async register(

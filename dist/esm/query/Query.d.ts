@@ -1,4 +1,4 @@
-import { HttpClient } from "../http/HttpClient.js";
+import { BaseHttp } from "../http/BaseHttp.js";
 import { z } from "zod";
 import {
   PaginatedSearchRequest,
@@ -9,7 +9,7 @@ import { DetailsResponse } from "./types/details.js";
 import { IQuery } from "./interface/IQuery.js";
 import { RequestConfig } from "../http/types/http.js";
 export declare abstract class Query<T> implements IQuery<T> {
-  protected http: HttpClient;
+  protected http: BaseHttp;
   protected pathname: string;
   protected schema: z.ZodType<T>;
   constructor(

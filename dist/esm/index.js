@@ -1,10 +1,10 @@
 import { Auth } from "./auth/Auth.js";
-import { HttpClient } from "./http/HttpClient.js";
+import { BaseHttp } from "./http/BaseHttp.js";
 import { Mutation } from "./mutation/Mutation.js";
 import { Query } from "./query/Query.js";
 export {
   Auth,
-  HttpClient,
+  BaseHttp,
   Mutation,
   Query
 };

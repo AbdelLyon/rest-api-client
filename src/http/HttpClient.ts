@@ -1,95 +1,65 @@
-import { HttpConfig } from "./HttpConfig";
-import { HttpRequest } from "./HttpRequest";
-import { Interceptor } from "./Interceptor";
-import type { IHttpClient } from "./interface/IHttpClient";
-import type { HttpConfigOptions, RequestConfig } from "./types/http";
-import { ApiRequestError } from "@/error/ApiRequestError";
+import { BaseHttp } from "./BaseHttp";
+import type { HttpConfig } from "./types/http";
 
-export class HttpClient implements IHttpClient {
-  private baseURL: string;
-  private defaultTimeout: number;
-  private defaultHeaders: Record<string, string>;
-  private withCredentials: boolean;
-  private maxRetries: number;
+export class HttpCLient {
+  private static instances: Map<string, BaseHttp> = new Map();
+  private static defaultInstanceName: string;
 
-  constructor() {
-    this.baseURL = "";
-    this.defaultTimeout = 10000;
-    this.defaultHeaders = {};
-    this.withCredentials = true;
-    this.maxRetries = 3;
+  static init(config: {
+    httpConfig: HttpConfig;
+    instanceName: string;
+  }): BaseHttp {
+    const { httpConfig, instanceName } = config;
+
+    if (!this.instances.has(instanceName)) {
+      const instance = new BaseHttp();
+      instance.configure(httpConfig);
+      this.instances.set(instanceName, instance);
+
+      if (this.instances.size === 1) this.defaultInstanceName = instanceName;
+    }
+
+    return this.instances.get(instanceName)!;
   }
 
-  configure(options: HttpConfigOptions): void {
-    this.baseURL = HttpConfig.getFullBaseUrl(options);
-    this.defaultTimeout = options.timeout ?? 10000;
-    this.maxRetries = options.maxRetries ?? 3;
-    this.withCredentials = options.withCredentials ?? true;
+  static getInstance(instanceName?: string): BaseHttp {
+    const name = instanceName || this.defaultInstanceName;
 
-    this.defaultHeaders = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...options.headers,
-    };
-
-    Interceptor.setupDefaultErrorInterceptor(HttpConfig.logError);
-    Interceptor.addInterceptors(options);
-  }
-
-  async request<TResponse = any>(
-    config: Partial<RequestConfig> & { url: string },
-    options: Partial<RequestConfig> = {},
-  ): Promise<TResponse> {
-    try {
-      const mergedConfig: RequestConfig = {
-        method: "GET",
-        timeout: this.defaultTimeout,
-        ...config,
-        ...options,
-        headers: {
-          ...this.defaultHeaders,
-          ...(config.headers || {}),
-          ...(options.headers || {}),
-        },
-      };
-
-      const url = new URL(
-        mergedConfig.url.startsWith("http")
-          ? mergedConfig.url
-          : `${this.baseURL}${mergedConfig.url.startsWith("/") ? "" : "/"}${mergedConfig.url}`,
-      ).toString();
-
-      const interceptedConfig = await Interceptor.applyRequestInterceptors({
-        ...mergedConfig,
-        url,
-      });
-
-      let response = await HttpRequest.fetchWithRetry(
-        url,
-        interceptedConfig,
-        this.maxRetries,
-        this.defaultTimeout,
-        this.withCredentials,
+    if (!this.instances.has(name)) {
+      throw new Error(
+        `Http instance '${name}' not initialized. Call Http.init() first.`,
       );
+    }
+    return this.instances.get(name)!;
+  }
 
-      response = await Interceptor.applyResponseSuccessInterceptors(response);
+  static setDefaultInstance(instanceName: string): void {
+    if (!this.instances.has(instanceName)) {
+      throw new Error(
+        `Cannot set default: Http instance '${instanceName}' not initialized.`,
+      );
+    }
+    this.defaultInstanceName = instanceName;
+  }
 
-      if (response.headers.get("content-type")?.includes("application/json")) {
-        return (await response.json()) as TResponse;
-      } else {
-        return (await response.text()) as TResponse;
+  static getAvailableInstances(): Array<string> {
+    return Array.from(this.instances.keys());
+  }
+
+  static resetInstance(instanceName?: string): void {
+    if (instanceName) {
+      this.instances.delete(instanceName);
+
+      if (
+        instanceName === this.defaultInstanceName &&
+        this.instances.size > 0
+      ) {
+        this.defaultInstanceName =
+          this.instances.keys().next().value ?? "default";
       }
-    } catch (error) {
-      const apiError =
-        error instanceof ApiRequestError
-          ? error
-          : new ApiRequestError(error, {
-              ...config,
-              ...options,
-              url: config.url,
-            });
-
-      return Interceptor.applyResponseErrorInterceptors(apiError);
+    } else {
+      this.instances.clear();
+      this.defaultInstanceName = "default";
     }
   }
 }

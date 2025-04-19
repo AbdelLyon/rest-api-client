@@ -1,17 +1,14 @@
-import { IHttpClient } from "./interface/IHttpClient.js";
-import { HttpConfigOptions, RequestConfig } from "./types/http.js";
-export declare class HttpClient implements IHttpClient {
-  private baseURL;
-  private defaultTimeout;
-  private defaultHeaders;
-  private withCredentials;
-  private maxRetries;
-  constructor();
-  configure(options: HttpConfigOptions): void;
-  request<TResponse = any>(
-    config: Partial<RequestConfig> & {
-      url: string;
-    },
-    options?: Partial<RequestConfig>,
-  ): Promise<TResponse>;
+import { BaseHttp } from "./BaseHttp.js";
+import { HttpConfig } from "./types/http.js";
+export declare class HttpCLient {
+  private static instances;
+  private static defaultInstanceName;
+  static init(config: {
+    httpConfig: HttpConfig;
+    instanceName: string;
+  }): BaseHttp;
+  static getInstance(instanceName?: string): BaseHttp;
+  static setDefaultInstance(instanceName: string): void;
+  static getAvailableInstances(): Array<string>;
+  static resetInstance(instanceName?: string): void;
 }

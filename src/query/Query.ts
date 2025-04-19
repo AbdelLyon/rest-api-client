@@ -1,4 +1,4 @@
-import type { HttpClient } from "../http/HttpClient";
+import type { BaseHttp } from "../http/BaseHttp";
 import type { z } from "zod";
 import type {
   PaginatedSearchRequest,
@@ -8,10 +8,10 @@ import type {
 import type { DetailsResponse } from "@/query/types/details";
 import type { IQuery } from "@/query/interface/IQuery";
 import type { RequestConfig } from "@/http/types/http";
-import { HttpManager } from "@/http/HttpManager";
+import { HttpCLient } from "@/http/HttpClient";
 
 export abstract class Query<T> implements IQuery<T> {
-  protected http: HttpClient;
+  protected http: BaseHttp;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
@@ -20,7 +20,7 @@ export abstract class Query<T> implements IQuery<T> {
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   ) {
-    this.http = HttpManager.getInstance(httpInstanceName);
+    this.http = HttpCLient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
   }

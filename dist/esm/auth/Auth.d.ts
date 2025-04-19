@@ -1,7 +1,7 @@
 import { IAuth } from "./interface/IAuth.js";
 import { RequestConfig } from "../http/types/http.js";
 import { z } from "zod";
-import { HttpClient } from "../http.js";
+import { BaseHttp } from "../http.js";
 export declare abstract class Auth<
   TUser extends object = {},
   TCredentials extends object = {},
@@ -9,7 +9,7 @@ export declare abstract class Auth<
   TTokens extends object = {},
 > implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
 {
-  protected http: HttpClient;
+  protected http: BaseHttp;
   protected pathname: string;
   protected userSchema: z.ZodType<TUser>;
   protected credentialsSchema?: z.ZodType<TCredentials>;
