@@ -39,8 +39,6 @@ export default defineConfig({
         /^node_modules\/.*/,
       ],
       output: {
-        preserveModulesRoot: "src",
-        preserveModules: true,
         exports: "named",
         entryFileNames: (chunkInfo) => {
           return `${chunkInfo.name}/index.es.js`;

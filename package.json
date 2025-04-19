@@ -29,10 +29,6 @@
     "./query": {
       "import": "./dist/query/index.es.js",
       "types": "./dist/query/index.d.ts"
-    },
-    "./types": {
-      "import": "./dist/types/index.es.js",
-      "types": "./dist/types/index.d.ts"
     }
   },
   "typesVersions": {
