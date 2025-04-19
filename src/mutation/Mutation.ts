@@ -6,8 +6,9 @@ import type { RequestConfig } from "@/http/types/http";
 import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
 import type { IMutation } from "@/mutation/interface/IMutation";
 import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
-import { HttpClient } from "@/http/HttpClient";
+import type { HttpClient } from "@/http/HttpClient";
 import { Builder } from "@/mutation/Builder";
+import { HttpManager } from "@/http/HttpManager";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpClient;
@@ -16,8 +17,12 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   private readonly relation: IRelationBuilder;
 
-  constructor(pathname: string, schema: z.ZodType<T>) {
-    this.http = HttpClient.getInstance();
+  constructor(
+    pathname: string,
+    schema: z.ZodType<T>,
+    httpInstanceName?: string,
+  ) {
+    this.http = HttpManager.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
 

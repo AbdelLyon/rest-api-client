@@ -8,7 +8,9 @@ const _Builder = class _Builder {
     return _Builder.relationInstance;
   }
   static createEntityBuilder(relationBuilder) {
-    return new EntityBuilder(relationBuilder || _Builder.getRelationBuilder());
+    return new EntityBuilder(
+      relationBuilder || _Builder.getRelationBuilder()
+    );
   }
 };
 __publicField(_Builder, "relationInstance", new RelationBuilder());

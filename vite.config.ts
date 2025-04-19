@@ -12,7 +12,8 @@ export default tanstackViteConfig({
     "zod",
     "@tanstack/.*",
     "eslint",
-    "jiti"
+    "jiti",
   ],
   outDir: "dist",
+  tsconfigPath: "./tsconfig.json",
 });

@@ -1,7 +1,8 @@
-import { HttpClient } from "../http/HttpClient";
 import type { IAuth } from "./interface/IAuth";
 import type { RequestConfig } from "@/http/types/http";
 import type { z } from "zod";
+import type { HttpClient } from "@/http";
+import { HttpManager } from "@/http/HttpManager";
 
 export abstract class Auth<
   TUser extends object = {},
@@ -17,6 +18,9 @@ export abstract class Auth<
   protected registerDataSchema?: z.ZodType<TRegisterData>;
   protected tokenSchema?: z.ZodType<TTokens>;
 
+  // Optionnellement utiliser un nom d'instance spécifique
+  protected httpInstanceName?: string;
+
   constructor(
     pathname: string,
     schemas: {
@@ -25,13 +29,21 @@ export abstract class Auth<
       registerData?: z.ZodType<TRegisterData>;
       tokens?: z.ZodType<TTokens>;
     },
+    httpInstanceName?: string,
   ) {
-    this.http = HttpClient.getInstance();
     this.pathname = pathname;
     this.userSchema = schemas.user;
     this.credentialsSchema = schemas.credentials;
     this.registerDataSchema = schemas.registerData;
     this.tokenSchema = schemas.tokens;
+    this.httpInstanceName = httpInstanceName;
+
+    this.initHttpClient();
+    this.http = HttpManager.getInstance(this.httpInstanceName);
+  }
+
+  private initHttpClient(): void {
+    this.http = HttpManager.getInstance(this.httpInstanceName);
   }
 
   public async register(
@@ -132,7 +144,6 @@ export abstract class Auth<
         options,
       );
 
-      // Validation du schéma des tokens si défini
       return this.tokenSchema ? this.tokenSchema.parse(response) : response;
     } catch (error) {
       console.error("Token refresh error", error);
