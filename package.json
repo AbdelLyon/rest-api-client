@@ -14,22 +14,27 @@
   "author": "DailyApps",
   "license": "MIT",
   "exports": {
+    ".": {
+      "import": "./dist/esm/index.es.js",
+      "types": "./dist/esm/index.d.ts"
+    },
     "./auth": {
-      "import": "./dist/auth/index.es.js",
-      "types": "./dist/auth/inex.d.ts"
+      "import": "./dist/esm/auth/index.js",
+      "types": "./dist/esm/auth/inex.d.ts"
     },
     "./http": {
-      "import": "./dist/http/index.es.js",
-      "types": "./dist/http/index.d.ts"
+      "import": "./dist/esm/http/index.es.js",
+      "types": "./dist/esm/http/index.d.ts"
     },
     "./mutation": {
-      "import": "./dist/mutation/index.es.js",
-      "types": "./dist/mutation/index.d.ts"
+      "import": "./dist/esm/mutation/index.es.js",
+      "types": "./dist/esm/mutation/index.d.ts"
     },
     "./query": {
-      "import": "./dist/query/index.es.js",
-      "types": "./dist/query/index.d.ts"
-    }
+      "import": "./dist/esm/query/index.es.js",
+      "types": "./dist/esm/query/index.d.ts"
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
@@ -48,6 +53,7 @@
     "reset": "pnpm clean && pnpm build"
   },
   "dependencies": {
+    "@tanstack/vite-config": "^0.2.0",
     "axios": "^1.7.9",
     "axios-retry": "^4.5.0",
     "cookies-next": "^5.1.0",
@@ -57,9 +63,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
-    "@tanstack/config": "^0.15.1",
     "@tanstack/eslint-config": "^0.1.0",
-    "@tanstack/vite-config": "^0.2.0",
     "@types/node": "^22.10.7",
     "@vitest/coverage-v8": "^2.1.8",
     "globals": "^15.14.0",

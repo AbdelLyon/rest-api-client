@@ -1,35 +1,15 @@
-// vite.config.js
-import path from "path";
-import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { defineConfig, mergeConfig } from "vite";
+import { tanstackViteConfig } from "@tanstack/vite-config";
 
-export default defineConfig({
-  plugins: [
-    dts({
-      exclude: ["src/tests/**/*"],
-      rollupTypes: true,
-    }),
-  ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  build: {
-    lib: {
-      entry: path.resolve(__dirname, "src/index.ts"),
-      formats: ["es"],
-      fileName: (format) => `index.${format}.js`,
-    },
-    rollupOptions: {
-      external: ["axios", "axios-retry", "cookies-next", "zod"],
-      output: {
-        format: "es",
-        exports: "named",
-      },
-    },
-    outDir: "dist",
-    emptyOutDir: true,
-    sourcemap: true,
-  },
-});
+const config = {};
+
+export default mergeConfig(
+  defineConfig(config),
+  tanstackViteConfig({
+    entry: "./src/index.ts",
+    srcDir: "./src",
+    exclude: ["src/tests/**/*"],
+    cjs: false
+
+  }),
+);

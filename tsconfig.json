@@ -15,7 +15,7 @@
             "./src/*"
          ]
       },
-      "moduleResolution": "Node",
+      "moduleResolution": "bundler",
       "allowImportingTsExtensions": true,
       "resolveJsonModule": true,
       "isolatedModules": true,
