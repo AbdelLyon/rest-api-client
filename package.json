@@ -14,9 +14,21 @@
   "author": "DailyApps",
   "license": "MIT",
   "exports": {
-    ".": {
-      "import": "./dist/index.es.js",
-      "types": "./dist/index.d.ts"
+    "./auth": {
+      "import": "./dist/auth.es.js",
+      "types": "./dist/auth/index.d.ts"
+    },
+    "./http": {
+      "import": "./dist/http.es.js",
+      "types": "./dist/http/index.d.ts"
+    },
+    "./mutation": {
+      "import": "./dist/mutation.es.js",
+      "types": "./dist/mutation/index.d.ts"
+    },
+    "./query": {
+      "import": "./dist/query.es.js",
+      "types": "./dist/query/index.d.ts"
     }
   },
   "typesVersions": {

@@ -1,3 +1,5 @@
+import { HttpClient } from "@/http";
+import { Mutation } from "@/mutation";
 import {
   describe,
   it,
@@ -10,9 +12,6 @@ import {
 } from "vitest";
 import { z } from "zod";
 
-import { HttpClient, Mutation } from "@/services";
-
-// Définir un schéma Zod pour TestResource
 const TestResourceSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -20,23 +19,18 @@ const TestResourceSchema = z.object({
   createdAt: z.string(),
 });
 
-// Type dérivé du schéma
 type TestResource = z.infer<typeof TestResourceSchema>;
 
-// Interfaces d'attributs compatibles avec ModelAttributes
 
-// // Définition des relations pour le test
 // interface TestRelations extends Record<string, unknown> {
 //   // Aucune relation définie pour ce test
 // }
 
-// Classe concrète pour tester la classe abstraite Mutation
 class TestMutation extends Mutation<TestResource> {
   constructor (pathname: string) {
     super(pathname, TestResourceSchema);
   }
 
-  // Méthode fictive pour simuler la récupération des ressources par ID
   async getResourcesByIds(): Promise<TestResource[]> {
     // Cette méthode serait implémentée pour aller chercher les ressources
     // Mais dans le test, elle sera mockée
@@ -45,12 +39,9 @@ class TestMutation extends Mutation<TestResource> {
 }
 
 describe("Mutation avec Zod", () => {
-  // const pathname = "/api/resources";
-  // let mutation: TestMutation;
   const mockRequest = vi.fn();
 
   beforeAll(() => {
-    // Initialiser HttpClient avant tous les tests
     HttpClient.init({
       httpConfig: {
         baseURL: "https://api.test.com",
@@ -62,16 +53,11 @@ describe("Mutation avec Zod", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Espionner les méthodes que nous voulons tester
     vi.spyOn(HttpClient, "getInstance");
     vi.spyOn(console, "error").mockImplementation(() => { });
 
-    // Remplacer la méthode request par un mock
     const httpInstance = HttpClient.getInstance();
     vi.spyOn(httpInstance, "request").mockImplementation(mockRequest);
-
-    // Créer une nouvelle instance pour chaque test
-    // mutation = new TestMutation(pathname);
   });
 
   afterEach(() => {
@@ -97,7 +83,6 @@ describe("Mutation avec Zod", () => {
     });
 
     it("devrait lancer une erreur si HttpClient n'est pas initialisé", () => {
-      // Simuler que HttpClient.getInstance lance une erreur
       vi.spyOn(HttpClient, "getInstance").mockImplementationOnce(() => {
         throw new Error("Http not initialized. Call Http.init() first.");
       });

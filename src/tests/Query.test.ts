@@ -10,16 +10,11 @@ import {
 } from "vitest";
 
 import { z } from "zod";
-import type {
-  SearchRequest,
-  PaginatedSearchRequest,
-  SearchResponse,
-  DetailsResponse,
-} from "../types";
-import { HttpClient, Query } from "@/services";
-import { ApiRequestError } from "@/services/ApiRequestError";
 
-// Schéma Zod pour les tests
+import { ApiRequestError } from "@/error/ApiRequestError";
+import { DetailsResponse, PaginatedSearchRequest, Query, SearchRequest, SearchResponse } from "@/query";
+import { HttpClient } from "@/http";
+
 const TestResourceSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -27,10 +22,8 @@ const TestResourceSchema = z.object({
   createdAt: z.string(),
 });
 
-// Type dérivé du schéma
 type TestResource = z.infer<typeof TestResourceSchema>;
 
-// Classe concrète pour tester la classe abstraite Query
 class TestQuery extends Query<TestResource> {
   constructor (pathname: string) {
     super(pathname, TestResourceSchema);
@@ -43,7 +36,6 @@ describe("Query avec Zod", () => {
   const mockRequest = vi.fn();
 
   beforeAll(() => {
-    // Initialiser HttpClient avant tous les tests
     HttpClient.init({
       httpConfig: {
         baseURL: "https://api.test.com",
@@ -207,7 +199,6 @@ describe("Query avec Zod", () => {
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      // Accéder à la méthode privée
       const searchRequest = query["searchRequest"].bind(query);
       const searchParams: SearchRequest = {
         filters: [
@@ -275,7 +266,6 @@ describe("Query avec Zod", () => {
 
   describe("search", () => {
     it("devrait appeler searchRequest, valider et retourner les données", async () => {
-      // Données de test
       const mockData: TestResource[] = [
         {
           id: 1,
@@ -411,7 +401,6 @@ describe("Query avec Zod", () => {
 
       mockRequest.mockResolvedValueOnce(mockResponse);
 
-      // Espionner les méthodes privées
       const searchRequestSpy = vi.spyOn(query as any, "searchRequest");
       const validateDataSpy = vi.spyOn(query as any, "validateData");
 
@@ -468,7 +457,7 @@ describe("Query avec Zod", () => {
           status: "active",
           createdAt: "2023-01-01",
         },
-        { id: "2", name: 123, status: true }, // Données invalides
+        { id: "2", name: 123, status: true },
       ];
 
       const mockResponse: SearchResponse<any> = {
@@ -597,7 +586,6 @@ describe("Query avec Zod", () => {
 
   describe("Intégration des composants", () => {
     it("devrait fonctionner de bout en bout avec des données valides", async () => {
-      // Simuler une séquence complète d'appels API
       const mockData: TestResource[] = [
         {
           id: 1,
@@ -612,11 +600,9 @@ describe("Query avec Zod", () => {
         meta: { page: 1, perPage: 10, total: 1 },
       };
 
-      // Configurer les mocks pour simuler plusieurs appels
       mockRequest
-        .mockResolvedValueOnce(mockResponse) // Pour search
+        .mockResolvedValueOnce(mockResponse)
         .mockResolvedValueOnce({
-          // Pour getdetails
           data: {
             actions: [],
             instructions: [],
@@ -628,14 +614,12 @@ describe("Query avec Zod", () => {
           },
         });
 
-      // Exécuter une séquence d'opérations
       const searchResult = await query.search({
         filters: [{ field: "status", operator: "=", value: "active" }],
       });
 
       const detailsResult = await query.getdetails();
 
-      // Vérifier les résultats
       expect(searchResult).toEqual(mockData);
       expect(detailsResult.data.fields).toContain("name");
       expect(mockRequest).toHaveBeenCalledTimes(2);

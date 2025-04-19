@@ -1,6 +1,6 @@
+import type { RequestConfig } from "@/http/types/http";
 import { describe, it, expect, test } from "vitest";
-import { ApiRequestError } from "@/services/ApiRequestError";
-import type { RequestConfig } from "@/types/common";
+import { ApiRequestError } from "@/error/ApiRequestError";
 
 describe("ApiRequestError", () => {
   it("devrait créer une instance avec les propriétés attendues", () => {
