@@ -16,19 +16,19 @@
   "exports": {
     "./auth": {
       "import": "./dist/auth/index.es.js",
-      "types": "./dist/auth/Auth.d.ts"
+      "types": "./dist/auth/inex.d.ts"
     },
     "./http": {
       "import": "./dist/http/index.es.js",
-      "types": "./dist/http/Http.d.ts"
+      "types": "./dist/http/index.d.ts"
     },
     "./mutation": {
       "import": "./dist/mutation/index.es.js",
-      "types": "./dist/mutation/Mutation.d.ts"
+      "types": "./dist/mutation/index.d.ts"
     },
     "./query": {
       "import": "./dist/query/index.es.js",
-      "types": "./dist/query/Query.d.ts"
+      "types": "./dist/query/index.d.ts"
     }
   },
   "typesVersions": {
