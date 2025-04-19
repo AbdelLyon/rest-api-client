@@ -2,13 +2,12 @@ import path from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
+const modules = ["auth", "http", "mutation", "query"];
+
 export default defineConfig({
   plugins: [
     dts({
       exclude: ["src/tests/**/*"],
-      rollupTypes: true,
-      entryRoot: "src",
-      outputDir: "dist",
     }),
   ],
   resolve: {
@@ -17,27 +16,66 @@ export default defineConfig({
     },
   },
   build: {
+    target: "es2015",
+    minify: "terser",
     lib: {
       entry: {
-        auth: path.resolve(__dirname, "src/auth/index.ts"),
-        http: path.resolve(__dirname, "src/http/index.ts"),
-        mutation: path.resolve(__dirname, "src/mutation/index.ts"),
-        query: path.resolve(__dirname, "src/query/index.ts"),
+        ...Object.fromEntries(
+          modules.map((module) => [
+            module,
+            path.resolve(__dirname, `src/${module}/index.ts`),
+          ]),
+        ),
       },
+      name: "rest-api-client",
       formats: ["es"],
-      fileName: (format, entryName) => `${entryName}.${format}.js`,
     },
     rollupOptions: {
-      external: ["axios", "axios-retry", "cookies-next", "zod"],
+      external: [
+        "axios",
+        "axios-retry",
+        "cookies-next",
+        "zod",
+        /^node_modules\/.*/,
+      ],
       output: {
-        format: "es",
-        exports: "named",
+        preserveModulesRoot: "src",
         preserveModules: true,
-        dir: "dist",
+        exports: "named",
+        entryFileNames: (chunkInfo) => {
+          return `${chunkInfo.name}/index.es.js`;
+        },
+        assetFileNames: (chunkInfo) => {
+          if (chunkInfo.type?.endsWith(".d.ts")) {
+            return `${chunkInfo.type.replace(".d.ts", "")}/index.d.ts`;
+          }
+          return "[name][extname]";
+        },
+      },
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
       },
     },
-    outDir: "dist",
-    emptyOutDir: true,
-    sourcemap: false,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: [
+          "console.log",
+          "console.info",
+          "console.debug",
+          "console.warn",
+        ],
+        passes: 2,
+      },
+      mangle: {
+        safari10: true,
+      },
+      format: {
+        comments: false,
+      },
+    },
   },
 });
