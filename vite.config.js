@@ -2,7 +2,7 @@ import { tanstackViteConfig } from "@tanstack/vite-config";
 export default tanstackViteConfig({
   entry: "./src/index.ts",
   srcDir: "./src",
-  exclude: ["src/tests/**/*", "src/error/**/*"],
+  exclude: ["src/tests/**/*", "src/**/shared/**/*"],
   cjs: false,
   externalDeps: [
     "axios",
