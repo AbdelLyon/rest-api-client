@@ -8,7 +8,7 @@ import type {
   ValidCreateNestedRelation,
   ValidUpdateNestedRelation,
 } from "@/mutation/types/mutation";
-import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
+import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
 
 export class RelationBuilder implements IRelationBuilder {
   private defineRelationDefinition(result: Record<string, unknown>): void {

@@ -1,4 +1,3 @@
-import type { BaseHttp } from "../http/shared/BaseHttp";
 import type { z } from "zod";
 import type {
   PaginatedSearchRequest,
@@ -6,12 +5,13 @@ import type {
   SearchResponse,
 } from "@/query/types/search";
 import type { DetailsResponse } from "@/query/types/details";
-import type { IQuery } from "@/query/interface/IQuery";
+import type { IQuery } from "@/query/types/IQuery";
 import type { RequestConfig } from "@/http/types/http";
+import type { HttpRequest } from "@/http/common/HttpRequest";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Query<T> implements IQuery<T> {
-  protected http: BaseHttp;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 

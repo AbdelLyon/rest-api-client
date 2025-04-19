@@ -1,4 +1,4 @@
-import { BaseHttp } from "./shared/BaseHttp.js";
+import { HttpRequest } from "./common/HttpRequest.js";
 import { HttpConfig } from "./types/http.js";
 export declare class HttpClient {
   private static instances;
@@ -6,8 +6,8 @@ export declare class HttpClient {
   static init(config: {
     httpConfig: HttpConfig;
     instanceName: string;
-  }): BaseHttp;
-  static getInstance(instanceName?: string): BaseHttp;
+  }): HttpRequest;
+  static getInstance(instanceName?: string): HttpRequest;
   static setDefaultInstance(instanceName: string): void;
   static getAvailableInstances(): Array<string>;
   static resetInstance(instanceName?: string): void;

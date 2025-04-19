@@ -3,15 +3,15 @@ import type { DeleteRequest, DeleteResponse } from "@/mutation/types/delete";
 import type { ActionRequest, ActionResponse } from "@/mutation/types/action";
 import type { BuildOnly, MutationResponse } from "@/mutation/types/mutation";
 import type { RequestConfig } from "@/http/types/http";
-import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
-import type { IMutation } from "@/mutation/interface/IMutation";
-import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
-import type { BaseHttp } from "@/http/shared/BaseHttp";
+import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
+import type { IMutation } from "@/mutation/types/IMutation";
+import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
+import type { HttpRequest } from "@/http/common/HttpRequest";
 import { Builder } from "@/mutation/Builder";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Mutation<T> implements IMutation<T> {
-  protected http: BaseHttp;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 

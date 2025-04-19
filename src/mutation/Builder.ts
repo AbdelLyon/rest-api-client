@@ -1,5 +1,5 @@
-import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
-import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
+import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
+import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
 import { EntityBuilder } from "@/mutation/EntityBuilder";
 import { RelationBuilder } from "@/mutation/RelationBuilder";
 

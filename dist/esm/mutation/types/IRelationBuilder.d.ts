@@ -7,45 +7,40 @@ import {
   UpdateRelationOperation,
   ValidCreateNestedRelation,
   ValidUpdateNestedRelation,
-} from "./types/mutation.js";
-import { IRelationBuilder } from "./types/IRelationBuilder.js";
-export declare class RelationBuilder implements IRelationBuilder {
-  private defineRelationDefinition;
-  private extractNestedRelations;
-  private addGetters;
-  createRelation<
+} from "./mutation.js";
+export interface IRelationBuilder {
+  createRelation: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     attributes: T,
     relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>,
-  ): T &
+  ) => T &
     CreateRelationOperation<T> & {
       relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>;
     };
-  updateRelation<
+  updateRelation: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     key: string | number,
     attributes: T,
     relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>,
-  ): T &
+  ) => T &
     UpdateRelationOperation<T> & {
-      operation: "update";
       relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>;
     };
-  attach(key: string | number): AttachRelationDefinition;
-  detach(key: string | number): DetachRelationDefinition;
-  sync<T>(
+  attach: (key: string | number) => AttachRelationDefinition;
+  detach: (key: string | number) => DetachRelationDefinition;
+  sync: <T>(
     key: string | number | Array<string | number>,
     attributes?: T,
     pivot?: Record<string, string | number>,
     withoutDetaching?: boolean,
-  ): SyncRelationDefinition<T>;
-  toggle<T>(
+  ) => SyncRelationDefinition<T>;
+  toggle: <T>(
     key: string | number | Array<string | number>,
     attributes?: T,
     pivot?: Record<string, string | number>,
-  ): ToggleRelationDefinition<T>;
+  ) => ToggleRelationDefinition<T>;
 }

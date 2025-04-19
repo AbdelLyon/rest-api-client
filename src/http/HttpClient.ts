@@ -1,18 +1,18 @@
-import { BaseHttp } from "./shared/BaseHttp";
+import { HttpRequest } from "./common/HttpRequest";
 import type { HttpConfig } from "./types/http";
 
 export class HttpClient {
-  private static instances: Map<string, BaseHttp> = new Map();
+  private static instances: Map<string, HttpRequest> = new Map();
   private static defaultInstanceName: string;
 
   static init(config: {
     httpConfig: HttpConfig;
     instanceName: string;
-  }): BaseHttp {
+  }): HttpRequest {
     const { httpConfig, instanceName } = config;
 
     if (!this.instances.has(instanceName)) {
-      const instance = new BaseHttp();
+      const instance = new HttpRequest();
       instance.configure(httpConfig);
       this.instances.set(instanceName, instance);
 
@@ -22,7 +22,7 @@ export class HttpClient {
     return this.instances.get(instanceName)!;
   }
 
-  static getInstance(instanceName?: string): BaseHttp {
+  static getInstance(instanceName?: string): HttpRequest {
     const name = instanceName || this.defaultInstanceName;
 
     if (!this.instances.has(name)) {

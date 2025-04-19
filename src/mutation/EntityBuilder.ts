@@ -9,8 +9,8 @@ import type {
   ValidCreateNestedRelation,
   ValidUpdateNestedRelation,
 } from "@/mutation/types/mutation";
-import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
-import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
+import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
+import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
 import type { RequestConfig } from "@/http/types/http";
 import { RelationBuilder } from "@/mutation/RelationBuilder";
 

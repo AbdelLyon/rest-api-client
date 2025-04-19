@@ -1,2 +1,2 @@
 export * from "./Auth";
-export type * from "./interface/IAuth";
+export type * from "./types/IAuth";
