@@ -8,7 +8,7 @@ import type { IMutation } from "@/mutation/interface/IMutation";
 import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
 import type { BaseHttp } from "@/http/shared/BaseHttp";
 import { Builder } from "@/mutation/Builder";
-import { HttpCLient } from "@/http/HttpClient";
+import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: BaseHttp;
@@ -22,7 +22,7 @@ export abstract class Mutation<T> implements IMutation<T> {
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   ) {
-    this.http = HttpCLient.getInstance(httpInstanceName);
+    this.http = HttpClient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
 

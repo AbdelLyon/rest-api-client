@@ -2,7 +2,7 @@ import type { IAuth } from "./interface/IAuth";
 import type { RequestConfig } from "@/http/types/http";
 import type { z } from "zod";
 import type { BaseHttp } from "@/http/shared/BaseHttp";
-import { HttpCLient } from "@/http/HttpClient";
+import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Auth<
   TUser extends object = {},
@@ -38,11 +38,11 @@ export abstract class Auth<
     this.httpInstanceName = httpInstanceName;
 
     this.initHttpClient();
-    this.http = HttpCLient.getInstance(this.httpInstanceName);
+    this.http = HttpClient.getInstance(this.httpInstanceName);
   }
 
   private initHttpClient(): void {
-    this.http = HttpCLient.getInstance(this.httpInstanceName);
+    this.http = HttpClient.getInstance(this.httpInstanceName);
   }
 
   public async register(

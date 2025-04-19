@@ -1,6 +1,6 @@
 import { BaseHttp } from "./shared/BaseHttp.js";
 import { HttpConfig } from "./types/http.js";
-export declare class HttpCLient {
+export declare class HttpClient {
   private static instances;
   private static defaultInstanceName;
   static init(config: {

@@ -1,7 +1,7 @@
 import { BaseHttp } from "./shared/BaseHttp";
 import type { HttpConfig } from "./types/http";
 
-export class HttpCLient {
+export class HttpClient {
   private static instances: Map<string, BaseHttp> = new Map();
   private static defaultInstanceName: string;
 

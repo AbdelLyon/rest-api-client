@@ -8,7 +8,7 @@ import type {
 import type { DetailsResponse } from "@/query/types/details";
 import type { IQuery } from "@/query/interface/IQuery";
 import type { RequestConfig } from "@/http/types/http";
-import { HttpCLient } from "@/http/HttpClient";
+import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Query<T> implements IQuery<T> {
   protected http: BaseHttp;
@@ -20,7 +20,7 @@ export abstract class Query<T> implements IQuery<T> {
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   ) {
-    this.http = HttpCLient.getInstance(httpInstanceName);
+    this.http = HttpClient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
   }
