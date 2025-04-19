@@ -1,4 +1,4 @@
-import { Permission } from "@/http/types/http";
+import type { Permission } from "@/http/types/http";
 
 export interface DeleteRequest {
   resources: Array<number | string>;

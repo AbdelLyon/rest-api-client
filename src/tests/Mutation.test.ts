@@ -1,16 +1,16 @@
-import { HttpClient } from "@/http";
-import { Mutation } from "@/mutation";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
   afterAll,
   afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 import { z } from "zod";
+import { HttpClient } from "@/http";
+import { Mutation } from "@/mutation";
 
 const TestResourceSchema = z.object({
   id: z.number(),
@@ -31,10 +31,11 @@ class TestMutation extends Mutation<TestResource> {
     super(pathname, TestResourceSchema);
   }
 
-  async getResourcesByIds(): Promise<TestResource[]> {
+  async getResourcesByIds(): Promise<Array<TestResource>> {
     // Cette méthode serait implémentée pour aller chercher les ressources
     // Mais dans le test, elle sera mockée
-    return [];
+    const data = await [];
+    return data;
   }
 }
 

@@ -1,3 +1,4 @@
+import type { z } from "zod";
 import type { DeleteRequest, DeleteResponse } from "@/mutation/types/delete";
 import type { ActionRequest, ActionResponse } from "@/mutation/types/action";
 import type { BuildOnly, MutationResponse } from "@/mutation/types/mutation";
@@ -5,7 +6,6 @@ import type { RequestConfig } from "@/http/types/http";
 import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
 import type { IMutation } from "@/mutation/interface/IMutation";
 import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
-import { z } from "zod";
 import { HttpClient } from "@/http/HttpClient";
 import { Builder } from "@/mutation/Builder";
 
@@ -35,7 +35,7 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
 
-  private validateData(data: unknown[]): T[] {
+  private validateData(data: Array<unknown>): Array<T> {
     return data.map((item) => {
       const result = this.schema.safeParse(item);
       if (!result.success) {

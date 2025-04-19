@@ -1,18 +1,19 @@
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
   afterAll,
   afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 import { z } from "zod";
 
+import type { DetailsResponse, PaginatedSearchRequest, SearchRequest, SearchResponse } from "@/query";
 import { ApiRequestError } from "@/error/ApiRequestError";
-import { DetailsResponse, PaginatedSearchRequest, Query, SearchRequest, SearchResponse } from "@/query";
+import { Query } from "@/query";
 import { HttpClient } from "@/http";
 
 const TestResourceSchema = z.object({
@@ -266,7 +267,7 @@ describe("Query avec Zod", () => {
 
   describe("search", () => {
     it("devrait appeler searchRequest, valider et retourner les données", async () => {
-      const mockData: TestResource[] = [
+      const mockData: Array<TestResource> = [
         {
           id: 1,
           name: "Resource 1",
@@ -309,7 +310,7 @@ describe("Query avec Zod", () => {
     });
 
     it("devrait transmettre les options à searchRequest", async () => {
-      const mockData: TestResource[] = [
+      const mockData: Array<TestResource> = [
         {
           id: 1,
           name: "Resource 1",
@@ -375,7 +376,7 @@ describe("Query avec Zod", () => {
 
   describe("searchPaginate", () => {
     it("devrait appeler searchRequest, valider les données et retourner la réponse paginée", async () => {
-      const mockData: TestResource[] = [
+      const mockData: Array<TestResource> = [
         {
           id: 1,
           name: "Resource 1",
@@ -419,7 +420,7 @@ describe("Query avec Zod", () => {
     });
 
     it("devrait transmettre les options à searchRequest", async () => {
-      const mockData: TestResource[] = [
+      const mockData: Array<TestResource> = [
         {
           id: 1,
           name: "Resource 1",
@@ -586,7 +587,7 @@ describe("Query avec Zod", () => {
 
   describe("Intégration des composants", () => {
     it("devrait fonctionner de bout en bout avec des données valides", async () => {
-      const mockData: TestResource[] = [
+      const mockData: Array<TestResource> = [
         {
           id: 1,
           name: "Resource 1",

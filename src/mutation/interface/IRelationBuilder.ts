@@ -1,34 +1,34 @@
-import { AttachRelationDefinition, CreateRelationOperation, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, UpdateRelationOperation, ValidCreateNestedRelation, ValidUpdateNestedRelation } from "@/mutation/types/mutation";
+import type { AttachRelationDefinition, CreateRelationOperation, DetachRelationDefinition, SyncRelationDefinition, ToggleRelationDefinition, UpdateRelationOperation, ValidCreateNestedRelation, ValidUpdateNestedRelation } from "@/mutation/types/mutation";
 
 export interface IRelationBuilder {
-   createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   createRelation: <T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       attributes: T,
-      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
-   ): T & CreateRelationOperation<T> & {
-      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
+      relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>
+   ) => T & CreateRelationOperation<T> & {
+      relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>;
    };
 
-   updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   updateRelation: <T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
-   ): T & UpdateRelationOperation<T> & {
-      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
+      relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>
+   ) => T & UpdateRelationOperation<T> & {
+      relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>;
    };
 
-   attach(key: string | number): AttachRelationDefinition;
-   detach(key: string | number): DetachRelationDefinition;
+   attach: (key: string | number) => AttachRelationDefinition;
+   detach: (key: string | number) => DetachRelationDefinition;
 
-   sync<T>(
+   sync: <T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>,
       withoutDetaching?: boolean
-   ): SyncRelationDefinition<T>;
+   ) => SyncRelationDefinition<T>;
 
-   toggle<T>(
+   toggle: <T>(
       key: string | number | Array<string | number>,
       attributes?: T,
       pivot?: Record<string, string | number>
-   ): ToggleRelationDefinition<T>;
+   ) => ToggleRelationDefinition<T>;
 }

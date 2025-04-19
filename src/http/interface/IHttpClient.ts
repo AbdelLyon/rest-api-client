@@ -1,4 +1,4 @@
-import { RequestConfig } from "@/http/types/http";
+import type { RequestConfig } from "@/http/types/http";
 
 export interface IHttpClient {
   request: <TResponse>(

@@ -1,16 +1,17 @@
+import { fail } from "node:assert";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
-  Mock,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
 } from "vitest";
 import { HttpClient } from "../http/HttpClient";
 import { ApiRequestError } from "../error/ApiRequestError";
-import { fail } from "assert";
-import { HttpConfig } from "@/http/types/http";
+import type {
+  Mock} from "vitest";
+import type { HttpConfig } from "@/http/types/http";
 
 describe("HttpClient", () => {
   global.fetch = vi.fn();
@@ -21,7 +22,7 @@ describe("HttpClient", () => {
   }));
 
   let httpClient: HttpClient;
-  let mockResponseBody = { success: true };
+  const mockResponseBody = { success: true };
   let mockResponse: Response;
 
   // Configuration des mocks et des fixtures

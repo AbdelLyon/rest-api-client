@@ -1,3 +1,5 @@
+import type { RequestConfig } from "@/http/types/http";
+
 export type RelationDefinitionType =
   | "create"
   | "update"
@@ -59,12 +61,10 @@ export type ValidUpdateNestedRelation<T> =
   | SyncRelationDefinition<T>
   | ToggleRelationDefinition<T>;
 
-export type RelationDefinition<T = unknown, InCreateContext extends boolean = false> =
-  InCreateContext extends true
+export type RelationDefinition<T = unknown, TInCreateContext extends boolean = false> =
+  TInCreateContext extends true
   ? ValidCreateNestedRelation<T>
   : ValidUpdateNestedRelation<T>;
-
-import { RequestConfig } from "@/http/types/http";
 
 export type ExtractModelAttributes<T> = Omit<T, 'relations'>;
 
@@ -94,8 +94,8 @@ export type IsValidCreateOperation<T> = T extends { operation: "update" | "detac
 
 export type ValidCreateRelationOnly<T> = T extends { operation: "update" | "detach"; } ? never : T;
 
-export type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
-  [K in keyof T]: K extends RelationKeys
+export type CreateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
+  [K in keyof T]: K extends TRelationKeys
   ? IsRelationOperation<T[K]> extends true
   ? ValidCreateRelationOnly<T[K]>
   : T[K]
@@ -103,8 +103,8 @@ export type CreateEntityAttributes<T, RelationKeys extends keyof T = never> = {
 };
 
 export interface BuildOnly<TModel, TRelations = {}> {
-  build(): MutationRequest<TModel, TRelations>;
-  mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
+  build: () => MutationRequest<TModel, TRelations>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 }
 
 export type CreateOperationOnly = { operation: "create"; };
@@ -114,7 +114,4 @@ export type DetachOperationOnly = { operation: "detach"; };
 
 export type ExcludeUpdateOperations<T> = T extends UpdateOperationOnly | DetachOperationOnly ? never : T;
 
-export type RelationResult<T, Op extends string> = T & {
-  operation: Op;
-};
 

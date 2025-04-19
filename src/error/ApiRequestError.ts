@@ -37,10 +37,6 @@ export class ApiRequestError extends Error {
       }
     }
 
-    // Capturer la stack trace
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ApiRequestError);
-    }
   }
 
   // Méthodes utilitaires pour vérifier le type d'erreur

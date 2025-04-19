@@ -1,35 +1,35 @@
 import type { RequestConfig } from "@/http/types/http";
 
 export interface IAuth<
-   UserType extends object = {},
-   CredentialsType extends object = {},
-   RegisterDataType extends object = {},
-   TokenType extends object = {}
+   TUser extends object = {},
+   TCredentials extends object = {},
+   TRegisterData extends object = {},
+   TToken extends object = {}
 > {
 
-   register(
-      userData: RegisterDataType,
+   register: (
+      userData: TRegisterData,
       options?: Partial<RequestConfig>
-   ): Promise<UserType>;
+   ) => Promise<TUser>;
 
-   login(
-      credentials: CredentialsType,
+   login: (
+      credentials: TCredentials,
       options?: Partial<RequestConfig>
-   ): Promise<{
-      user: UserType;
-      tokens: TokenType;
+   ) => Promise<{
+      user: TUser;
+      tokens: TToken;
    }>;
 
-   logout(
+   logout: (
       options?: Partial<RequestConfig>
-   ): Promise<void>;
+   ) => Promise<void>;
 
-   refreshToken(
+   refreshToken: (
       refreshToken: string,
       options?: Partial<RequestConfig>
-   ): Promise<TokenType>;
+   ) => Promise<TToken>;
 
-   getCurrentUser(
+   getCurrentUser: (
       options?: Partial<RequestConfig>
-   ): Promise<UserType>;
+   ) => Promise<TUser>;
 };

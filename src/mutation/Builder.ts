@@ -5,12 +5,9 @@ import { RelationBuilder } from "@/mutation/RelationBuilder";
 
 export class Builder {
 
-   private static relationInstance: IRelationBuilder;
+   private static relationInstance: IRelationBuilder = new RelationBuilder();
 
    public static getRelationBuilder(): IRelationBuilder {
-      if (!Builder.relationInstance) {
-         Builder.relationInstance = new RelationBuilder();
-      }
       return Builder.relationInstance;
    }
 

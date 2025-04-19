@@ -1,12 +1,12 @@
 import type {
    AttachRelationDefinition,
+   CreateRelationOperation,
    DetachRelationDefinition,
    SyncRelationDefinition,
    ToggleRelationDefinition,
+   UpdateRelationOperation,
    ValidCreateNestedRelation,
-   ValidUpdateNestedRelation,
-   CreateRelationOperation,
-   UpdateRelationOperation
+   ValidUpdateNestedRelation
 } from "@/mutation/types/mutation";
 import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
 
@@ -54,11 +54,11 @@ export class RelationBuilder implements IRelationBuilder {
       }
    }
 
-   public createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   public createRelation<T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       attributes: T,
-      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
+      relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>
    ): T & CreateRelationOperation<T> & {
-      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
+      relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>;
    } {
       const { normalAttributes, nestedRelations: initialNestedRelations } = this.extractNestedRelations(attributes);
       const nestedRelations = relations
@@ -70,7 +70,7 @@ export class RelationBuilder implements IRelationBuilder {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & CreateRelationOperation<T> & {
-         relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>;
+         relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>;
       };
 
       this.defineRelationDefinition(relationDefinition);
@@ -79,13 +79,13 @@ export class RelationBuilder implements IRelationBuilder {
       return relationDefinition;
    }
 
-   public updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   public updateRelation<T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
+      relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>
    ): T & UpdateRelationOperation<T> & {
       operation: "update";
-      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
+      relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>;
    } {
       const { normalAttributes, nestedRelations: initialNestedRelations } = this.extractNestedRelations(attributes);
       const nestedRelations = relations
@@ -98,7 +98,7 @@ export class RelationBuilder implements IRelationBuilder {
          attributes: normalAttributes as T,
          ...(Object.keys(nestedRelations).length > 0 ? { relations: nestedRelations } : {})
       } as T & UpdateRelationOperation<T> & {
-         relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>;
+         relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>;
       };
 
       this.defineRelationDefinition(relationDefinition);

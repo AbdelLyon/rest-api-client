@@ -1,6 +1,6 @@
 import type { SearchRequest, SearchResponse } from "@/query/types/search";
 import type { DetailsResponse } from "@/query/types/details";
-import { RequestConfig } from "@/http/types/http";
+import type { RequestConfig } from "@/http/types/http";
 
 export interface IQuery<T> {
   search: (

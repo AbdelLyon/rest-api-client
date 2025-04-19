@@ -56,10 +56,10 @@ export interface ApiErrorSource {
 
 export interface HttpConfig extends HttpConfigOptions {
    interceptors?: {
-      request?: RequestInterceptor[];
+      request?: Array<RequestInterceptor>;
       response?: {
-         success?: ResponseSuccessInterceptor[];
-         error?: ResponseErrorInterceptor[];
+         success?: Array<ResponseSuccessInterceptor>;
+         error?: Array<ResponseErrorInterceptor>;
       };
    };
 }

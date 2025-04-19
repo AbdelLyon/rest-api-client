@@ -6,9 +6,9 @@ export class HttpClient implements IHttpClient {
   private static instances: Map<string, HttpClient> = new Map();
   private static defaultInstanceName: string;
 
-  private static requestInterceptors: RequestInterceptor[] = [];
-  private static responseSuccessInterceptors: ResponseSuccessInterceptor[] = [];
-  private static responseErrorInterceptors: ResponseErrorInterceptor[] = [];
+  private static requestInterceptors: Array<RequestInterceptor> = [];
+  private static responseSuccessInterceptors: Array<ResponseSuccessInterceptor> = [];
+  private static responseErrorInterceptors: Array<ResponseErrorInterceptor> = [];
 
   private baseURL: string;
   private defaultTimeout: number;
@@ -81,7 +81,7 @@ export class HttpClient implements IHttpClient {
     this.defaultInstanceName = instanceName;
   }
 
-  static getAvailableInstances(): string[] {
+  static getAvailableInstances(): Array<string> {
     return Array.from(this.instances.keys());
   }
 
@@ -317,7 +317,7 @@ export class HttpClient implements IHttpClient {
       if (response.headers.get('content-type')?.includes('application/json')) {
         return await response.json() as TResponse;
       } else {
-        return await response.text() as unknown as TResponse;
+        return await response.text() as TResponse;
       }
 
     } catch (error) {

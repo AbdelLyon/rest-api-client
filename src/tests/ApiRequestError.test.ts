@@ -1,5 +1,5 @@
+import { describe, expect, it, test } from "vitest";
 import type { RequestConfig } from "@/http/types/http";
-import { describe, it, expect, test } from "vitest";
 import { ApiRequestError } from "@/error/ApiRequestError";
 
 describe("ApiRequestError", () => {
@@ -69,7 +69,7 @@ describe("ApiRequestError", () => {
       // Vérifier si la méthode existe et est une fonction
       if (typeof error[method] === 'function') {
         // Appeler la méthode avec un type casting sécurisé
-        const result = (error[method] as Function)();
+        const result = (error[method])();
         expect(result).toBe(true);
       } else {
         // Si la méthode n'existe pas, faire échouer le test
@@ -95,7 +95,7 @@ describe("ApiRequestError", () => {
       const error = new ApiRequestError(originalError, requestConfig);
 
       if (typeof error[method] === 'function') {
-        const result = (error[method] as Function)();
+        const result = (error[method])();
         expect(result).toBe(false);
       } else {
         expect(`La méthode ${method} n'existe pas`).toBe(false);

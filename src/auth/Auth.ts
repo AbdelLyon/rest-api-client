@@ -1,29 +1,29 @@
+import { HttpClient } from "../http/HttpClient";
+import type { z } from "zod";
 import type { IAuth } from "./interface/IAuth";
 import type { RequestConfig } from "@/http/types/http";
-import { z } from "zod";
-import { HttpClient } from "../http/HttpClient";
 
 
 export abstract class Auth<
-   UserType extends object = {},
-   CredentialsType extends object = {},
-   RegisterDataType extends object = {},
-   TokenType extends object = {}
-> implements IAuth<UserType, CredentialsType, RegisterDataType, TokenType> {
+   TUser extends object = {},
+   TCredentials extends object = {},
+   TRegisterData extends object = {},
+   TTokens extends object = {}
+> implements IAuth<TUser, TCredentials, TRegisterData, TTokens> {
    protected http: HttpClient;
    protected pathname: string;
-   protected userSchema: z.ZodType<UserType>;
-   protected credentialsSchema?: z.ZodType<CredentialsType>;
-   protected registerDataSchema?: z.ZodType<RegisterDataType>;
-   protected tokenSchema?: z.ZodType<TokenType>;
+   protected userSchema: z.ZodType<TUser>;
+   protected credentialsSchema?: z.ZodType<TCredentials>;
+   protected registerDataSchema?: z.ZodType<TRegisterData>;
+   protected tokenSchema?: z.ZodType<TTokens>;
 
    constructor (
       pathname: string,
       schemas: {
-         user: z.ZodType<UserType>;
-         credentials?: z.ZodType<CredentialsType>;
-         registerData?: z.ZodType<RegisterDataType>;
-         tokens?: z.ZodType<TokenType>;
+         user: z.ZodType<TUser>;
+         credentials?: z.ZodType<TCredentials>;
+         registerData?: z.ZodType<TRegisterData>;
+         tokens?: z.ZodType<TTokens>;
       }
    ) {
       this.http = HttpClient.getInstance();
@@ -35,17 +35,17 @@ export abstract class Auth<
    }
 
    public async register(
-      userData: RegisterDataType,
+      userData: TRegisterData,
       options: Partial<RequestConfig> = {}
-   ): Promise<UserType> {
+   ): Promise<TUser> {
       if (this.registerDataSchema) {
          this.registerDataSchema.parse(userData);
       }
 
       try {
          const response = await this.http.request<{
-            user: UserType;
-            tokens: TokenType;
+            user: TUser;
+            tokens: TTokens;
          }>({
             method: 'POST',
             url: `${this.pathname}/register`,
@@ -65,11 +65,11 @@ export abstract class Auth<
    }
 
    public async login(
-      credentials: CredentialsType,
+      credentials: TCredentials,
       options: Partial<RequestConfig> = {}
    ): Promise<{
-      user: UserType;
-      tokens: TokenType;
+      user: TUser;
+      tokens: TTokens;
    }> {
       if (this.credentialsSchema) {
          this.credentialsSchema.parse(credentials);
@@ -77,8 +77,8 @@ export abstract class Auth<
 
       try {
          const response = await this.http.request<{
-            user: UserType;
-            tokens: TokenType;
+            user: TUser;
+            tokens: TTokens;
          }>({
             method: 'POST',
             url: `${this.pathname}/login`,
@@ -112,9 +112,9 @@ export abstract class Auth<
    public async refreshToken(
       refreshToken: string,
       options: Partial<RequestConfig> = {}
-   ): Promise<TokenType> {
+   ): Promise<TTokens> {
       try {
-         const response = await this.http.request<TokenType>({
+         const response = await this.http.request<TTokens>({
             method: 'POST',
             url: `${this.pathname}/refresh-token`,
             data: { refreshToken }
@@ -130,9 +130,9 @@ export abstract class Auth<
 
    public async getCurrentUser(
       options: Partial<RequestConfig> = {}
-   ): Promise<UserType> {
+   ): Promise<TUser> {
       try {
-         const response = await this.http.request<UserType>({
+         const response = await this.http.request<TUser>({
             method: 'GET',
             url: `${this.pathname}/me`
          }, options);

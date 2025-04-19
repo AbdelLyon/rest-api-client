@@ -1,10 +1,9 @@
-import type { SearchRequest, SearchResponse } from "@/query/types/search";
+import { HttpClient } from "../http/HttpClient";
+import type { z } from "zod";
+import type { PaginatedSearchRequest, SearchRequest, SearchResponse  } from "@/query/types/search";
 import type { DetailsResponse } from "@/query/types/details";
 import type { IQuery } from "@/query/interface/IQuery";
-import type { PaginatedSearchRequest } from "@/query/types/search";
 import type { RequestConfig } from "@/http/types/http";
-import { z } from "zod";
-import { HttpClient } from "../http/HttpClient";
 
 export abstract class Query<T> implements IQuery<T> {
   protected http: HttpClient;
@@ -17,7 +16,7 @@ export abstract class Query<T> implements IQuery<T> {
     this.schema = schema;
   }
 
-  private validateData(data: unknown[]): T[] {
+  private validateData(data: Array<unknown>): Array<T> {
     return data.map((item) => {
       const result = this.schema.safeParse(item);
       if (!result.success) {

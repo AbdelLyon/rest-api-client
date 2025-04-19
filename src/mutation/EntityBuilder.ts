@@ -1,19 +1,19 @@
 
 import type {
    BuildOnly,
+   CreateEntityAttributes,
    ExtractModelAttributes,
    MutationFunction,
    MutationRequest,
+   MutationResponse,
    TypedMutationOperation,
    ValidCreateNestedRelation,
-   ValidUpdateNestedRelation,
-   CreateEntityAttributes,
-   MutationResponse
+   ValidUpdateNestedRelation
 } from "@/mutation/types/mutation";
 import type { IEntityBuilder } from "@/mutation/interface/IEntityBuilder";
 import type { IRelationBuilder } from "@/mutation/interface/IRelationBuilder";
+import type { RequestConfig } from "@/http/types/http";
 import { RelationBuilder } from "@/mutation/RelationBuilder";
-import { RequestConfig } from "@/http/types/http";
 
 export class EntityBuilder<TModel> extends RelationBuilder implements IEntityBuilder<TModel>, BuildOnly<TModel> {
    private operations: Array<TypedMutationOperation<TModel, any>> = [];
@@ -49,9 +49,9 @@ export class EntityBuilder<TModel> extends RelationBuilder implements IEntityBui
       this.mutationFn = fn;
    }
 
-   public createEntity<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
-      attributes: CreateEntityAttributes<T, RelationKeys>
-   ): BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>> {
+   public createEntity<T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
+      attributes: CreateEntityAttributes<T, TRelationKeys>
+   ): BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>> {
       const { normalAttributes, relations } = this.extractOperationData(attributes);
 
       const operation: TypedMutationOperation<TModel, typeof relations> = {
@@ -61,7 +61,7 @@ export class EntityBuilder<TModel> extends RelationBuilder implements IEntityBui
       };
 
       this.operations.push(operation);
-      return this as unknown as BuildOnly<TModel, Pick<T, Extract<RelationKeys, string>>>;
+      return this as unknown as BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
    }
 
    public updateEntity<T extends Record<string, unknown>>(
@@ -96,19 +96,19 @@ export class EntityBuilder<TModel> extends RelationBuilder implements IEntityBui
       return this.mutationFn(data, options);
    }
 
-   public override createRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   public override createRelation<T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       attributes: T,
-      relations?: Record<RelationKeys, ValidCreateNestedRelation<unknown>>
+      relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>
    ) {
-      return this.relationBuilder.createRelation<T, RelationKeys>(attributes, relations);
+      return this.relationBuilder.createRelation<T, TRelationKeys>(attributes, relations);
    }
 
-   public override updateRelation<T extends Record<string, unknown>, RelationKeys extends keyof T = never>(
+   public override updateRelation<T extends Record<string, unknown>, TRelationKeys extends keyof T = never>(
       key: string | number,
       attributes: T,
-      relations?: Record<RelationKeys, ValidUpdateNestedRelation<unknown>>
+      relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>
    ) {
-      return this.relationBuilder.updateRelation<T, RelationKeys>(key, attributes, relations);
+      return this.relationBuilder.updateRelation<T, TRelationKeys>(key, attributes, relations);
    }
 
    public override attach(key: string | number) {

@@ -1,32 +1,32 @@
-import { RequestConfig } from "@/http/types/http";
 import type { BuildOnly, MutationResponse } from '@/mutation/types/mutation';
 import type { ActionRequest, ActionResponse } from '@/mutation/types/action';
 import type { DeleteRequest, DeleteResponse } from '@/mutation/types/delete';
+import type { RequestConfig } from "@/http/types/http";
 
 export interface IMutation<T> {
 
-  mutate(
+  mutate: (
     mutateRequest: BuildOnly<T>,
     options?: Partial<RequestConfig>
-  ): Promise<MutationResponse>;
+  ) => Promise<MutationResponse>;
 
-  executeAction(
+  executeAction: (
     actionRequest: ActionRequest,
     options?: Partial<RequestConfig>,
-  ): Promise<ActionResponse>;
+  ) => Promise<ActionResponse>;
 
-  delete(
+  delete: (
     request: DeleteRequest,
     options?: Partial<RequestConfig>,
-  ): Promise<DeleteResponse<T>>;
+  ) => Promise<DeleteResponse<T>>;
 
-  forceDelete(
+  forceDelete: (
     request: DeleteRequest,
     options?: Partial<RequestConfig>,
-  ): Promise<DeleteResponse<T>>;
+  ) => Promise<DeleteResponse<T>>;
 
-  restore(
+  restore: (
     request: DeleteRequest,
     options?: Partial<RequestConfig>,
-  ): Promise<DeleteResponse<T>>;
+  ) => Promise<DeleteResponse<T>>;
 }
