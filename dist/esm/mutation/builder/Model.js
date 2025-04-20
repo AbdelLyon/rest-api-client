@@ -1,14 +1,14 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { RelationBuilder } from "./RelationBuilder.js";
-class EntityBuilder extends RelationBuilder {
-  constructor(relationBuilder) {
+import { Relation } from "./Relation.js";
+class Model extends Relation {
+  constructor(relation) {
     super();
     __publicField(this, "operations", []);
     __publicField(this, "mutationFn", null);
-    __publicField(this, "relationBuilder");
-    this.relationBuilder = relationBuilder;
+    __publicField(this, "relation");
+    this.relation = relation;
   }
   extractOperationData(attributes) {
     const normalAttributes = {};
@@ -25,7 +25,7 @@ class EntityBuilder extends RelationBuilder {
   setMutationFunction(fn) {
     this.mutationFn = fn;
   }
-  createEntity(attributes) {
+  createModel(attributes) {
     const { normalAttributes, relations } = this.extractOperationData(attributes);
     const operation = {
       operation: "create",
@@ -35,7 +35,7 @@ class EntityBuilder extends RelationBuilder {
     this.operations.push(operation);
     return this;
   }
-  updateEntity(key, attributes) {
+  updateModel(key, attributes) {
     const { normalAttributes, relations } = this.extractOperationData(attributes);
     const operation = {
       operation: "update",
@@ -60,28 +60,28 @@ class EntityBuilder extends RelationBuilder {
   }
   createRelation(params) {
     const { attributes, relations } = params;
-    return this.relationBuilder.createRelation({
+    return this.relation.createRelation({
       attributes,
       relations
     });
   }
   updateRelation(params) {
     const { key, attributes, relations } = params;
-    return this.relationBuilder.updateRelation({
+    return this.relation.updateRelation({
       key,
       attributes,
       relations
     });
   }
   attach(key) {
-    return this.relationBuilder.attach(key);
+    return this.relation.attach(key);
   }
   detach(key) {
-    return this.relationBuilder.detach(key);
+    return this.relation.detach(key);
   }
   sync(params) {
     const { key, attributes, pivot, withoutDetaching } = params;
-    return this.relationBuilder.sync({
+    return this.relation.sync({
       key,
       attributes,
       pivot,
@@ -90,7 +90,7 @@ class EntityBuilder extends RelationBuilder {
   }
   toggle(params) {
     const { key, attributes, pivot } = params;
-    return this.relationBuilder.toggle({
+    return this.relation.toggle({
       key,
       attributes,
       pivot
@@ -98,6 +98,6 @@ class EntityBuilder extends RelationBuilder {
   }
 }
 export {
-  EntityBuilder
+  Model
 };
-//# sourceMappingURL=EntityBuilder.js.map
+//# sourceMappingURL=Model.js.map

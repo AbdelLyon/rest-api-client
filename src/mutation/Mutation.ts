@@ -4,23 +4,23 @@ import type {
   BuildOnly,
   DeleteRequest,
   DeleteResponse,
-  IEntityBuilder,
+  IModel,
   IMutation,
-  IRelationBuilder,
+  IRelation,
   MutationResponse,
 } from "./types";
 import type { z } from "zod";
 import type { RequestConfig } from "@/http/types";
-import type { HttpRequest } from "@/http/common/HttpRequest";
-import { Builder } from "@/mutation/common/Builder";
+import type { Request } from "@/http/Request/Request";
+import { Builder } from "@/mutation/builder/Builder";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Mutation<T> implements IMutation<T> {
-  protected http: HttpRequest;
+  protected http: Request;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
-  private readonly relation: IRelationBuilder;
+  private readonly relation: IRelation;
 
   constructor(
     pathname: string,
@@ -31,16 +31,16 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.pathname = pathname;
     this.schema = schema;
 
-    this.relation = Builder.getRelationBuilder();
+    this.relation = Builder.getRelation();
   }
 
-  public entityBuilder(): IEntityBuilder<T> {
-    const builder = Builder.createEntityBuilder<T>(this.relation);
+  public builderModel(): IModel<T> {
+    const builder = Builder.create<T>(this.relation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
 
-  public relationBuilder(): IRelationBuilder {
+  public builderRelation(): IRelation {
     return this.relation;
   }
 
@@ -76,7 +76,7 @@ export abstract class Mutation<T> implements IMutation<T> {
     return response;
   }
 
-  public executeAction(
+  public action(
     actionRequest: ActionRequest,
     options: Partial<RequestConfig> = {},
   ): Promise<ActionResponse> {

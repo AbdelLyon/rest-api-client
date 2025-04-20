@@ -6,8 +6,8 @@ import {
   CreateRelationParams,
   CreateRelationResult,
   DetachRelationDefinition,
-  IEntityBuilder,
-  IRelationBuilder,
+  IModel,
+  IRelation,
   MutationFunction,
   MutationRequest,
   MutationResponse,
@@ -20,27 +20,27 @@ import {
   UpdateRelationResult,
 } from "../types.js";
 import { RequestConfig } from "../../http/types.js";
-import { RelationBuilder } from "./RelationBuilder.js";
-export declare class EntityBuilder<TModel>
-  extends RelationBuilder
-  implements IEntityBuilder<TModel>, BuildOnly<TModel>
+import { Relation } from "./Relation.js";
+export declare class Model<TModel>
+  extends Relation
+  implements IModel<TModel>, BuildOnly<TModel>
 {
   private operations;
   private mutationFn;
-  private relationBuilder;
-  constructor(relationBuilder: IRelationBuilder);
+  private relation;
+  constructor(relation: IRelation);
   private extractOperationData;
   setMutationFunction(fn: MutationFunction): void;
-  createEntity<
+  createModel<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     attributes: CreateEntityAttributes<T, TRelationKeys>,
   ): BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
-  updateEntity<T extends Record<string, unknown>>(
+  updateModel<T extends Record<string, unknown>>(
     key: string | number,
     attributes: T,
-  ): IEntityBuilder<TModel>;
+  ): IModel<TModel>;
   build(): MutationRequest<TModel, any>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
   createRelation<T extends Attributes, TRelationKeys extends keyof T = never>(

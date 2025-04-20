@@ -1,4 +1,4 @@
-class HttpConfig {
+class Config {
   static getFullBaseUrl(options) {
     if (!options.baseURL) {
       throw new Error("baseURL is required in HttpConfigOptions");
@@ -35,6 +35,6 @@ class HttpConfig {
   }
 }
 export {
-  HttpConfig
+  Config
 };
-//# sourceMappingURL=HttpConfig.js.map
+//# sourceMappingURL=Config.js.map

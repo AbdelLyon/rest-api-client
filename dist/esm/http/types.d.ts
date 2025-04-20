@@ -9,7 +9,7 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
 }
-export interface HttpConfigOptions {
+export interface ConfigOptions {
   baseURL: string;
   timeout?: number;
   headers?: Record<string, string>;
@@ -41,7 +41,7 @@ export interface ApiErrorSource {
   data?: unknown;
   response?: Response;
 }
-export interface HttpConfig extends HttpConfigOptions {
+export interface HttpConfig extends ConfigOptions {
   interceptors?: {
     request?: Array<RequestInterceptor>;
     response?: {
@@ -51,7 +51,7 @@ export interface HttpConfig extends HttpConfigOptions {
   };
 }
 export interface IHttpRequest {
-  configure: (options: HttpConfigOptions) => void;
+  configure: (options: ConfigOptions) => void;
   request: <TResponse = any>(
     config: Partial<RequestConfig> & {
       url: string;

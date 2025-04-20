@@ -4,7 +4,7 @@ import {
   CreateRelationParams,
   CreateRelationResult,
   DetachRelationDefinition,
-  IRelationBuilder,
+  IRelation,
   SimpleKey,
   SyncParams,
   SyncRelationDefinition,
@@ -13,7 +13,7 @@ import {
   UpdateRelationParams,
   UpdateRelationResult,
 } from "../types.js";
-export declare class RelationBuilder implements IRelationBuilder {
+export declare class Relation implements IRelation {
   createRelation<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
   ): CreateRelationResult<T, TRelationKeys>;

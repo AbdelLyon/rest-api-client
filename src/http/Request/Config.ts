@@ -1,7 +1,7 @@
-import type { HttpConfigOptions } from "@/http/types";
+import type { ConfigOptions } from "@/http/types";
 
-export class HttpConfig {
-  static getFullBaseUrl(options: HttpConfigOptions): string {
+export class Config {
+  static getFullBaseUrl(options: ConfigOptions): string {
     if (!options.baseURL) {
       throw new Error("baseURL is required in HttpConfigOptions");
     }

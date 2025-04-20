@@ -1,10 +1,10 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { HttpConfig } from "./HttpConfig.js";
+import { Config } from "./Config.js";
 import { Interceptor } from "./Interceptor.js";
-import { ApiRequestError } from "./ApiRequestError.js";
-class HttpRequest {
+import { RequestError } from "./RequestError.js";
+class Request {
   constructor() {
     __publicField(this, "baseURL", "");
     __publicField(this, "defaultTimeout", 1e4);
@@ -13,7 +13,7 @@ class HttpRequest {
     __publicField(this, "maxRetries", 3);
   }
   configure(options) {
-    this.baseURL = HttpConfig.getFullBaseUrl(options);
+    this.baseURL = Config.getFullBaseUrl(options);
     this.defaultTimeout = options.timeout ?? 1e4;
     this.maxRetries = options.maxRetries ?? 3;
     this.withCredentials = options.withCredentials ?? true;
@@ -22,7 +22,7 @@ class HttpRequest {
       Accept: "application/json",
       ...options.headers
     };
-    Interceptor.setupDefaultErrorInterceptor(HttpConfig.logError);
+    Interceptor.setupDefaultErrorInterceptor(Config.logError);
     Interceptor.addInterceptors(options);
   }
   async request(config, options = {}) {
@@ -83,7 +83,7 @@ class HttpRequest {
     return await response.text();
   }
   handleRequestError(error, config, options) {
-    const apiError = error instanceof ApiRequestError ? error : new ApiRequestError(error, {
+    const apiError = error instanceof RequestError ? error : new RequestError(error, {
       ...config,
       ...options,
       url: config.url
@@ -184,6 +184,6 @@ class HttpRequest {
   }
 }
 export {
-  HttpRequest
+  Request
 };
-//# sourceMappingURL=HttpRequest.js.map
+//# sourceMappingURL=Request.js.map

@@ -5,7 +5,7 @@ import type {
   CreateRelationResult,
   DetachRelationDefinition,
   ExtractedAttributes,
-  IRelationBuilder,
+  IRelation,
   RelationDefinition,
   SimpleKey,
   SyncParams,
@@ -16,7 +16,7 @@ import type {
   UpdateRelationResult,
 } from "../types";
 
-export class RelationBuilder implements IRelationBuilder {
+export class Relation implements IRelation {
   public createRelation<
     T extends Attributes,
     TRelationKeys extends keyof T = never,

@@ -1,4 +1,4 @@
-class RelationBuilder {
+class Relation {
   createRelation(params) {
     const { attributes, relations } = params;
     const { normalAttributes, nestedRelations: extractedRelations } = this.extractNestedRelations(attributes);
@@ -96,6 +96,6 @@ class RelationBuilder {
   }
 }
 export {
-  RelationBuilder
+  Relation
 };
-//# sourceMappingURL=RelationBuilder.js.map
+//# sourceMappingURL=Relation.js.map

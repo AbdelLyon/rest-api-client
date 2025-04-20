@@ -1,11 +1,11 @@
-import { HttpConfigOptions, IHttpRequest, RequestConfig } from "../types.js";
-export declare class HttpRequest implements IHttpRequest {
+import { ConfigOptions, IHttpRequest, RequestConfig } from "../types.js";
+export declare class Request implements IHttpRequest {
   private baseURL;
   private defaultTimeout;
   private defaultHeaders;
   private withCredentials;
   private maxRetries;
-  configure(options: HttpConfigOptions): void;
+  configure(options: ConfigOptions): void;
   request<TResponse = any>(
     config: Partial<RequestConfig> & {
       url: string;

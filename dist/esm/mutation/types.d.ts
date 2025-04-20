@@ -203,7 +203,7 @@ export interface DeleteResponse<T> {
     gates?: Partial<Permission>;
   };
 }
-export interface IRelationBuilder {
+export interface IRelation {
   createRelation: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,
   ) => CreateRelationResult<T, TRelationKey>;
@@ -215,8 +215,8 @@ export interface IRelationBuilder {
   sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
-export interface IEntityBuilder<TModel> {
-  createEntity: <
+export interface IModel<TModel> {
+  createModel: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(attributes: {
@@ -224,10 +224,10 @@ export interface IEntityBuilder<TModel> {
       ? ValidCreateRelationOnly<T[K]>
       : T[K];
   }) => BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
-  updateEntity: <T extends Record<string, unknown>>(
+  updateModel: <T extends Record<string, unknown>>(
     key: SimpleKey,
     attributes: T,
-  ) => IEntityBuilder<TModel>;
+  ) => IModel<TModel>;
   build: () => MutationRequest<TModel>;
   setMutationFunction: (cb: MutationFunction) => void;
 }
@@ -236,7 +236,7 @@ export interface IMutation<T> {
     mutateRequest: BuildOnly<T>,
     options?: Partial<RequestConfig>,
   ) => Promise<MutationResponse>;
-  executeAction: (
+  action: (
     actionRequest: ActionRequest,
     options?: Partial<RequestConfig>,
   ) => Promise<ActionResponse>;

@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-class ApiRequestError extends Error {
+class RequestError extends Error {
   constructor(error, requestConfig) {
     const message = error instanceof Error ? error.message : "API Service Request Failed";
     super(message);
@@ -49,6 +49,6 @@ class ApiRequestError extends Error {
   }
 }
 export {
-  ApiRequestError
+  RequestError
 };
-//# sourceMappingURL=ApiRequestError.js.map
+//# sourceMappingURL=RequestError.js.map

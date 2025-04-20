@@ -1,5 +1,5 @@
 import { RequestConfig } from "../types.js";
-export declare class ApiRequestError extends Error {
+export declare class RequestError extends Error {
   status?: number;
   statusText?: string;
   data?: unknown;

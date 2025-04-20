@@ -1,6 +1,6 @@
 import type { ApiErrorSource, RequestConfig } from "@/http/types";
 
-export class ApiRequestError extends Error {
+export class RequestError extends Error {
   status?: number;
   statusText?: string;
   data?: unknown;

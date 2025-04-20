@@ -1,21 +1,17 @@
-import type {
-  HttpConfigOptions,
-  IHttpRequest,
-  RequestConfig,
-} from "@/http/types";
-import { HttpConfig } from "@/http/common/HttpConfig";
-import { Interceptor } from "@/http/common/Interceptor";
-import { ApiRequestError } from "@/http/common/ApiRequestError";
+import type { ConfigOptions, IHttpRequest, RequestConfig } from "@/http/types";
+import { Config } from "@/http/Request/Config";
+import { Interceptor } from "@/http/Request/Interceptor";
+import { RequestError } from "@/http/Request/RequestError";
 
-export class HttpRequest implements IHttpRequest {
+export class Request implements IHttpRequest {
   private baseURL = "";
   private defaultTimeout = 10000;
   private defaultHeaders: Record<string, string> = {};
   private withCredentials = true;
   private maxRetries = 3;
 
-  configure(options: HttpConfigOptions): void {
-    this.baseURL = HttpConfig.getFullBaseUrl(options);
+  configure(options: ConfigOptions): void {
+    this.baseURL = Config.getFullBaseUrl(options);
     this.defaultTimeout = options.timeout ?? 10000;
     this.maxRetries = options.maxRetries ?? 3;
     this.withCredentials = options.withCredentials ?? true;
@@ -26,7 +22,7 @@ export class HttpRequest implements IHttpRequest {
       ...options.headers,
     };
 
-    Interceptor.setupDefaultErrorInterceptor(HttpConfig.logError);
+    Interceptor.setupDefaultErrorInterceptor(Config.logError);
     Interceptor.addInterceptors(options);
   }
 
@@ -113,9 +109,9 @@ export class HttpRequest implements IHttpRequest {
     options: Partial<RequestConfig>,
   ): Promise<any> {
     const apiError =
-      error instanceof ApiRequestError
+      error instanceof RequestError
         ? error
-        : new ApiRequestError(error, {
+        : new RequestError(error, {
             ...config,
             ...options,
             url: config.url,

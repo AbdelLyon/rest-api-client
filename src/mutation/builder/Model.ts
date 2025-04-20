@@ -7,8 +7,8 @@ import type {
   CreateRelationResult,
   DetachRelationDefinition,
   ExtractModelAttributes,
-  IEntityBuilder,
-  IRelationBuilder,
+  IModel,
+  IRelation,
   MutationFunction,
   MutationRequest,
   MutationResponse,
@@ -22,19 +22,19 @@ import type {
   UpdateRelationResult,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
-import { RelationBuilder } from "@/mutation/common/RelationBuilder";
+import { Relation } from "@/mutation/builder/Relation";
 
-export class EntityBuilder<TModel>
-  extends RelationBuilder
-  implements IEntityBuilder<TModel>, BuildOnly<TModel>
+export class Model<TModel>
+  extends Relation
+  implements IModel<TModel>, BuildOnly<TModel>
 {
   private operations: Array<TypedMutationOperation<TModel, any>> = [];
   private mutationFn: MutationFunction | null = null;
-  private relationBuilder: IRelationBuilder;
+  private relation: IRelation;
 
-  constructor(relationBuilder: IRelationBuilder) {
+  constructor(relation: IRelation) {
     super();
-    this.relationBuilder = relationBuilder;
+    this.relation = relation;
   }
 
   private extractOperationData<T extends Record<string, unknown>>(
@@ -61,7 +61,7 @@ export class EntityBuilder<TModel>
     this.mutationFn = fn;
   }
 
-  public createEntity<
+  public createModel<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
@@ -83,10 +83,10 @@ export class EntityBuilder<TModel>
     >;
   }
 
-  public updateEntity<T extends Record<string, unknown>>(
+  public updateModel<T extends Record<string, unknown>>(
     key: string | number,
     attributes: T,
-  ): IEntityBuilder<TModel> {
+  ): IModel<TModel> {
     const { normalAttributes, relations } =
       this.extractOperationData(attributes);
 
@@ -125,7 +125,7 @@ export class EntityBuilder<TModel>
     params: CreateRelationParams<T, TRelationKeys>,
   ): CreateRelationResult<T, TRelationKeys> {
     const { attributes, relations } = params;
-    return this.relationBuilder.createRelation<T, TRelationKeys>({
+    return this.relation.createRelation<T, TRelationKeys>({
       attributes,
       relations,
     });
@@ -138,7 +138,7 @@ export class EntityBuilder<TModel>
     params: UpdateRelationParams<T, TRelationKeys>,
   ): UpdateRelationResult<T, TRelationKeys> {
     const { key, attributes, relations } = params;
-    return this.relationBuilder.updateRelation<T, TRelationKeys>({
+    return this.relation.updateRelation<T, TRelationKeys>({
       key,
       attributes,
       relations,
@@ -146,16 +146,16 @@ export class EntityBuilder<TModel>
   }
 
   public override attach(key: SimpleKey): AttachRelationDefinition {
-    return this.relationBuilder.attach(key);
+    return this.relation.attach(key);
   }
 
   public override detach(key: SimpleKey): DetachRelationDefinition {
-    return this.relationBuilder.detach(key);
+    return this.relation.detach(key);
   }
 
   public override sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
     const { key, attributes, pivot, withoutDetaching } = params;
-    return this.relationBuilder.sync<T>({
+    return this.relation.sync<T>({
       key,
       attributes,
       pivot,
@@ -167,7 +167,7 @@ export class EntityBuilder<TModel>
     params: ToggleParams<T>,
   ): ToggleRelationDefinition<T> {
     const { key, attributes, pivot } = params;
-    return this.relationBuilder.toggle<T>({
+    return this.relation.toggle<T>({
       key,
       attributes,
       pivot,
