@@ -61,7 +61,7 @@ export class Model<TModel>
     this.mutationFn = fn;
   }
 
-  public createModel<
+  public create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
@@ -83,7 +83,7 @@ export class Model<TModel>
     >;
   }
 
-  public updateModel<T extends Record<string, unknown>>(
+  public update<T extends Record<string, unknown>>(
     key: string | number,
     attributes: T,
   ): IModel<TModel> {
@@ -118,10 +118,7 @@ export class Model<TModel>
     return this.mutationFn(data, options);
   }
 
-  public override createRelation<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
+  public add<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
   ): CreateRelationResult<T, TRelationKeys> {
     const { attributes, relations } = params;
@@ -131,10 +128,7 @@ export class Model<TModel>
     });
   }
 
-  public override updateRelation<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
+  public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
   ): UpdateRelationResult<T, TRelationKeys> {
     const { key, attributes, relations } = params;

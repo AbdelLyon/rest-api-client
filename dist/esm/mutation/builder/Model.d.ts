@@ -31,22 +31,22 @@ export declare class Model<TModel>
   constructor(relation: IRelation);
   private extractOperationData;
   setMutationFunction(fn: MutationFunction): void;
-  createModel<
+  create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     attributes: CreateEntityAttributes<T, TRelationKeys>,
   ): BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
-  updateModel<T extends Record<string, unknown>>(
+  update<T extends Record<string, unknown>>(
     key: string | number,
     attributes: T,
   ): IModel<TModel>;
   build(): MutationRequest<TModel, any>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
-  createRelation<T extends Attributes, TRelationKeys extends keyof T = never>(
+  add<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
   ): CreateRelationResult<T, TRelationKeys>;
-  updateRelation<T extends Attributes, TRelationKeys extends keyof T = never>(
+  edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
   ): UpdateRelationResult<T, TRelationKeys>;
   attach(key: SimpleKey): AttachRelationDefinition;

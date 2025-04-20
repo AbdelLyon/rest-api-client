@@ -216,7 +216,7 @@ export interface IRelation {
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 export interface IModel<TModel> {
-  createModel: <
+  create: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(attributes: {
@@ -224,7 +224,7 @@ export interface IModel<TModel> {
       ? ValidCreateRelationOnly<T[K]>
       : T[K];
   }) => BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
-  updateModel: <T extends Record<string, unknown>>(
+  update: <T extends Record<string, unknown>>(
     key: SimpleKey,
     attributes: T,
   ) => IModel<TModel>;

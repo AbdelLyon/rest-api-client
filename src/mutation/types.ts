@@ -270,7 +270,7 @@ export interface IRelation {
 }
 
 export interface IModel<TModel> {
-  createModel: <
+  create: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(attributes: {
@@ -279,7 +279,7 @@ export interface IModel<TModel> {
       : T[K];
   }) => BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
 
-  updateModel: <T extends Record<string, unknown>>(
+  update: <T extends Record<string, unknown>>(
     key: SimpleKey,
     attributes: T,
   ) => IModel<TModel>;

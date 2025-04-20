@@ -25,7 +25,7 @@ class Model extends Relation {
   setMutationFunction(fn) {
     this.mutationFn = fn;
   }
-  createModel(attributes) {
+  create(attributes) {
     const { normalAttributes, relations } = this.extractOperationData(attributes);
     const operation = {
       operation: "create",
@@ -35,7 +35,7 @@ class Model extends Relation {
     this.operations.push(operation);
     return this;
   }
-  updateModel(key, attributes) {
+  update(key, attributes) {
     const { normalAttributes, relations } = this.extractOperationData(attributes);
     const operation = {
       operation: "update",
@@ -58,14 +58,14 @@ class Model extends Relation {
     const data = this.build();
     return this.mutationFn(data, options);
   }
-  createRelation(params) {
+  add(params) {
     const { attributes, relations } = params;
     return this.relation.createRelation({
       attributes,
       relations
     });
   }
-  updateRelation(params) {
+  edit(params) {
     const { key, attributes, relations } = params;
     return this.relation.updateRelation({
       key,

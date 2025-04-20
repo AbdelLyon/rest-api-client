@@ -8,9 +8,7 @@ const _Builder = class _Builder {
     return _Builder.relationInstance;
   }
   static create(relation) {
-    return new Model(
-      relation || _Builder.getRelation()
-    );
+    return new Model(relation || _Builder.getRelation());
   }
 };
 __publicField(_Builder, "relationInstance", new Relation());
