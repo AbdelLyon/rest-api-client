@@ -1,5 +1,5 @@
-import { IAuth } from "./types/IAuth.js";
-import { RequestConfig } from "../http/types/http.js";
+import { IAuth } from "./types.js";
+import { RequestConfig } from "../http/types.js";
 import { z } from "zod";
 import { HttpRequest } from "../http/common/HttpRequest.js";
 export declare abstract class Auth<

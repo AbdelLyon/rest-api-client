@@ -1,7 +1,6 @@
-import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
-import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
-import { EntityBuilder } from "@/mutation/EntityBuilder";
-import { RelationBuilder } from "@/mutation/RelationBuilder";
+import type { IEntityBuilder, IRelationBuilder } from "../types";
+import { EntityBuilder } from "@/mutation/common/EntityBuilder";
+import { RelationBuilder } from "@/mutation/common/RelationBuilder";
 
 export class Builder {
   private static relationInstance: IRelationBuilder = new RelationBuilder();

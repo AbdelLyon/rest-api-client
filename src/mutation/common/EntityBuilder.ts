@@ -1,18 +1,28 @@
 import type {
+  AttachRelationDefinition,
+  Attributes,
   BuildOnly,
   CreateEntityAttributes,
+  CreateRelationParams,
+  CreateRelationResult,
+  DetachRelationDefinition,
   ExtractModelAttributes,
+  IEntityBuilder,
+  IRelationBuilder,
   MutationFunction,
   MutationRequest,
   MutationResponse,
+  SimpleKey,
+  SyncParams,
+  SyncRelationDefinition,
+  ToggleParams,
+  ToggleRelationDefinition,
   TypedMutationOperation,
-  ValidCreateNestedRelation,
-  ValidUpdateNestedRelation,
-} from "@/mutation/types/mutation";
-import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
-import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
-import type { RequestConfig } from "@/http/types/http";
-import { RelationBuilder } from "@/mutation/RelationBuilder";
+  UpdateRelationParams,
+  UpdateRelationResult,
+} from "@/mutation/types";
+import type { RequestConfig } from "@/http/types";
+import { RelationBuilder } from "@/mutation/common/RelationBuilder";
 
 export class EntityBuilder<TModel>
   extends RelationBuilder
@@ -109,60 +119,58 @@ export class EntityBuilder<TModel>
   }
 
   public override createRelation<
-    T extends Record<string, unknown>,
+    T extends Attributes,
     TRelationKeys extends keyof T = never,
   >(
-    attributes: T,
-    relations?: Record<TRelationKeys, ValidCreateNestedRelation<unknown>>,
-  ) {
-    return this.relationBuilder.createRelation<T, TRelationKeys>(
+    params: CreateRelationParams<T, TRelationKeys>,
+  ): CreateRelationResult<T, TRelationKeys> {
+    const { attributes, relations } = params;
+    return this.relationBuilder.createRelation<T, TRelationKeys>({
       attributes,
       relations,
-    );
+    });
   }
 
   public override updateRelation<
-    T extends Record<string, unknown>,
+    T extends Attributes,
     TRelationKeys extends keyof T = never,
   >(
-    key: string | number,
-    attributes: T,
-    relations?: Record<TRelationKeys, ValidUpdateNestedRelation<unknown>>,
-  ) {
-    return this.relationBuilder.updateRelation<T, TRelationKeys>(
+    params: UpdateRelationParams<T, TRelationKeys>,
+  ): UpdateRelationResult<T, TRelationKeys> {
+    const { key, attributes, relations } = params;
+    return this.relationBuilder.updateRelation<T, TRelationKeys>({
       key,
       attributes,
       relations,
-    );
+    });
   }
 
-  public override attach(key: string | number) {
+  public override attach(key: SimpleKey): AttachRelationDefinition {
     return this.relationBuilder.attach(key);
   }
 
-  public override detach(key: string | number) {
+  public override detach(key: SimpleKey): DetachRelationDefinition {
     return this.relationBuilder.detach(key);
   }
 
-  public override sync<T>(
-    key: string | number | Array<string | number>,
-    attributes?: T,
-    pivot?: Record<string, string | number>,
-    withoutDetaching?: boolean,
-  ) {
-    return this.relationBuilder.sync<T>(
+  public override sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
+    const { key, attributes, pivot, withoutDetaching } = params;
+    return this.relationBuilder.sync<T>({
       key,
       attributes,
       pivot,
       withoutDetaching,
-    );
+    });
   }
 
   public override toggle<T>(
-    key: string | number | Array<string | number>,
-    attributes?: T,
-    pivot?: Record<string, string | number>,
-  ) {
-    return this.relationBuilder.toggle<T>(key, attributes, pivot);
+    params: ToggleParams<T>,
+  ): ToggleRelationDefinition<T> {
+    const { key, attributes, pivot } = params;
+    return this.relationBuilder.toggle<T>({
+      key,
+      attributes,
+      pivot,
+    });
   }
 }

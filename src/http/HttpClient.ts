@@ -1,5 +1,5 @@
 import { HttpRequest } from "./common/HttpRequest";
-import type { HttpConfig } from "./types/http";
+import type { HttpConfig } from "./types";
 
 export class HttpClient {
   private static instances: Map<string, HttpRequest> = new Map();

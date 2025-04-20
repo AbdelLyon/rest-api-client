@@ -1,4 +1,4 @@
-import { RequestConfig } from "../types/http.js";
+import { RequestConfig } from "../types.js";
 export declare class ApiRequestError extends Error {
   status?: number;
   statusText?: string;

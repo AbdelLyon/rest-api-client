@@ -1,5 +1,5 @@
 import { HttpRequest } from "./common/HttpRequest.js";
-import { HttpConfig } from "./types/http.js";
+import { HttpConfig } from "./types.js";
 export declare class HttpClient {
   private static instances;
   private static defaultInstanceName;

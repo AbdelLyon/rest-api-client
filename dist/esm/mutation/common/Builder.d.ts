@@ -1,5 +1,4 @@
-import { IRelationBuilder } from "./types/IRelationBuilder.js";
-import { IEntityBuilder } from "./types/IEntityBuilder.js";
+import { IEntityBuilder, IRelationBuilder } from "../types.js";
 export declare class Builder {
   private static relationInstance;
   static getRelationBuilder(): IRelationBuilder;

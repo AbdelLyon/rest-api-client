@@ -1,11 +1,16 @@
+import {
+  ActionRequest,
+  ActionResponse,
+  BuildOnly,
+  DeleteRequest,
+  DeleteResponse,
+  IEntityBuilder,
+  IMutation,
+  IRelationBuilder,
+  MutationResponse,
+} from "./types.js";
 import { z } from "zod";
-import { DeleteRequest, DeleteResponse } from "./types/delete.js";
-import { ActionRequest, ActionResponse } from "./types/action.js";
-import { BuildOnly, MutationResponse } from "./types/mutation.js";
-import { RequestConfig } from "../http/types/http.js";
-import { IRelationBuilder } from "./types/IRelationBuilder.js";
-import { IMutation } from "./types/IMutation.js";
-import { IEntityBuilder } from "./types/IEntityBuilder.js";
+import { RequestConfig } from "../http/types.js";
 import { HttpRequest } from "../http/common/HttpRequest.js";
 export declare abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpRequest;

@@ -1,13 +1,18 @@
+import type {
+  ActionRequest,
+  ActionResponse,
+  BuildOnly,
+  DeleteRequest,
+  DeleteResponse,
+  IEntityBuilder,
+  IMutation,
+  IRelationBuilder,
+  MutationResponse,
+} from "./types";
 import type { z } from "zod";
-import type { DeleteRequest, DeleteResponse } from "@/mutation/types/delete";
-import type { ActionRequest, ActionResponse } from "@/mutation/types/action";
-import type { BuildOnly, MutationResponse } from "@/mutation/types/mutation";
-import type { RequestConfig } from "@/http/types/http";
-import type { IRelationBuilder } from "@/mutation/types/IRelationBuilder";
-import type { IMutation } from "@/mutation/types/IMutation";
-import type { IEntityBuilder } from "@/mutation/types/IEntityBuilder";
+import type { RequestConfig } from "@/http/types";
 import type { HttpRequest } from "@/http/common/HttpRequest";
-import { Builder } from "@/mutation/Builder";
+import { Builder } from "@/mutation/common/Builder";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Mutation<T> implements IMutation<T> {

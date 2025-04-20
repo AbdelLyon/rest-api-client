@@ -1,12 +1,12 @@
-import type { z } from "zod";
 import type {
+  DetailsResponse,
+  IQuery,
   PaginatedSearchRequest,
   SearchRequest,
   SearchResponse,
-} from "@/query/types/search";
-import type { DetailsResponse } from "@/query/types/details";
-import type { IQuery } from "@/query/types/IQuery";
-import type { RequestConfig } from "@/http/types/http";
+} from "./types";
+import type { z } from "zod";
+import type { RequestConfig } from "@/http/types";
 import type { HttpRequest } from "@/http/common/HttpRequest";
 import { HttpClient } from "@/http/HttpClient";
 

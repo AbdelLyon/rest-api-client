@@ -1,4 +1,4 @@
-import type { ApiErrorSource, RequestConfig } from "@/http/types/http";
+import type { ApiErrorSource, RequestConfig } from "@/http/types";
 
 export class ApiRequestError extends Error {
   status?: number;

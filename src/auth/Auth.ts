@@ -1,5 +1,5 @@
-import type { IAuth } from "./types/IAuth";
-import type { RequestConfig } from "@/http/types/http";
+import type { IAuth } from "./types";
+import type { RequestConfig } from "@/http/types";
 import type { z } from "zod";
 import type { HttpRequest } from "@/http/common/HttpRequest";
 import { HttpClient } from "@/http/HttpClient";

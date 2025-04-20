@@ -1,0 +1,317 @@
+import type { Permission, RequestConfig } from "@/http/types";
+
+// ==================== Types de base ====================
+
+export type SimpleKey = string | number;
+export type CompositeKey = SimpleKey | Array<SimpleKey>;
+export type Attributes = Record<string, unknown>;
+export type PivotData = Record<string, string | number>;
+export type RelationDefinitionType =
+  | "create"
+  | "update"
+  | "attach"
+  | "detach"
+  | "sync"
+  | "toggle";
+
+// ==================== Définitions de relations de base ====================
+
+export interface BaseRelationDefinition {
+  operation: RelationDefinitionType;
+  __relationDefinition?: true;
+}
+
+export interface AttachRelationDefinition extends BaseRelationDefinition {
+  operation: "attach";
+  key: SimpleKey;
+}
+
+export interface DetachRelationDefinition extends BaseRelationDefinition {
+  operation: "detach";
+  key: SimpleKey;
+}
+
+export interface CreateRelationOperation<T> extends BaseRelationDefinition {
+  operation: "create";
+  attributes: T;
+}
+
+export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
+  operation: "update";
+  key: SimpleKey;
+  attributes: T;
+}
+
+export interface SyncRelationDefinition<T> extends BaseRelationDefinition {
+  operation: "sync";
+  without_detaching?: boolean;
+  key: CompositeKey;
+  attributes?: T;
+  pivot?: PivotData;
+}
+
+export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
+  operation: "toggle";
+  key: CompositeKey;
+  attributes?: T;
+  pivot?: PivotData;
+}
+
+// ==================== Types de relations valides ====================
+
+export type ValidCreateNestedRelation<T> =
+  | (CreateRelationOperation<T> & {
+      relations?: Record<string, ValidCreateNestedRelation<any>>;
+    })
+  | AttachRelationDefinition;
+
+export type ValidUpdateNestedRelation<T> =
+  | (CreateRelationOperation<T> & {
+      relations?: Record<string, ValidCreateNestedRelation<any>>;
+    })
+  | (UpdateRelationOperation<T> & {
+      relations?: Record<string, ValidUpdateNestedRelation<any>>;
+    })
+  | AttachRelationDefinition
+  | DetachRelationDefinition
+  | SyncRelationDefinition<T>
+  | ToggleRelationDefinition<T>;
+
+export type RelationDefinition<
+  T = unknown,
+  TInCreateContext extends boolean = false,
+> = TInCreateContext extends true
+  ? ValidCreateNestedRelation<T>
+  : ValidUpdateNestedRelation<T>;
+
+// ==================== Types pour les paramètres des méthodes ====================
+
+export type CreateRelationParams<
+  T extends Attributes,
+  TRelationKey extends keyof T = never,
+> = {
+  attributes: T;
+  relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
+};
+
+export type UpdateRelationParams<
+  T extends Attributes,
+  TRelationKey extends keyof T = never,
+> = {
+  key: SimpleKey;
+  attributes: T;
+  relations?: Record<TRelationKey, ValidUpdateNestedRelation<unknown>>;
+};
+
+export type SyncParams<T> = {
+  key: CompositeKey;
+  attributes?: T;
+  pivot?: PivotData;
+  withoutDetaching?: boolean;
+};
+
+export type ToggleParams<T> = {
+  key: CompositeKey;
+  attributes?: T;
+  pivot?: PivotData;
+};
+
+// ==================== Types pour les résultats des méthodes ====================
+
+export type CreateRelationResult<
+  T extends Attributes,
+  TRelationKey extends keyof T = never,
+> = T &
+  CreateRelationOperation<T> & {
+    relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
+  };
+
+export type UpdateRelationResult<
+  T extends Attributes,
+  TRelationKey extends keyof T = never,
+> = T &
+  UpdateRelationOperation<T> & {
+    operation: "update";
+    relations?: Record<TRelationKey, ValidUpdateNestedRelation<unknown>>;
+  };
+
+export type ExtractedAttributes = {
+  normalAttributes: Attributes;
+  nestedRelations: Attributes;
+};
+
+// ==================== Types pour les opérations de mutation ====================
+
+export type ExtractModelAttributes<T> = Omit<T, "relations">;
+
+export type TypedMutationOperation<TModel, TRelations = {}> = {
+  operation: "create" | "update";
+  key?: SimpleKey;
+  attributes: ExtractModelAttributes<TModel>;
+  relations: TRelations;
+};
+
+export type MutationRequest<TModel, TRelations = {}> = {
+  mutate: Array<TypedMutationOperation<TModel, TRelations>>;
+};
+
+export interface MutationFunction {
+  (data: any, options?: Partial<RequestConfig>): Promise<MutationResponse>;
+}
+
+export interface MutationResponse {
+  created: Array<SimpleKey>;
+  updated: Array<SimpleKey>;
+}
+
+// ==================== Types pour les vérifications d'opérations ====================
+
+export type IsRelationOperation<T> = T extends { operation: string }
+  ? true
+  : false;
+
+export type IsValidCreateOperation<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? false
+  : true;
+
+export type ValidCreateRelationOnly<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? never
+  : T;
+
+export type CreateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
+  [K in keyof T]: K extends TRelationKeys
+    ? IsRelationOperation<T[K]> extends true
+      ? ValidCreateRelationOnly<T[K]>
+      : T[K]
+    : T[K];
+};
+
+// ==================== Types pour le build et les opérations simples ====================
+
+export interface BuildOnly<TModel, TRelations = {}> {
+  build: () => MutationRequest<TModel, TRelations>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
+}
+
+export type CreateOperationOnly = { operation: "create" };
+export type UpdateOperationOnly = { operation: "update" };
+export type AttachOperationOnly = { operation: "attach" };
+export type DetachOperationOnly = { operation: "detach" };
+
+export type ExcludeUpdateOperations<T> = T extends
+  | UpdateOperationOnly
+  | DetachOperationOnly
+  ? never
+  : T;
+
+// ==================== Types pour les actions et suppressions ====================
+
+export interface ActionFieldDefinition {
+  name: string;
+  value: string | number | boolean;
+}
+
+export interface ActionFilterCriteria {
+  field: string;
+  value: boolean | string | number;
+}
+
+export interface ActionPayload {
+  fields: Array<ActionFieldDefinition>;
+  search?: {
+    filters?: Array<ActionFilterCriteria>;
+  };
+}
+
+export interface ActionRequest {
+  action: string;
+  payload: ActionPayload;
+}
+
+export interface ActionResponse {
+  data: {
+    impacted: number;
+  };
+}
+
+export interface DeleteRequest {
+  resources: Array<SimpleKey>;
+}
+
+export interface DeleteResponse<T> {
+  data: Array<T>;
+  meta?: {
+    gates?: Partial<Permission>;
+  };
+}
+
+// ==================== Interfaces ====================
+
+export interface IRelationBuilder {
+  createRelation: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ) => CreateRelationResult<T, TRelationKey>;
+
+  updateRelation: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: UpdateRelationParams<T, TRelationKey>,
+  ) => UpdateRelationResult<T, TRelationKey>;
+
+  attach: (key: SimpleKey) => AttachRelationDefinition;
+
+  detach: (key: SimpleKey) => DetachRelationDefinition;
+
+  sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
+
+  toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
+}
+
+export interface IEntityBuilder<TModel> {
+  createEntity: <
+    T extends Record<string, unknown>,
+    TRelationKeys extends keyof T = never,
+  >(attributes: {
+    [K in keyof T]: K extends TRelationKeys
+      ? ValidCreateRelationOnly<T[K]>
+      : T[K];
+  }) => BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
+
+  updateEntity: <T extends Record<string, unknown>>(
+    key: SimpleKey,
+    attributes: T,
+  ) => IEntityBuilder<TModel>;
+
+  build: () => MutationRequest<TModel>;
+
+  setMutationFunction: (cb: MutationFunction) => void;
+}
+
+export interface IMutation<T> {
+  mutate: (
+    mutateRequest: BuildOnly<T>,
+    options?: Partial<RequestConfig>,
+  ) => Promise<MutationResponse>;
+
+  executeAction: (
+    actionRequest: ActionRequest,
+    options?: Partial<RequestConfig>,
+  ) => Promise<ActionResponse>;
+
+  delete: (
+    request: DeleteRequest,
+    options?: Partial<RequestConfig>,
+  ) => Promise<DeleteResponse<T>>;
+
+  forceDelete: (
+    request: DeleteRequest,
+    options?: Partial<RequestConfig>,
+  ) => Promise<DeleteResponse<T>>;
+
+  restore: (
+    request: DeleteRequest,
+    options?: Partial<RequestConfig>,
+  ) => Promise<DeleteResponse<T>>;
+}

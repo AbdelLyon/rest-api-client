@@ -58,18 +58,20 @@ class EntityBuilder extends RelationBuilder {
     const data = this.build();
     return this.mutationFn(data, options);
   }
-  createRelation(attributes, relations) {
-    return this.relationBuilder.createRelation(
+  createRelation(params) {
+    const { attributes, relations } = params;
+    return this.relationBuilder.createRelation({
       attributes,
       relations
-    );
+    });
   }
-  updateRelation(key, attributes, relations) {
-    return this.relationBuilder.updateRelation(
+  updateRelation(params) {
+    const { key, attributes, relations } = params;
+    return this.relationBuilder.updateRelation({
       key,
       attributes,
       relations
-    );
+    });
   }
   attach(key) {
     return this.relationBuilder.attach(key);
@@ -77,16 +79,22 @@ class EntityBuilder extends RelationBuilder {
   detach(key) {
     return this.relationBuilder.detach(key);
   }
-  sync(key, attributes, pivot, withoutDetaching) {
-    return this.relationBuilder.sync(
+  sync(params) {
+    const { key, attributes, pivot, withoutDetaching } = params;
+    return this.relationBuilder.sync({
       key,
       attributes,
       pivot,
       withoutDetaching
-    );
+    });
   }
-  toggle(key, attributes, pivot) {
-    return this.relationBuilder.toggle(key, attributes, pivot);
+  toggle(params) {
+    const { key, attributes, pivot } = params;
+    return this.relationBuilder.toggle({
+      key,
+      attributes,
+      pivot
+    });
   }
 }
 export {

@@ -1,2 +1,2 @@
-export * from "./HttpClient";
-export type * from "./types/http";
+export { HttpClient } from "./HttpClient";
+export type * from "./types";

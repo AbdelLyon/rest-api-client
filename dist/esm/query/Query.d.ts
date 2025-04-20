@@ -1,8 +1,11 @@
+import {
+  DetailsResponse,
+  IQuery,
+  PaginatedSearchRequest,
+  SearchRequest,
+} from "./types.js";
 import { z } from "zod";
-import { PaginatedSearchRequest, SearchRequest } from "./types/search.js";
-import { DetailsResponse } from "./types/details.js";
-import { IQuery } from "./types/IQuery.js";
-import { RequestConfig } from "../http/types/http.js";
+import { RequestConfig } from "../http/types.js";
 import { HttpRequest } from "../http/common/HttpRequest.js";
 export declare abstract class Query<T> implements IQuery<T> {
   protected http: HttpRequest;

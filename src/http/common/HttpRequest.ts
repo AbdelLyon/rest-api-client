@@ -1,7 +1,10 @@
-import { HttpConfig } from "./HttpConfig";
-import { Interceptor } from "./Interceptor";
-import type { HttpConfigOptions, RequestConfig } from "@/http/types/http";
-import type { IHttpRequest } from "../types/IHttpRequest";
+import type {
+  HttpConfigOptions,
+  IHttpRequest,
+  RequestConfig,
+} from "@/http/types";
+import { HttpConfig } from "@/http/common/HttpConfig";
+import { Interceptor } from "@/http/common/Interceptor";
 import { ApiRequestError } from "@/http/common/ApiRequestError";
 
 export class HttpRequest implements IHttpRequest {

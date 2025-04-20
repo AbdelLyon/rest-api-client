@@ -1,5 +1,4 @@
-import { HttpConfigOptions, RequestConfig } from "../types/http.js";
-import { IHttpRequest } from "../types/IHttpRequest.js";
+import { HttpConfigOptions, IHttpRequest, RequestConfig } from "../types.js";
 export declare class HttpRequest implements IHttpRequest {
   private baseURL;
   private defaultTimeout;
