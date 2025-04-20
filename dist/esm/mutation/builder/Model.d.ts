@@ -3,8 +3,6 @@ import {
   Attributes,
   BuildOnly,
   CreateEntityAttributes,
-  CreateRelationParams,
-  CreateRelationResult,
   DetachRelationDefinition,
   IModel,
   IRelation,
@@ -16,8 +14,10 @@ import {
   SyncRelationDefinition,
   ToggleParams,
   ToggleRelationDefinition,
-  UpdateRelationParams,
-  UpdateRelationResult,
+  addRelationParams,
+  addRelationResult,
+  editRelationParams,
+  editRelationResult,
 } from "../types.js";
 import { RequestConfig } from "../../http/types.js";
 import { Relation } from "./Relation.js";
@@ -44,11 +44,11 @@ export declare class Model<TModel>
   build(): MutationRequest<TModel, any>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
   add<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys>;
+    params: addRelationParams<T, TRelationKeys>,
+  ): addRelationResult<T, TRelationKeys>;
   edit<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys>;
+    params: editRelationParams<T, TRelationKeys>,
+  ): editRelationResult<T, TRelationKeys>;
   attach(key: SimpleKey): AttachRelationDefinition;
   detach(key: SimpleKey): DetachRelationDefinition;
   sync<T>(params: SyncParams<T>): SyncRelationDefinition<T>;

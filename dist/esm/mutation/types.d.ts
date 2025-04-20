@@ -22,11 +22,11 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
   operation: "detach";
   key: SimpleKey;
 }
-export interface CreateRelationOperation<T> extends BaseRelationDefinition {
+export interface addRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
 }
-export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
+export interface editRelationOperation<T> extends BaseRelationDefinition {
   operation: "update";
   key: SimpleKey;
   attributes: T;
@@ -45,15 +45,15 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 export type ValidCreateNestedRelation<T> =
-  | (CreateRelationOperation<T> & {
+  | (addRelationOperation<T> & {
       relations?: Record<string, ValidCreateNestedRelation<any>>;
     })
   | AttachRelationDefinition;
 export type ValidUpdateNestedRelation<T> =
-  | (CreateRelationOperation<T> & {
+  | (addRelationOperation<T> & {
       relations?: Record<string, ValidCreateNestedRelation<any>>;
     })
-  | (UpdateRelationOperation<T> & {
+  | (editRelationOperation<T> & {
       relations?: Record<string, ValidUpdateNestedRelation<any>>;
     })
   | AttachRelationDefinition
@@ -66,14 +66,14 @@ export type RelationDefinition<
 > = TInCreateContext extends true
   ? ValidCreateNestedRelation<T>
   : ValidUpdateNestedRelation<T>;
-export type CreateRelationParams<
+export type addRelationParams<
   T extends Attributes,
   TRelationKey extends keyof T = never,
 > = {
   attributes: T;
   relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
 };
-export type UpdateRelationParams<
+export type editRelationParams<
   T extends Attributes,
   TRelationKey extends keyof T = never,
 > = {
@@ -92,18 +92,18 @@ export type ToggleParams<T> = {
   attributes?: T;
   pivot?: PivotData;
 };
-export type CreateRelationResult<
+export type addRelationResult<
   T extends Attributes,
   TRelationKey extends keyof T = never,
 > = T &
-  CreateRelationOperation<T> & {
+  addRelationOperation<T> & {
     relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
   };
-export type UpdateRelationResult<
+export type editRelationResult<
   T extends Attributes,
   TRelationKey extends keyof T = never,
 > = T &
-  UpdateRelationOperation<T> & {
+  editRelationOperation<T> & {
     operation: "update";
     relations?: Record<TRelationKey, ValidUpdateNestedRelation<unknown>>;
   };
@@ -138,7 +138,7 @@ export type IsValidCreateOperation<T> = T extends {
 }
   ? false
   : true;
-export type ValidCreateRelationOnly<T> = T extends {
+export type ValidaddRelationOnly<T> = T extends {
   operation: "update" | "detach";
 }
   ? never
@@ -146,7 +146,7 @@ export type ValidCreateRelationOnly<T> = T extends {
 export type CreateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
   [K in keyof T]: K extends TRelationKeys
     ? IsRelationOperation<T[K]> extends true
-      ? ValidCreateRelationOnly<T[K]>
+      ? ValidaddRelationOnly<T[K]>
       : T[K]
     : T[K];
 };
@@ -204,12 +204,12 @@ export interface DeleteResponse<T> {
   };
 }
 export interface IRelation {
-  createRelation: <T extends Attributes, TRelationKey extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKey>,
-  ) => CreateRelationResult<T, TRelationKey>;
-  updateRelation: <T extends Attributes, TRelationKey extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKey>,
-  ) => UpdateRelationResult<T, TRelationKey>;
+  add: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: addRelationParams<T, TRelationKey>,
+  ) => addRelationResult<T, TRelationKey>;
+  edit: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: editRelationParams<T, TRelationKey>,
+  ) => editRelationResult<T, TRelationKey>;
   attach: (key: SimpleKey) => AttachRelationDefinition;
   detach: (key: SimpleKey) => DetachRelationDefinition;
   sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
@@ -220,9 +220,7 @@ export interface IModel<TModel> {
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(attributes: {
-    [K in keyof T]: K extends TRelationKeys
-      ? ValidCreateRelationOnly<T[K]>
-      : T[K];
+    [K in keyof T]: K extends TRelationKeys ? ValidaddRelationOnly<T[K]> : T[K];
   }) => BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>>;
   update: <T extends Record<string, unknown>>(
     key: SimpleKey,

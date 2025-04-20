@@ -60,14 +60,14 @@ class Model extends Relation {
   }
   add(params) {
     const { attributes, relations } = params;
-    return this.relation.createRelation({
+    return this.relation.add({
       attributes,
       relations
     });
   }
   edit(params) {
     const { key, attributes, relations } = params;
-    return this.relation.updateRelation({
+    return this.relation.edit({
       key,
       attributes,
       relations

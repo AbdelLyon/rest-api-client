@@ -1,8 +1,6 @@
 import type {
   AttachRelationDefinition,
   Attributes,
-  CreateRelationParams,
-  CreateRelationResult,
   DetachRelationDefinition,
   ExtractedAttributes,
   IRelation,
@@ -12,17 +10,16 @@ import type {
   SyncRelationDefinition,
   ToggleParams,
   ToggleRelationDefinition,
-  UpdateRelationParams,
-  UpdateRelationResult,
+  addRelationParams,
+  addRelationResult,
+  editRelationParams,
+  editRelationResult,
 } from "../types";
 
 export class Relation implements IRelation {
-  public createRelation<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys> {
+  public add<T extends Attributes, TRelationKeys extends keyof T = never>(
+    params: addRelationParams<T, TRelationKeys>,
+  ): addRelationResult<T, TRelationKeys> {
     const { attributes, relations } = params;
 
     const { normalAttributes, nestedRelations: extractedRelations } =
@@ -38,7 +35,7 @@ export class Relation implements IRelation {
       ...(Object.keys(allRelations).length > 0
         ? { relations: allRelations }
         : {}),
-    } as CreateRelationResult<T, TRelationKeys>;
+    } as addRelationResult<T, TRelationKeys>;
 
     this.defineRelationDefinition(relationDefinition);
     this.addGetters(relationDefinition, normalAttributes);
@@ -46,12 +43,9 @@ export class Relation implements IRelation {
     return relationDefinition;
   }
 
-  public updateRelation<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys> {
+  public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
+    params: editRelationParams<T, TRelationKeys>,
+  ): editRelationResult<T, TRelationKeys> {
     const { key, attributes, relations } = params;
 
     const { normalAttributes, nestedRelations: extractedRelations } =
@@ -68,7 +62,7 @@ export class Relation implements IRelation {
       ...(Object.keys(allRelations).length > 0
         ? { relations: allRelations }
         : {}),
-    } as UpdateRelationResult<T, TRelationKeys>;
+    } as editRelationResult<T, TRelationKeys>;
 
     this.defineRelationDefinition(relationDefinition);
     this.addGetters(relationDefinition, normalAttributes);

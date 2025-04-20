@@ -1,5 +1,5 @@
 class Relation {
-  createRelation(params) {
+  add(params) {
     const { attributes, relations } = params;
     const { normalAttributes, nestedRelations: extractedRelations } = this.extractNestedRelations(attributes);
     const allRelations = relations ? { ...extractedRelations, ...relations } : extractedRelations;
@@ -12,7 +12,7 @@ class Relation {
     this.addGetters(relationDefinition, normalAttributes);
     return relationDefinition;
   }
-  updateRelation(params) {
+  edit(params) {
     const { key, attributes, relations } = params;
     const { normalAttributes, nestedRelations: extractedRelations } = this.extractNestedRelations(attributes);
     const allRelations = relations ? { ...extractedRelations, ...relations } : extractedRelations;

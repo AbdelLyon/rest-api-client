@@ -1,8 +1,6 @@
 import {
   AttachRelationDefinition,
   Attributes,
-  CreateRelationParams,
-  CreateRelationResult,
   DetachRelationDefinition,
   IRelation,
   SimpleKey,
@@ -10,16 +8,18 @@ import {
   SyncRelationDefinition,
   ToggleParams,
   ToggleRelationDefinition,
-  UpdateRelationParams,
-  UpdateRelationResult,
+  addRelationParams,
+  addRelationResult,
+  editRelationParams,
+  editRelationResult,
 } from "../types.js";
 export declare class Relation implements IRelation {
-  createRelation<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys>;
-  updateRelation<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys>;
+  add<T extends Attributes, TRelationKeys extends keyof T = never>(
+    params: addRelationParams<T, TRelationKeys>,
+  ): addRelationResult<T, TRelationKeys>;
+  edit<T extends Attributes, TRelationKeys extends keyof T = never>(
+    params: editRelationParams<T, TRelationKeys>,
+  ): editRelationResult<T, TRelationKeys>;
   attach(key: SimpleKey): AttachRelationDefinition;
   detach(key: SimpleKey): DetachRelationDefinition;
   sync<T>(params: SyncParams<T>): SyncRelationDefinition<T>;

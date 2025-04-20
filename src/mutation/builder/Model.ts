@@ -3,8 +3,6 @@ import type {
   Attributes,
   BuildOnly,
   CreateEntityAttributes,
-  CreateRelationParams,
-  CreateRelationResult,
   DetachRelationDefinition,
   ExtractModelAttributes,
   IModel,
@@ -18,8 +16,10 @@ import type {
   ToggleParams,
   ToggleRelationDefinition,
   TypedMutationOperation,
-  UpdateRelationParams,
-  UpdateRelationResult,
+  addRelationParams,
+  addRelationResult,
+  editRelationParams,
+  editRelationResult,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
 import { Relation } from "@/mutation/builder/Relation";
@@ -118,21 +118,27 @@ export class Model<TModel>
     return this.mutationFn(data, options);
   }
 
-  public add<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys> {
+  public override add<
+    T extends Attributes,
+    TRelationKeys extends keyof T = never,
+  >(
+    params: addRelationParams<T, TRelationKeys>,
+  ): addRelationResult<T, TRelationKeys> {
     const { attributes, relations } = params;
-    return this.relation.createRelation<T, TRelationKeys>({
+    return this.relation.add<T, TRelationKeys>({
       attributes,
       relations,
     });
   }
 
-  public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys> {
+  public override edit<
+    T extends Attributes,
+    TRelationKeys extends keyof T = never,
+  >(
+    params: editRelationParams<T, TRelationKeys>,
+  ): editRelationResult<T, TRelationKeys> {
     const { key, attributes, relations } = params;
-    return this.relation.updateRelation<T, TRelationKeys>({
+    return this.relation.edit<T, TRelationKeys>({
       key,
       attributes,
       relations,
