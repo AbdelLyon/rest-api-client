@@ -8,19 +8,19 @@ class Mutation {
     __publicField(this, "http");
     __publicField(this, "pathname");
     __publicField(this, "schema");
-    __publicField(this, "relation");
+    __publicField(this, "builderRelation");
     this.http = HttpClient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
-    this.relation = Builder.getRelation();
+    this.builderRelation = Builder.getRelation();
   }
-  builderModel() {
-    const builder = Builder.create(this.relation);
+  model() {
+    const builder = Builder.create(this.builderRelation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
-  builderRelation() {
-    return this.relation;
+  relation() {
+    return this.builderRelation;
   }
   validateData(data) {
     return data.map((item) => {

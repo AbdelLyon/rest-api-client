@@ -17,14 +17,14 @@ export declare abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
-  private readonly relation;
+  private readonly builderRelation;
   constructor(
     pathname: string,
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   );
-  builderModel(): IModel<T>;
-  builderRelation(): IRelation;
+  model(): IModel<T>;
+  relation(): IRelation;
   private validateData;
   mutate(
     mutateRequest: BuildOnly<T> | MutationRequest<T, Record<string, unknown>>,

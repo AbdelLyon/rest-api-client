@@ -21,7 +21,7 @@ export abstract class Mutation<T> implements IMutation<T> {
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
-  private readonly relation: IRelation;
+  private readonly builderRelation: IRelation;
 
   constructor(
     pathname: string,
@@ -32,17 +32,17 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.pathname = pathname;
     this.schema = schema;
 
-    this.relation = Builder.getRelation();
+    this.builderRelation = Builder.getRelation();
   }
 
-  public builderModel(): IModel<T> {
-    const builder = Builder.create<T>(this.relation);
+  public model(): IModel<T> {
+    const builder = Builder.create<T>(this.builderRelation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
 
-  public builderRelation(): IRelation {
-    return this.relation;
+  public relation(): IRelation {
+    return this.builderRelation;
   }
 
   private validateData(data: Array<unknown>): Array<T> {
