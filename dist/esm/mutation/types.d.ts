@@ -234,19 +234,6 @@ export interface IRelation {
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 export interface IModel<TModel> {
-  create: <
-    T extends Record<string, unknown>,
-    TRelationKeys extends keyof T = never,
-  >(
-    attributes: CreateEntityAttributes<T, TRelationKeys>,
-  ) => this;
-  update: <
-    T extends Record<string, unknown>,
-    TRelationKeys extends keyof T = never,
-  >(
-    key: SimpleKey,
-    attributes: UpdateEntityAttributes<T, TRelationKeys>,
-  ) => this;
   build: () => MutationRequest<TModel, Record<string, unknown>>;
   mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
