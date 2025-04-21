@@ -49,9 +49,11 @@ export class Model<TModel>
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: CreateRelationsMap<
-      Record<Extract<TRelationKeys, string>, unknown>
-    >;
+    relations?: {
+      [K in TRelationKeys]?: CreateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
+    };
   }): BuilderOnly<TModel> {
     const { attributes, relations = {} } = params;
 
@@ -76,9 +78,11 @@ export class Model<TModel>
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: UpdateRelationsMap<
-        Record<Extract<TRelationKeys, string>, unknown>
-      >;
+      relations?: {
+        [K in TRelationKeys]?: UpdateRelationsMap<
+          Record<Extract<TRelationKeys, string>, unknown>
+        >;
+      };
     },
   ): BuilderOnly<TModel> {
     const { attributes, relations = {} } = params;
