@@ -14,9 +14,6 @@ export interface BaseRelationDefinition {
   operation: RelationDefinitionType;
   __relationDefinition?: true;
 }
-export type blablabl = {
-  name: string;
-};
 export interface AttachRelationDefinition extends BaseRelationDefinition {
   operation: "attach";
   key: SimpleKey;
@@ -47,16 +44,6 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   attributes?: T;
   pivot?: PivotData;
 }
-export type CreateValidRelationOperation =
-  | ValidCreateNestedRelation<Attributes>
-  | AttachRelationDefinition;
-export type UpdateValidRelationOperation =
-  | ValidUpdateNestedRelation<Attributes>
-  | ValidUpdateNestedRelation<Attributes>
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<Attributes>
-  | ToggleRelationDefinition<Attributes>;
 export type ValidCreateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
       relations?: Record<string, ValidCreateNestedRelation<T>>;
@@ -64,7 +51,7 @@ export type ValidCreateNestedRelation<T> =
   | AttachRelationDefinition;
 export type ValidUpdateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
-      relations?: Record<string, ValidCreateNestedRelation<T>>;
+      relations?: Record<string, ValidUpdateNestedRelation<T>>;
     })
   | (UpdateRelationOperation<T> & {
       relations?: Record<string, ValidUpdateNestedRelation<T>>;
@@ -73,6 +60,15 @@ export type ValidUpdateNestedRelation<T> =
   | DetachRelationDefinition
   | SyncRelationDefinition<T>
   | ToggleRelationDefinition<T>;
+export type CreateValidRelationOperation =
+  | ValidCreateNestedRelation<Attributes>
+  | AttachRelationDefinition;
+export type UpdateValidRelationOperation =
+  | ValidUpdateNestedRelation<Attributes>
+  | AttachRelationDefinition
+  | DetachRelationDefinition
+  | SyncRelationDefinition<Attributes>
+  | ToggleRelationDefinition<Attributes>;
 export type RelationDefinition<
   T = unknown,
   TInCreateContext extends boolean = false,
@@ -110,6 +106,26 @@ export type ExtractedAttributes = {
   nestedRelations: Attributes;
 };
 export type ExtractModelAttributes<T> = Omit<T, "relations">;
+export type IsRelationOperation<T> = T extends {
+  operation: RelationDefinitionType;
+}
+  ? true
+  : false;
+export type IsCreateOperationValid<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? false
+  : true;
+export type FilterValidCreateOperation<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? never
+  : T;
+export type FilterValidUpdateOperation<T> = T extends {
+  operation: RelationDefinitionType;
+}
+  ? T
+  : never;
 export type TypedMutationOperation<
   TModel,
   TRelations = Record<string, unknown>,
@@ -132,31 +148,11 @@ export interface MutationResponse {
   created: Array<SimpleKey>;
   updated: Array<SimpleKey>;
 }
-export type IsRelationOperation<T> = T extends {
-  operation: string;
-}
-  ? true
-  : false;
-export type IsValidCreateOperation<T> = T extends {
-  operation: "update" | "detach";
-}
-  ? false
-  : true;
-export type ValidCreateRelationOnly<T> = T extends {
-  operation: "update" | "detach";
-}
-  ? never
-  : T;
-export type ValidUpdateRelationOnly<T> = T extends {
-  operation: string;
-}
-  ? T
-  : T;
 export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: ValidCreateRelationOnly<TRelations[K]>;
+  [K in keyof TRelations]: FilterValidCreateOperation<TRelations[K]>;
 };
 export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: ValidUpdateRelationOnly<TRelations[K]>;
+  [K in keyof TRelations]: FilterValidUpdateOperation<TRelations[K]>;
 };
 export type StrictCreateRelationsMap<
   TRelations extends Record<string, unknown>,
@@ -168,10 +164,6 @@ export type StrictUpdateRelationsMap<
 > = {
   [K in keyof TRelations]: UpdateValidRelationOperation;
 };
-export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
-  build: () => MutationRequest<TModel, TRelations>;
-  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
-}
 export type CreateOperationOnly = {
   operation: "create";
 };
@@ -183,6 +175,12 @@ export type AttachOperationOnly = {
 };
 export type DetachOperationOnly = {
   operation: "detach";
+};
+export type SyncOperationOnly = {
+  operation: "sync";
+};
+export type ToggleOperationOnly = {
+  operation: "toggle";
 };
 export type ExcludeUpdateOperations<T> = T extends
   | UpdateOperationOnly
@@ -234,7 +232,7 @@ export interface IRelation {
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 export interface IModel<TModel> {
-  create: <
+  create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(params: {
@@ -242,8 +240,8 @@ export interface IModel<TModel> {
     relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
-  }) => BuilderOnly<TModel>;
-  update: <
+  }): BuilderOnly<TModel>;
+  update<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
@@ -254,8 +252,12 @@ export interface IModel<TModel> {
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },
-  ) => BuilderOnly<TModel>;
+  ): BuilderOnly<TModel>;
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
+}
+export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
+  build: () => MutationRequest<TModel, TRelations>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 }
 export interface IMutation<T> {
   mutate: (

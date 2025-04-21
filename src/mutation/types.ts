@@ -1,6 +1,6 @@
 import type { Permission, RequestConfig } from "@/http/types";
 
-// ==================== Types de base ====================
+// ==================== 1. TYPES FONDAMENTAUX ====================
 
 export type SimpleKey = string | number;
 export type CompositeKey = SimpleKey | Array<SimpleKey>;
@@ -14,17 +14,14 @@ export type RelationDefinitionType =
   | "sync"
   | "toggle";
 
-// ==================== Définitions de relations de base ====================
+// ==================== 2. DÉFINITIONS DES OPÉRATIONS DE BASE ====================
 
 export interface BaseRelationDefinition {
   operation: RelationDefinitionType;
   __relationDefinition?: true;
 }
 
-export type blablabl = {
-  name: string;
-};
-
+// Opérations simples
 export interface AttachRelationDefinition extends BaseRelationDefinition {
   operation: "attach";
   key: SimpleKey;
@@ -35,6 +32,7 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
   key: SimpleKey;
 }
 
+// Opérations avec données
 export interface CreateRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
@@ -46,6 +44,7 @@ export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
   attributes: T;
 }
 
+// Opérations de gestion collective
 export interface SyncRelationDefinition<T> extends BaseRelationDefinition {
   operation: "sync";
   without_detaching?: boolean;
@@ -61,24 +60,9 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 
-// ==================== Types d'opérations valides par contexte ====================
+// ==================== 3. TYPES DE RELATIONS IMBRIQUÉES ====================
 
-// Opérations valides dans un contexte de création d'entité
-export type CreateValidRelationOperation =
-  | ValidCreateNestedRelation<Attributes>
-  | AttachRelationDefinition;
-
-// Opérations valides dans un contexte de mise à jour d'entité
-export type UpdateValidRelationOperation =
-  | ValidUpdateNestedRelation<Attributes>
-  | ValidUpdateNestedRelation<Attributes>
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<Attributes>
-  | ToggleRelationDefinition<Attributes>;
-
-// ==================== Types de relations imbriquées ====================
-
+// Définitions récursives pour les relations imbriquées
 export type ValidCreateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
       relations?: Record<string, ValidCreateNestedRelation<T>>;
@@ -87,7 +71,7 @@ export type ValidCreateNestedRelation<T> =
 
 export type ValidUpdateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
-      relations?: Record<string, ValidCreateNestedRelation<T>>;
+      relations?: Record<string, ValidUpdateNestedRelation<T>>;
     })
   | (UpdateRelationOperation<T> & {
       relations?: Record<string, ValidUpdateNestedRelation<T>>;
@@ -97,6 +81,22 @@ export type ValidUpdateNestedRelation<T> =
   | SyncRelationDefinition<T>
   | ToggleRelationDefinition<T>;
 
+// ==================== 4. OPÉRATIONS VALIDES PAR CONTEXTE ====================
+
+// Opérations valides dans un contexte de création d'entité
+export type CreateValidRelationOperation =
+  | ValidCreateNestedRelation<Attributes>
+  | AttachRelationDefinition;
+
+// Opérations valides dans un contexte de mise à jour d'entité
+export type UpdateValidRelationOperation =
+  | ValidUpdateNestedRelation<Attributes>
+  | AttachRelationDefinition
+  | DetachRelationDefinition
+  | SyncRelationDefinition<Attributes>
+  | ToggleRelationDefinition<Attributes>;
+
+// Type générique pour relation avec contexte
 export type RelationDefinition<
   T = unknown,
   TInCreateContext extends boolean = false,
@@ -104,7 +104,7 @@ export type RelationDefinition<
   ? ValidCreateNestedRelation<T>
   : ValidUpdateNestedRelation<T>;
 
-// ==================== Types pour les paramètres des méthodes de relation ====================
+// ==================== 5. PARAMÈTRES DES MÉTHODES DE RELATION ====================
 
 export type CreateRelationParams<
   T extends Attributes,
@@ -136,16 +136,46 @@ export type ToggleParams<T> = {
   pivot?: PivotData;
 };
 
-// ==================== Types pour les résultats des méthodes de relation ====================
+// ==================== 6. TYPES DE RÉSULTATS ET UTILITAIRES ====================
 
 export type ExtractedAttributes = {
   normalAttributes: Attributes;
   nestedRelations: Attributes;
 };
 
-// ==================== Types pour les opérations de mutation d'entité ====================
-
 export type ExtractModelAttributes<T> = Omit<T, "relations">;
+
+// ==================== 7. TYPES UTILITAIRES DE VÉRIFICATION (RÉVISÉS) ====================
+
+// Vérifie si un type est une opération de relation
+export type IsRelationOperation<T> = T extends {
+  operation: RelationDefinitionType;
+}
+  ? true
+  : false;
+
+// Vérifie si une opération est valide dans un contexte de création
+export type IsCreateOperationValid<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? false
+  : true;
+
+// Filtre pour ne garder que les opérations valides en création
+export type FilterValidCreateOperation<T> = T extends {
+  operation: "update" | "detach";
+}
+  ? never
+  : T;
+
+// Filtre pour ne garder que les opérations valides en mise à jour
+export type FilterValidUpdateOperation<T> = T extends {
+  operation: RelationDefinitionType;
+}
+  ? T
+  : never;
+
+// ==================== 8. MUTATIONS D'ENTITÉS ====================
 
 export type TypedMutationOperation<
   TModel,
@@ -173,42 +203,18 @@ export interface MutationResponse {
   updated: Array<SimpleKey>;
 }
 
-// ==================== Types pour les vérifications d'opérations ====================
+// ==================== 9. MAPS DE RELATIONS (CORRIGÉES) ====================
 
-export type IsRelationOperation<T> = T extends { operation: string }
-  ? true
-  : false;
-
-export type IsValidCreateOperation<T> = T extends {
-  operation: "update" | "detach";
-}
-  ? false
-  : true;
-
-export type ValidCreateRelationOnly<T> = T extends {
-  operation: "update" | "detach";
-}
-  ? never
-  : T;
-
-export type ValidUpdateRelationOnly<T> = T extends {
-  operation: string;
-}
-  ? T
-  : T;
-
-// ==================== Types pour les relations dans les entités ====================
-
-// Maps pour relations dans les entités avec validation
+// Maps pour filtrage plus précis des opérations
 export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: ValidCreateRelationOnly<TRelations[K]>;
+  [K in keyof TRelations]: FilterValidCreateOperation<TRelations[K]>;
 };
 
 export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: ValidUpdateRelationOnly<TRelations[K]>;
+  [K in keyof TRelations]: FilterValidUpdateOperation<TRelations[K]>;
 };
 
-// Maps plus strictes pour empêcher les opérations illogiques
+// Maps strictes pour les interfaces (inchangées car correctes)
 export type StrictCreateRelationsMap<
   TRelations extends Record<string, unknown>,
 > = {
@@ -221,25 +227,24 @@ export type StrictUpdateRelationsMap<
   [K in keyof TRelations]: UpdateValidRelationOperation;
 };
 
-// ==================== Types pour le build et les opérations simples ====================
+// ==================== 10. TYPES D'OPÉRATIONS SIMPLES ====================
 
-export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
-  build: () => MutationRequest<TModel, TRelations>;
-  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
-}
-
+// Types pour les opérations atomiques
 export type CreateOperationOnly = { operation: "create" };
 export type UpdateOperationOnly = { operation: "update" };
 export type AttachOperationOnly = { operation: "attach" };
 export type DetachOperationOnly = { operation: "detach" };
+export type SyncOperationOnly = { operation: "sync" };
+export type ToggleOperationOnly = { operation: "toggle" };
 
+// Filtre pour exclure certaines opérations
 export type ExcludeUpdateOperations<T> = T extends
   | UpdateOperationOnly
   | DetachOperationOnly
   ? never
   : T;
 
-// ==================== Types pour les actions et suppressions ====================
+// ==================== 11. ACTIONS ET SUPPRESSIONS ====================
 
 export interface ActionFieldDefinition {
   name: string;
@@ -280,7 +285,7 @@ export interface DeleteResponse<T> {
   };
 }
 
-// ==================== Interfaces principales ====================
+// ==================== 12. INTERFACES PRINCIPALES ====================
 
 export interface IRelation {
   add: <T extends Attributes, TRelationKey extends keyof T = never>(
@@ -301,7 +306,7 @@ export interface IRelation {
 }
 
 export interface IModel<TModel> {
-  create: <
+  create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(params: {
@@ -309,9 +314,9 @@ export interface IModel<TModel> {
     relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
-  }) => BuilderOnly<TModel>;
+  }): BuilderOnly<TModel>;
 
-  update: <
+  update<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
@@ -322,9 +327,14 @@ export interface IModel<TModel> {
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },
-  ) => BuilderOnly<TModel>;
+  ): BuilderOnly<TModel>;
 
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
+}
+
+export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
+  build: () => MutationRequest<TModel, TRelations>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 }
 
 export interface IMutation<T> {
