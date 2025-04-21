@@ -45,15 +45,15 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 export type CreateValidRelationOperation =
-  | CreateRelationResult<Record<string, unknown>, string>
+  | CreateRelationResult<Attributes, string>
   | AttachRelationDefinition;
 export type UpdateValidRelationOperation =
-  | CreateRelationResult<Record<string, unknown>, string>
-  | UpdateRelationResult<Record<string, unknown>, string>
+  | CreateRelationResult<Attributes, string>
+  | UpdateRelationResult<Attributes, string>
   | AttachRelationDefinition
   | DetachRelationDefinition
-  | SyncRelationDefinition<Record<string, unknown>>
-  | ToggleRelationDefinition<Record<string, unknown>>;
+  | SyncRelationDefinition<Attributes>
+  | ToggleRelationDefinition<Attributes>;
 export type ValidCreateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
       relations?: Record<string, ValidCreateNestedRelation<T>>;

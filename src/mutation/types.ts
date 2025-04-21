@@ -61,17 +61,17 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
 
 // Opérations valides dans un contexte de création d'entité
 export type CreateValidRelationOperation =
-  | CreateRelationResult<Record<string, unknown>, string>
+  | CreateRelationResult<Attributes, string>
   | AttachRelationDefinition;
 
 // Opérations valides dans un contexte de mise à jour d'entité
 export type UpdateValidRelationOperation =
-  | CreateRelationResult<Record<string, unknown>, string>
-  | UpdateRelationResult<Record<string, unknown>, string>
+  | CreateRelationResult<Attributes, string>
+  | UpdateRelationResult<Attributes, string>
   | AttachRelationDefinition
   | DetachRelationDefinition
-  | SyncRelationDefinition<Record<string, unknown>>
-  | ToggleRelationDefinition<Record<string, unknown>>;
+  | SyncRelationDefinition<Attributes>
+  | ToggleRelationDefinition<Attributes>;
 
 // ==================== Types de relations imbriquées ====================
 
