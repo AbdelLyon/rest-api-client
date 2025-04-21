@@ -2,7 +2,6 @@ import type {
   AttachRelationDefinition,
   Attributes,
   CreateRelationParams,
-  CreateRelationResult,
   CreateValidRelationOperation,
   DetachRelationDefinition,
   ExtractedAttributes,
@@ -14,7 +13,7 @@ import type {
   ToggleParams,
   ToggleRelationDefinition,
   UpdateRelationParams,
-  UpdateRelationResult,
+  UpdateValidRelationOperation,
 } from "../types";
 
 export class Relation implements IRelation {
@@ -36,7 +35,7 @@ export class Relation implements IRelation {
       ...(Object.keys(allRelations).length > 0
         ? { relations: allRelations }
         : {}),
-    } as CreateRelationResult<T, TRelationKeys>;
+    } as CreateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
     this.addGetters(relationDefinition, normalAttributes);
@@ -46,7 +45,7 @@ export class Relation implements IRelation {
 
   public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys> {
+  ): UpdateValidRelationOperation {
     const { key, attributes, relations } = params;
 
     const { normalAttributes, nestedRelations: extractedRelations } =
@@ -63,7 +62,7 @@ export class Relation implements IRelation {
       ...(Object.keys(allRelations).length > 0
         ? { relations: allRelations }
         : {}),
-    } as UpdateRelationResult<T, TRelationKeys>;
+    } as UpdateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
     this.addGetters(relationDefinition, normalAttributes);
@@ -151,7 +150,9 @@ export class Relation implements IRelation {
   }
 
   private addGetters(
-    relationDefinition: Record<string, unknown>,
+    relationDefinition:
+      | CreateValidRelationOperation
+      | UpdateValidRelationOperation,
     normalAttributes: Attributes,
   ): void {
     for (const key of Object.keys(normalAttributes)) {

@@ -302,7 +302,7 @@ export interface IRelation {
 
   edit: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKey>,
-  ) => UpdateRelationResult<T, TRelationKey>;
+  ) => UpdateValidRelationOperation;
 
   attach: (key: SimpleKey) => AttachRelationDefinition;
 

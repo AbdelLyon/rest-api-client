@@ -20,7 +20,7 @@ import type {
   ToggleRelationDefinition,
   TypedMutationOperation,
   UpdateRelationParams,
-  UpdateRelationResult,
+  UpdateValidRelationOperation,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
 import { Relation } from "@/mutation/builder/Relation";
@@ -132,7 +132,7 @@ export class Model<TModel>
     TRelationKeys extends keyof T = never,
   >(
     params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys> {
+  ): UpdateValidRelationOperation {
     const { key, attributes, relations } = params;
     return this.relation.edit<T, TRelationKeys>({
       key,

@@ -18,7 +18,7 @@ import {
   ToggleParams,
   ToggleRelationDefinition,
   UpdateRelationParams,
-  UpdateRelationResult,
+  UpdateValidRelationOperation,
 } from "../types.js";
 import { RequestConfig } from "../../http/types.js";
 import { Relation } from "./Relation.js";
@@ -59,7 +59,7 @@ export declare class Model<TModel>
   ): CreateValidRelationOperation;
   edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys>;
+  ): UpdateValidRelationOperation;
   attach(key: SimpleKey): AttachRelationDefinition;
   detach(key: SimpleKey): DetachRelationDefinition;
   sync<T>(params: SyncParams<T>): SyncRelationDefinition<T>;

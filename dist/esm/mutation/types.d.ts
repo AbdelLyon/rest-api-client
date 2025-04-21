@@ -239,7 +239,7 @@ export interface IRelation {
   ) => CreateValidRelationOperation;
   edit: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKey>,
-  ) => UpdateRelationResult<T, TRelationKey>;
+  ) => UpdateValidRelationOperation;
   attach: (key: SimpleKey) => AttachRelationDefinition;
   detach: (key: SimpleKey) => DetachRelationDefinition;
   sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;

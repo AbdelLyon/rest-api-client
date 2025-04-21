@@ -11,7 +11,7 @@ import {
   ToggleParams,
   ToggleRelationDefinition,
   UpdateRelationParams,
-  UpdateRelationResult,
+  UpdateValidRelationOperation,
 } from "../types.js";
 export declare class Relation implements IRelation {
   add<T extends Attributes, TRelationKeys extends keyof T = never>(
@@ -19,7 +19,7 @@ export declare class Relation implements IRelation {
   ): CreateValidRelationOperation;
   edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateRelationResult<T, TRelationKeys>;
+  ): UpdateValidRelationOperation;
   attach(key: SimpleKey): AttachRelationDefinition;
   detach(key: SimpleKey): DetachRelationDefinition;
   sync<T>(params: SyncParams<T>): SyncRelationDefinition<T>;
