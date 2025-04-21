@@ -58,7 +58,7 @@ export class Model<TModel>
     const operation: TypedMutationOperation<TModel, Record<string, unknown>> = {
       operation: "create",
       attributes: attributes as ExtractModelAttributes<TModel>,
-      relations,
+      relations: relations as Record<string, unknown>,
     };
 
     this.operations.push(operation);
@@ -87,7 +87,7 @@ export class Model<TModel>
       operation: "update",
       key,
       attributes: attributes as ExtractModelAttributes<TModel>,
-      relations,
+      relations: relations as Record<string, unknown>,
     };
 
     this.operations.push(operation);
@@ -114,7 +114,6 @@ export class Model<TModel>
     const data = this.build();
     return this.mutationFn(data, options);
   }
-
   public override add<
     T extends Attributes,
     TRelationKeys extends keyof T = never,
