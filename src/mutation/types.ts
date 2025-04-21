@@ -21,6 +21,10 @@ export interface BaseRelationDefinition {
   __relationDefinition?: true;
 }
 
+export type blablabl = {
+  name: string;
+};
+
 export interface AttachRelationDefinition extends BaseRelationDefinition {
   operation: "attach";
   key: SimpleKey;
@@ -66,7 +70,7 @@ export type CreateValidRelationOperation =
 
 // Opérations valides dans un contexte de mise à jour d'entité
 export type UpdateValidRelationOperation =
-  | ValidCreateNestedRelation<Attributes>
+  | ValidUpdateNestedRelation<Attributes>
   | ValidUpdateNestedRelation<Attributes>
   | AttachRelationDefinition
   | DetachRelationDefinition
@@ -133,23 +137,6 @@ export type ToggleParams<T> = {
 };
 
 // ==================== Types pour les résultats des méthodes de relation ====================
-
-// export type CreateRelationResult<
-//   T extends Attributes,
-//   TRelationKey extends keyof T = never,
-// > = T &
-//   CreateRelationOperation<T> & {
-//     relations?: Record<TRelationKey, ValidCreateNestedRelation<T>>;
-//   };
-
-// export type UpdateRelationResult<
-//   T extends Attributes,
-//   TRelationKey extends keyof T = never,
-// > = T &
-//   UpdateRelationOperation<T> & {
-//     operation: "update";
-//     relations?: Record<TRelationKey, ValidUpdateNestedRelation<T>>;
-//   };
 
 export type ExtractedAttributes = {
   normalAttributes: Attributes;

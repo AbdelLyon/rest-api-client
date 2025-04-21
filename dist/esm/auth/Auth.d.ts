@@ -2,12 +2,8 @@ import { HttpRequest } from "../http/Request/HttpRequest.js";
 import { IAuth } from "./types.js";
 import { RequestConfig } from "../http/types.js";
 import { z } from "zod";
-export declare abstract class Auth<
-  TUser extends object = {},
-  TCredentials extends object = {},
-  TRegisterData extends object = {},
-  TTokens extends object = {},
-> implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
+export declare abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
+  implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
 {
   protected http: HttpRequest;
   protected pathname: string;

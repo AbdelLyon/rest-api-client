@@ -2,12 +2,7 @@ import type { RequestConfig } from "@/http/types";
 
 // ==================== Interfaces ====================
 
-export interface IAuth<
-  TUser extends object = {},
-  TCredentials extends object = {},
-  TRegisterData extends object = {},
-  TToken extends object = {},
-> {
+export interface IAuth<TUser, TCredentials, TRegisterData, TToken> {
   register: (
     userData: TRegisterData,
     options?: Partial<RequestConfig>,

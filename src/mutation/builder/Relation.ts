@@ -4,7 +4,6 @@ import type {
   CreateRelationParams,
   CreateValidRelationOperation,
   DetachRelationDefinition,
-  ExtractedAttributes,
   IRelation,
   RelationDefinition,
   SimpleKey,
@@ -22,23 +21,14 @@ export class Relation implements IRelation {
   ): CreateValidRelationOperation {
     const { attributes, relations } = params;
 
-    const { normalAttributes, nestedRelations: extractedRelations } =
-      this.extractNestedRelations(attributes);
-
-    const allRelations = relations
-      ? { ...extractedRelations, ...relations }
-      : extractedRelations;
-
     const relationDefinition = {
       operation: "create" as const,
-      attributes: normalAttributes as T,
-      ...(Object.keys(allRelations).length > 0
-        ? { relations: allRelations }
-        : {}),
+      attributes,
+      relations,
     } as CreateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, normalAttributes);
+    this.addGetters(relationDefinition, attributes);
 
     return relationDefinition;
   }
@@ -48,24 +38,15 @@ export class Relation implements IRelation {
   ): UpdateValidRelationOperation {
     const { key, attributes, relations } = params;
 
-    const { normalAttributes, nestedRelations: extractedRelations } =
-      this.extractNestedRelations(attributes);
-
-    const allRelations = relations
-      ? { ...extractedRelations, ...relations }
-      : extractedRelations;
-
     const relationDefinition = {
       operation: "update" as const,
       key,
-      attributes: normalAttributes as T,
-      ...(Object.keys(allRelations).length > 0
-        ? { relations: allRelations }
-        : {}),
+      attributes,
+      relations,
     } as UpdateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, normalAttributes);
+    this.addGetters(relationDefinition, attributes);
 
     return relationDefinition;
   }
@@ -130,23 +111,6 @@ export class Relation implements IRelation {
       writable: false,
       configurable: true,
     });
-  }
-
-  private extractNestedRelations<T extends Attributes>(
-    attributes: T,
-  ): ExtractedAttributes {
-    const normalAttributes: Attributes = {};
-    const nestedRelations: Attributes = {};
-
-    for (const [key, value] of Object.entries(attributes)) {
-      if (value && typeof value === "object" && "operation" in value) {
-        nestedRelations[key] = value;
-      } else {
-        normalAttributes[key] = value;
-      }
-    }
-
-    return { normalAttributes, nestedRelations };
   }
 
   private addGetters(

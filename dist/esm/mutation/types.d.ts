@@ -14,6 +14,9 @@ export interface BaseRelationDefinition {
   operation: RelationDefinitionType;
   __relationDefinition?: true;
 }
+export type blablabl = {
+  name: string;
+};
 export interface AttachRelationDefinition extends BaseRelationDefinition {
   operation: "attach";
   key: SimpleKey;
@@ -45,10 +48,10 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 export type CreateValidRelationOperation =
-  | CreateRelationResult<Attributes, string>
+  | ValidCreateNestedRelation<Attributes>
   | AttachRelationDefinition;
 export type UpdateValidRelationOperation =
-  | ValidCreateNestedRelation<Attributes>
+  | ValidUpdateNestedRelation<Attributes>
   | ValidUpdateNestedRelation<Attributes>
   | AttachRelationDefinition
   | DetachRelationDefinition
@@ -102,21 +105,6 @@ export type ToggleParams<T> = {
   attributes?: T;
   pivot?: PivotData;
 };
-export type CreateRelationResult<
-  T extends Attributes,
-  TRelationKey extends keyof T = never,
-> = T &
-  CreateRelationOperation<T> & {
-    relations?: Record<TRelationKey, ValidCreateNestedRelation<T>>;
-  };
-export type UpdateRelationResult<
-  T extends Attributes,
-  TRelationKey extends keyof T = never,
-> = T &
-  UpdateRelationOperation<T> & {
-    operation: "update";
-    relations?: Record<TRelationKey, ValidUpdateNestedRelation<T>>;
-  };
 export type ExtractedAttributes = {
   normalAttributes: Attributes;
   nestedRelations: Attributes;

@@ -4,12 +4,8 @@ import type { RequestConfig } from "@/http/types";
 import type { z } from "zod";
 import { HttpClient } from "@/http/HttpClient";
 
-export abstract class Auth<
-  TUser extends object = {},
-  TCredentials extends object = {},
-  TRegisterData extends object = {},
-  TTokens extends object = {},
-> implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
+export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
+  implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
 {
   protected http: HttpRequest;
   protected pathname: string;

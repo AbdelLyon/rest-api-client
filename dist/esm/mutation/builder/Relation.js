@@ -1,29 +1,25 @@
 class Relation {
   add(params) {
     const { attributes, relations } = params;
-    const { normalAttributes, nestedRelations: extractedRelations } = this.extractNestedRelations(attributes);
-    const allRelations = relations ? { ...extractedRelations, ...relations } : extractedRelations;
     const relationDefinition = {
       operation: "create",
-      attributes: normalAttributes,
-      ...Object.keys(allRelations).length > 0 ? { relations: allRelations } : {}
+      attributes,
+      relations
     };
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, normalAttributes);
+    this.addGetters(relationDefinition, attributes);
     return relationDefinition;
   }
   edit(params) {
     const { key, attributes, relations } = params;
-    const { normalAttributes, nestedRelations: extractedRelations } = this.extractNestedRelations(attributes);
-    const allRelations = relations ? { ...extractedRelations, ...relations } : extractedRelations;
     const relationDefinition = {
       operation: "update",
       key,
-      attributes: normalAttributes,
-      ...Object.keys(allRelations).length > 0 ? { relations: allRelations } : {}
+      attributes,
+      relations
     };
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, normalAttributes);
+    this.addGetters(relationDefinition, attributes);
     return relationDefinition;
   }
   attach(key) {
@@ -71,18 +67,6 @@ class Relation {
       writable: false,
       configurable: true
     });
-  }
-  extractNestedRelations(attributes) {
-    const normalAttributes = {};
-    const nestedRelations = {};
-    for (const [key, value] of Object.entries(attributes)) {
-      if (value && typeof value === "object" && "operation" in value) {
-        nestedRelations[key] = value;
-      } else {
-        normalAttributes[key] = value;
-      }
-    }
-    return { normalAttributes, nestedRelations };
   }
   addGetters(relationDefinition, normalAttributes) {
     for (const key of Object.keys(normalAttributes)) {

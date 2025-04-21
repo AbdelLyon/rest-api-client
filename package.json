@@ -16,6 +16,14 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
+      "prettier --write",
+      "eslint --max-warnings 0"
+    ],
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
   },
@@ -37,7 +45,9 @@
     "prepare": "husky",
     "prerelease": "pnpm run prepublishOnly",
     "release": "changeset publish",
-    "reset": "rimraf node_modules dist *.log && pnpm install"
+    "reset": "rimraf node_modules dist *.log && pnpm install",
+    "knip": "knip",
+    "knip:prod": "knip --production"
   },
   "exports": {
     "./auth": {
@@ -67,10 +77,6 @@
   },
   "dependencies": {
     "@tanstack/vite-config": "^0.2.0",
-    "axios": "^1.8.4",
-    "axios-retry": "^4.5.0",
-    "cookies-next": "^5.1.0",
-    "eslint": "^9.25.0",
     "jiti": "^2.4.2",
     "publint": "^0.3.12",
     "zod": "^3.24.3"
@@ -80,7 +86,10 @@
     "@tanstack/eslint-config": "^0.1.0",
     "@types/node": "^22.14.1",
     "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^9.25.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
+    "knip": "^5.50.5",
     "lint-staged": "^15.5.1",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
