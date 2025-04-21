@@ -3,6 +3,8 @@ import type {
   Attributes,
   BuildOnly,
   CreateEntityAttributes,
+  CreateRelationParams,
+  CreateRelationResult,
   DetachRelationDefinition,
   ExtractModelAttributes,
   IModel,
@@ -16,10 +18,9 @@ import type {
   ToggleParams,
   ToggleRelationDefinition,
   TypedMutationOperation,
-  addRelationParams,
-  addRelationResult,
-  editRelationParams,
-  editRelationResult,
+  UpdateEntityAttributes,
+  UpdateRelationParams,
+  UpdateRelationResult,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
 import { Relation } from "@/mutation/builder/Relation";
@@ -28,8 +29,10 @@ export class Model<TModel>
   extends Relation
   implements IModel<TModel>, BuildOnly<TModel>
 {
-  private operations: Array<TypedMutationOperation<TModel, any>> = [];
-  private mutationFn: MutationFunction | null = null;
+  private operations: Array<
+    TypedMutationOperation<TModel, Record<string, unknown>>
+  > = [];
+  private mutationFn: MutationFunction<TModel> | null = null;
   private relation: IRelation;
 
   constructor(relation: IRelation) {
@@ -57,40 +60,38 @@ export class Model<TModel>
     return { normalAttributes, relations };
   }
 
-  public setMutationFunction(fn: MutationFunction): void {
+  public setMutationFunction(fn: MutationFunction<TModel>): void {
     this.mutationFn = fn;
   }
 
   public create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
-  >(
-    attributes: CreateEntityAttributes<T, TRelationKeys>,
-  ): BuildOnly<TModel, Pick<T, Extract<TRelationKeys, string>>> {
+  >(attributes: CreateEntityAttributes<T, TRelationKeys>): this {
     const { normalAttributes, relations } =
       this.extractOperationData(attributes);
 
-    const operation: TypedMutationOperation<TModel, typeof relations> = {
+    const operation: TypedMutationOperation<TModel, Record<string, unknown>> = {
       operation: "create",
       attributes: normalAttributes as ExtractModelAttributes<TModel>,
       relations,
     };
 
     this.operations.push(operation);
-    return this as unknown as BuildOnly<
-      TModel,
-      Pick<T, Extract<TRelationKeys, string>>
-    >;
+    return this;
   }
 
-  public update<T extends Record<string, unknown>>(
+  public update<
+    T extends Record<string, unknown>,
+    TRelationKeys extends keyof T = never,
+  >(
     key: string | number,
-    attributes: T,
-  ): IModel<TModel> {
+    attributes: UpdateEntityAttributes<T, TRelationKeys>,
+  ): this {
     const { normalAttributes, relations } =
       this.extractOperationData(attributes);
 
-    const operation: TypedMutationOperation<TModel, typeof relations> = {
+    const operation: TypedMutationOperation<TModel, Record<string, unknown>> = {
       operation: "update",
       key,
       attributes: normalAttributes as ExtractModelAttributes<TModel>,
@@ -101,7 +102,7 @@ export class Model<TModel>
     return this;
   }
 
-  public build(): MutationRequest<TModel, any> {
+  public build(): MutationRequest<TModel, Record<string, unknown>> {
     const result = [...this.operations];
     this.operations = [];
     return { mutate: result };
@@ -122,8 +123,8 @@ export class Model<TModel>
     T extends Attributes,
     TRelationKeys extends keyof T = never,
   >(
-    params: addRelationParams<T, TRelationKeys>,
-  ): addRelationResult<T, TRelationKeys> {
+    params: CreateRelationParams<T, TRelationKeys>,
+  ): CreateRelationResult<T, TRelationKeys> {
     const { attributes, relations } = params;
     return this.relation.add<T, TRelationKeys>({
       attributes,
@@ -135,8 +136,8 @@ export class Model<TModel>
     T extends Attributes,
     TRelationKeys extends keyof T = never,
   >(
-    params: editRelationParams<T, TRelationKeys>,
-  ): editRelationResult<T, TRelationKeys> {
+    params: UpdateRelationParams<T, TRelationKeys>,
+  ): UpdateRelationResult<T, TRelationKeys> {
     const { key, attributes, relations } = params;
     return this.relation.edit<T, TRelationKeys>({
       key,

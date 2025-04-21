@@ -1,12 +1,14 @@
 import { ConfigOptions, IHttpRequest, RequestConfig } from "../types.js";
-export declare class Request implements IHttpRequest {
+export declare class HttpRequest implements IHttpRequest {
   private baseURL;
   private defaultTimeout;
   private defaultHeaders;
   private withCredentials;
   private maxRetries;
+  private handler;
+  constructor();
   configure(options: ConfigOptions): void;
-  request<TResponse = any>(
+  request<TResponse>(
     config: Partial<RequestConfig> & {
       url: string;
     },
@@ -14,15 +16,5 @@ export declare class Request implements IHttpRequest {
   ): Promise<TResponse>;
   private createMergedConfig;
   private buildRequestUrl;
-  private applyRequestInterceptors;
-  private executeRequest;
-  private parseResponse;
-  private handleRequestError;
-  private isRetryableError;
-  private fetchWithRetry;
-  private performFetch;
-  private appendQueryParams;
-  private prepareRequestBody;
-  private shouldRetry;
-  private retryWithBackoff;
+  private handleReqError;
 }

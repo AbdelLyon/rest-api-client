@@ -7,16 +7,17 @@ import type {
   IModel,
   IMutation,
   IRelation,
+  MutationRequest,
   MutationResponse,
 } from "./types";
 import type { z } from "zod";
 import type { RequestConfig } from "@/http/types";
-import type { Request } from "@/http/Request/Request";
+import type { HttpRequest } from "@/http/Request/HttpRequest";
 import { Builder } from "@/mutation/builder/Builder";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Mutation<T> implements IMutation<T> {
-  protected http: Request;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 
@@ -58,7 +59,7 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate(
-    mutateRequest: BuildOnly<T> | { mutate: Array<any> },
+    mutateRequest: BuildOnly<T> | MutationRequest<T, Record<string, unknown>>,
     options?: Partial<RequestConfig>,
   ): Promise<MutationResponse> {
     const data =

@@ -1,5 +1,5 @@
 import { HttpConfig, RequestConfig } from "../types.js";
-export declare class Interceptor {
+export declare class HttpInterceptor {
   private static requestInterceptors;
   private static responseSuccessInterceptors;
   private static responseErrorInterceptors;
@@ -10,6 +10,8 @@ export declare class Interceptor {
   static applyResponseSuccessInterceptors(
     response: Response,
   ): Promise<Response>;
-  static applyResponseErrorInterceptors(error: any): Promise<any>;
-  static setupDefaultErrorInterceptor(logCallback: (error: any) => void): void;
+  static applyResponseErrorInterceptors(error: Error): Promise<Error>;
+  static setupDefaultErrorInterceptor(
+    logCallback: (error: Error) => void,
+  ): void;
 }

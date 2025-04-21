@@ -1,3 +1,4 @@
+import { HttpRequest } from "../http/Request/HttpRequest.js";
 import {
   DetailsResponse,
   IQuery,
@@ -6,9 +7,8 @@ import {
 } from "./types.js";
 import { z } from "zod";
 import { RequestConfig } from "../http/types.js";
-import { Request } from "../http/Request/Request.js";
 export declare abstract class Query<T> implements IQuery<T> {
-  protected http: Request;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
   constructor(

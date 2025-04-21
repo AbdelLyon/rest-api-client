@@ -1,7 +1,7 @@
+import type { HttpRequest } from "../http/Request/HttpRequest";
 import type { IAuth } from "./types";
 import type { RequestConfig } from "@/http/types";
 import type { z } from "zod";
-import type { Request } from "@/http/Request/Request";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Auth<
@@ -11,7 +11,7 @@ export abstract class Auth<
   TTokens extends object = {},
 > implements IAuth<TUser, TCredentials, TRegisterData, TTokens>
 {
-  protected http: Request;
+  protected http: HttpRequest;
   protected pathname: string;
   protected userSchema: z.ZodType<TUser>;
   protected credentialsSchema?: z.ZodType<TCredentials>;

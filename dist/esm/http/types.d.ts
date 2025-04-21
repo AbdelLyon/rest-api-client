@@ -4,7 +4,7 @@ export type RequestInterceptor = (
 export type ResponseSuccessInterceptor = (
   response: Response,
 ) => Promise<Response> | Response;
-export type ResponseErrorInterceptor = (error: any) => Promise<any>;
+export type ResponseErrorInterceptor = (error: Error) => Promise<Error>;
 export interface PaginationParams {
   page?: number;
   limit?: number;
@@ -26,10 +26,27 @@ export interface Permission {
   authorized_to_restore: boolean;
   authorized_to_force_delete: boolean;
 }
+export interface HandlerConfig {
+  baseURL: string;
+  defaultTimeout: number;
+  defaultHeaders: Record<string, string>;
+  maxRetries: number;
+  withCredentials: boolean;
+}
+export interface RetryOptions {
+  maxRetries: number;
+  attempt: number;
+  defaultTimeout: number;
+  withCredentials: boolean;
+}
+export interface FetchResult {
+  response: Response;
+  timeoutId: ReturnType<typeof setTimeout>;
+}
 export interface RequestConfig extends RequestInit {
   url: string;
   params?: Record<string, string>;
-  data?: any;
+  data?: unknown;
   timeout?: number;
   baseURL?: string;
   headers?: Record<string, string>;
@@ -52,7 +69,7 @@ export interface HttpConfig extends ConfigOptions {
 }
 export interface IHttpRequest {
   configure: (options: ConfigOptions) => void;
-  request: <TResponse = any>(
+  request: <TResponse>(
     config: Partial<RequestConfig> & {
       url: string;
     },

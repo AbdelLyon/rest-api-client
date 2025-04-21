@@ -6,7 +6,7 @@ import type {
   ResponseSuccessInterceptor,
 } from "@/http/types";
 
-export class Interceptor {
+export class HttpInterceptor {
   private static requestInterceptors: Array<RequestInterceptor> = [];
   private static responseSuccessInterceptors: Array<ResponseSuccessInterceptor> =
     [];
@@ -58,7 +58,7 @@ export class Interceptor {
     return interceptedResponse;
   }
 
-  static async applyResponseErrorInterceptors(error: any): Promise<any> {
+  static async applyResponseErrorInterceptors(error: Error): Promise<Error> {
     let interceptedError = error;
 
     for (const interceptor of this.responseErrorInterceptors) {
@@ -69,14 +69,17 @@ export class Interceptor {
           return interceptedError;
         }
       } catch (e) {
-        interceptedError = e;
+        interceptedError =
+          e instanceof Error ? e : new Error("Unknown error occurred");
       }
     }
 
     return Promise.reject(interceptedError);
   }
 
-  static setupDefaultErrorInterceptor(logCallback: (error: any) => void): void {
+  static setupDefaultErrorInterceptor(
+    logCallback: (error: Error) => void,
+  ): void {
     if (this.responseErrorInterceptors.length === 0) {
       this.responseErrorInterceptors.push((error) => {
         logCallback(error);

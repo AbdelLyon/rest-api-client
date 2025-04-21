@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-class Interceptor {
+class HttpInterceptor {
   static addInterceptors(httpConfig) {
     var _a, _b;
     this.requestInterceptors = [
@@ -44,7 +44,7 @@ class Interceptor {
           return interceptedError;
         }
       } catch (e) {
-        interceptedError = e;
+        interceptedError = e instanceof Error ? e : new Error("Unknown error occurred");
       }
     }
     return Promise.reject(interceptedError);
@@ -58,10 +58,10 @@ class Interceptor {
     }
   }
 }
-__publicField(Interceptor, "requestInterceptors", []);
-__publicField(Interceptor, "responseSuccessInterceptors", []);
-__publicField(Interceptor, "responseErrorInterceptors", []);
+__publicField(HttpInterceptor, "requestInterceptors", []);
+__publicField(HttpInterceptor, "responseSuccessInterceptors", []);
+__publicField(HttpInterceptor, "responseErrorInterceptors", []);
 export {
-  Interceptor
+  HttpInterceptor
 };
-//# sourceMappingURL=Interceptor.js.map
+//# sourceMappingURL=HttpInterceptor.js.map

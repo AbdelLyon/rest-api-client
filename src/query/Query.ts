@@ -1,3 +1,4 @@
+import type { HttpRequest } from "../http/Request/HttpRequest";
 import type {
   DetailsResponse,
   IQuery,
@@ -7,11 +8,10 @@ import type {
 } from "./types";
 import type { z } from "zod";
 import type { RequestConfig } from "@/http/types";
-import type { Request } from "@/http/Request/Request";
 import { HttpClient } from "@/http/HttpClient";
 
 export abstract class Query<T> implements IQuery<T> {
-  protected http: Request;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
 

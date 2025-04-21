@@ -1,18 +1,18 @@
-import { Request } from "./Request/Request";
+import { HttpRequest } from "./Request/HttpRequest";
 import type { HttpConfig } from "./types";
 
 export class HttpClient {
-  private static instances: Map<string, Request> = new Map();
+  private static instances: Map<string, HttpRequest> = new Map();
   private static defaultInstanceName: string;
 
   static init(config: {
     httpConfig: HttpConfig;
     instanceName: string;
-  }): Request {
+  }): HttpRequest {
     const { httpConfig, instanceName } = config;
 
     if (!this.instances.has(instanceName)) {
-      const instance = new Request();
+      const instance = new HttpRequest();
       instance.configure(httpConfig);
       this.instances.set(instanceName, instance);
 
@@ -22,7 +22,7 @@ export class HttpClient {
     return this.instances.get(instanceName)!;
   }
 
-  static getInstance(instanceName?: string): Request {
+  static getInstance(instanceName?: string): HttpRequest {
     const name = instanceName || this.defaultInstanceName;
 
     if (!this.instances.has(name)) {

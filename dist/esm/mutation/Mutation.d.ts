@@ -7,13 +7,14 @@ import {
   IModel,
   IMutation,
   IRelation,
+  MutationRequest,
   MutationResponse,
 } from "./types.js";
 import { z } from "zod";
 import { RequestConfig } from "../http/types.js";
-import { Request } from "../http/Request/Request.js";
+import { HttpRequest } from "../http/Request/HttpRequest.js";
 export declare abstract class Mutation<T> implements IMutation<T> {
-  protected http: Request;
+  protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
   private readonly relation;
@@ -26,11 +27,7 @@ export declare abstract class Mutation<T> implements IMutation<T> {
   builderRelation(): IRelation;
   private validateData;
   mutate(
-    mutateRequest:
-      | BuildOnly<T>
-      | {
-          mutate: Array<any>;
-        },
+    mutateRequest: BuildOnly<T> | MutationRequest<T, Record<string, unknown>>,
     options?: Partial<RequestConfig>,
   ): Promise<MutationResponse>;
   action(
