@@ -66,8 +66,8 @@ export type CreateValidRelationOperation =
 
 // Opérations valides dans un contexte de mise à jour d'entité
 export type UpdateValidRelationOperation =
-  | CreateRelationResult<Attributes, string>
-  | UpdateRelationResult<Attributes, string>
+  | ValidCreateNestedRelation<Attributes>
+  | ValidUpdateNestedRelation<Attributes>
   | AttachRelationDefinition
   | DetachRelationDefinition
   | SyncRelationDefinition<Attributes>

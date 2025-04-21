@@ -48,8 +48,8 @@ export type CreateValidRelationOperation =
   | CreateRelationResult<Attributes, string>
   | AttachRelationDefinition;
 export type UpdateValidRelationOperation =
-  | CreateRelationResult<Attributes, string>
-  | UpdateRelationResult<Attributes, string>
+  | ValidCreateNestedRelation<Attributes>
+  | ValidUpdateNestedRelation<Attributes>
   | AttachRelationDefinition
   | DetachRelationDefinition
   | SyncRelationDefinition<Attributes>
