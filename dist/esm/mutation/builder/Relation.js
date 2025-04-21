@@ -49,7 +49,6 @@ class Relation {
     this.defineRelationDefinition(result);
     return result;
   }
-  // Méthodes privées
   createSimpleOperation(operation, key) {
     const result = {
       operation,
@@ -66,21 +65,6 @@ class Relation {
       configurable: true
     });
   }
-  // private addGetters(
-  //   relationDefinition:
-  //     | CreateValidRelationOperation
-  //     | UpdateValidRelationOperation,
-  //   normalAttributes: Attributes,
-  // ): void {
-  //   for (const key of Object.keys(normalAttributes)) {
-  //     Object.defineProperty(relationDefinition, key, {
-  //       get() {
-  //         return normalAttributes[key];
-  //       },
-  //       enumerable: true,
-  //     });
-  //   }
-  // }
 }
 export {
   Relation
