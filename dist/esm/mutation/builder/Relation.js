@@ -7,7 +7,6 @@ class Relation {
       relations
     };
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, attributes);
     return relationDefinition;
   }
   edit(params) {
@@ -19,7 +18,6 @@ class Relation {
       relations
     };
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, attributes);
     return relationDefinition;
   }
   attach(key) {
@@ -68,16 +66,21 @@ class Relation {
       configurable: true
     });
   }
-  addGetters(relationDefinition, normalAttributes) {
-    for (const key of Object.keys(normalAttributes)) {
-      Object.defineProperty(relationDefinition, key, {
-        get() {
-          return normalAttributes[key];
-        },
-        enumerable: true
-      });
-    }
-  }
+  // private addGetters(
+  //   relationDefinition:
+  //     | CreateValidRelationOperation
+  //     | UpdateValidRelationOperation,
+  //   normalAttributes: Attributes,
+  // ): void {
+  //   for (const key of Object.keys(normalAttributes)) {
+  //     Object.defineProperty(relationDefinition, key, {
+  //       get() {
+  //         return normalAttributes[key];
+  //       },
+  //       enumerable: true,
+  //     });
+  //   }
+  // }
 }
 export {
   Relation

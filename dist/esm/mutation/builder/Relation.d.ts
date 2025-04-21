@@ -26,5 +26,4 @@ export declare class Relation implements IRelation {
   toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T>;
   private createSimpleOperation;
   private defineRelationDefinition;
-  private addGetters;
 }

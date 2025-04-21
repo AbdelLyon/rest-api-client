@@ -28,7 +28,7 @@ export class Relation implements IRelation {
     } as CreateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, attributes);
+    // this.addGetters(relationDefinition, attributes);
 
     return relationDefinition;
   }
@@ -46,7 +46,7 @@ export class Relation implements IRelation {
     } as UpdateValidRelationOperation;
 
     this.defineRelationDefinition(relationDefinition);
-    this.addGetters(relationDefinition, attributes);
+    // this.addGetters(relationDefinition, attributes);
 
     return relationDefinition;
   }
@@ -113,19 +113,19 @@ export class Relation implements IRelation {
     });
   }
 
-  private addGetters(
-    relationDefinition:
-      | CreateValidRelationOperation
-      | UpdateValidRelationOperation,
-    normalAttributes: Attributes,
-  ): void {
-    for (const key of Object.keys(normalAttributes)) {
-      Object.defineProperty(relationDefinition, key, {
-        get() {
-          return normalAttributes[key];
-        },
-        enumerable: true,
-      });
-    }
-  }
+  // private addGetters(
+  //   relationDefinition:
+  //     | CreateValidRelationOperation
+  //     | UpdateValidRelationOperation,
+  //   normalAttributes: Attributes,
+  // ): void {
+  //   for (const key of Object.keys(normalAttributes)) {
+  //     Object.defineProperty(relationDefinition, key, {
+  //       get() {
+  //         return normalAttributes[key];
+  //       },
+  //       enumerable: true,
+  //     });
+  //   }
+  // }
 }
