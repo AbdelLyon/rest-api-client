@@ -1,3 +1,4 @@
+// Fichier: Relation.ts
 import type {
   AttachRelationDefinition,
   Attributes,
@@ -5,6 +6,8 @@ import type {
   CreateValidRelationOperation,
   DetachRelationDefinition,
   IRelation,
+  ICreationRelation,
+  IUpdateRelation,
   RelationDefinition,
   SimpleKey,
   SyncParams,
@@ -89,6 +92,18 @@ export class Relation implements IRelation {
 
     this.defineRelationDefinition(result);
     return result;
+  }
+
+  // Méthodes pour obtenir les contextes spécifiques
+  public getCreationContext(): ICreationRelation {
+    return {
+      add: this.add.bind(this),
+      attach: this.attach.bind(this),
+    };
+  }
+
+  public getUpdateContext(): IUpdateRelation {
+    return this;
   }
 
   private createSimpleOperation<T extends "attach" | "detach">(

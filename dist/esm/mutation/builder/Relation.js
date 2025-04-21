@@ -49,6 +49,16 @@ class Relation {
     this.defineRelationDefinition(result);
     return result;
   }
+  // Méthodes pour obtenir les contextes spécifiques
+  getCreationContext() {
+    return {
+      add: this.add.bind(this),
+      attach: this.attach.bind(this)
+    };
+  }
+  getUpdateContext() {
+    return this;
+  }
   createSimpleOperation(operation, key) {
     const result = {
       operation,

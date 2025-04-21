@@ -1,10 +1,7 @@
+// Fichier: Model.ts
 import type {
-  AttachRelationDefinition,
-  Attributes,
-  BuilderOnly,
-  CreateRelationParams,
-  CreateValidRelationOperation,
-  DetachRelationDefinition,
+  BuilderWithCreationContext,
+  BuilderWithUpdateContext,
   ExtractModelAttributes,
   IModel,
   IRelation,
@@ -14,21 +11,11 @@ import type {
   SimpleKey,
   StrictCreateRelationsMap,
   StrictUpdateRelationsMap,
-  SyncParams,
-  SyncRelationDefinition,
-  ToggleParams,
-  ToggleRelationDefinition,
   TypedMutationOperation,
-  UpdateRelationParams,
-  UpdateValidRelationOperation,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
-import { Relation } from "@/mutation/builder/Relation";
 
-export class Model<TModel>
-  extends Relation
-  implements IModel<TModel>, BuilderOnly<TModel>
-{
+export class Model<TModel> implements IModel<TModel> {
   private operations: Array<
     TypedMutationOperation<TModel, Record<string, unknown>>
   > = [];
@@ -36,7 +23,6 @@ export class Model<TModel>
   private relation: IRelation;
 
   constructor(relation: IRelation) {
-    super();
     this.relation = relation;
   }
 
@@ -52,7 +38,7 @@ export class Model<TModel>
     relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
-  }): BuilderOnly<TModel> {
+  }): BuilderWithCreationContext<TModel> {
     const { attributes, relations = {} } = params;
 
     const operation: TypedMutationOperation<TModel, Record<string, unknown>> = {
@@ -66,6 +52,7 @@ export class Model<TModel>
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
+      relation: this.relation.getCreationContext(),
     };
   }
 
@@ -80,8 +67,8 @@ export class Model<TModel>
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },
-  ): BuilderOnly<TModel> {
-    const { attributes, relations = {} } = params;
+  ): BuilderWithUpdateContext<TModel> {
+    const { attributes = {} as T, relations = {} } = params;
 
     const operation: TypedMutationOperation<TModel, Record<string, unknown>> = {
       operation: "update",
@@ -95,16 +82,17 @@ export class Model<TModel>
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
+      relation: this.relation.getUpdateContext(),
     };
   }
 
-  public build(): MutationRequest<TModel, Record<string, unknown>> {
+  private build(): MutationRequest<TModel, Record<string, unknown>> {
     const result = [...this.operations];
     this.operations = [];
     return { mutate: result };
   }
 
-  public async mutate(
+  private async mutate(
     options?: Partial<RequestConfig>,
   ): Promise<MutationResponse> {
     if (!this.mutationFn) {
@@ -113,60 +101,5 @@ export class Model<TModel>
 
     const data = this.build();
     return this.mutationFn(data, options);
-  }
-  public override add<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateValidRelationOperation {
-    const { attributes, relations } = params;
-    return this.relation.add<T, TRelationKeys>({
-      attributes,
-      relations,
-    });
-  }
-
-  public override edit<
-    T extends Attributes,
-    TRelationKeys extends keyof T = never,
-  >(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateValidRelationOperation {
-    const { key, attributes, relations } = params;
-    return this.relation.edit<T, TRelationKeys>({
-      key,
-      attributes,
-      relations,
-    });
-  }
-
-  public override attach(key: SimpleKey): AttachRelationDefinition {
-    return this.relation.attach(key);
-  }
-
-  public override detach(key: SimpleKey): DetachRelationDefinition {
-    return this.relation.detach(key);
-  }
-
-  public override sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
-    const { key, attributes, pivot, withoutDetaching } = params;
-    return this.relation.sync<T>({
-      key,
-      attributes,
-      pivot,
-      withoutDetaching,
-    });
-  }
-
-  public override toggle<T>(
-    params: ToggleParams<T>,
-  ): ToggleRelationDefinition<T> {
-    const { key, attributes, pivot } = params;
-    return this.relation.toggle<T>({
-      key,
-      attributes,
-      pivot,
-    });
   }
 }

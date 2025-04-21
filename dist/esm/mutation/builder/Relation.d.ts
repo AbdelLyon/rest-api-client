@@ -5,6 +5,8 @@ import {
   CreateValidRelationOperation,
   DetachRelationDefinition,
   IRelation,
+  ICreationRelation,
+  IUpdateRelation,
   SimpleKey,
   SyncParams,
   SyncRelationDefinition,
@@ -24,6 +26,8 @@ export declare class Relation implements IRelation {
   detach(key: SimpleKey): DetachRelationDefinition;
   sync<T>(params: SyncParams<T>): SyncRelationDefinition<T>;
   toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T>;
+  getCreationContext(): ICreationRelation;
+  getUpdateContext(): IUpdateRelation;
   private createSimpleOperation;
   private defineRelationDefinition;
 }

@@ -1,7 +1,8 @@
 import type {
   ActionRequest,
   ActionResponse,
-  BuilderOnly,
+  BuilderWithCreationContext,
+  BuilderWithUpdateContext,
   DeleteRequest,
   DeleteResponse,
   IModel,
@@ -59,7 +60,10 @@ export abstract class Mutation<T> implements IMutation<T> {
   }
 
   public async mutate(
-    mutateRequest: BuilderOnly<T> | MutationRequest<T, Record<string, unknown>>,
+    mutateRequest:
+      | BuilderWithCreationContext<T>
+      | BuilderWithUpdateContext<T>
+      | MutationRequest<T, Record<string, unknown>>,
     options?: Partial<RequestConfig>,
   ): Promise<MutationResponse> {
     const data =

@@ -1,7 +1,8 @@
 import {
   ActionRequest,
   ActionResponse,
-  BuilderOnly,
+  BuilderWithCreationContext,
+  BuilderWithUpdateContext,
   DeleteRequest,
   DeleteResponse,
   IModel,
@@ -27,7 +28,10 @@ export declare abstract class Mutation<T> implements IMutation<T> {
   get relation(): IRelation;
   private validateData;
   mutate(
-    mutateRequest: BuilderOnly<T> | MutationRequest<T, Record<string, unknown>>,
+    mutateRequest:
+      | BuilderWithCreationContext<T>
+      | BuilderWithUpdateContext<T>
+      | MutationRequest<T, Record<string, unknown>>,
     options?: Partial<RequestConfig>,
   ): Promise<MutationResponse>;
   action(
