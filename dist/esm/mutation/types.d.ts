@@ -238,11 +238,9 @@ export interface IModel<TModel> {
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: {
-      [K in TRelationKeys]?: CreateRelationsMap<
-        Record<Extract<TRelationKeys, string>, unknown>
-      >;
-    };
+    relations?: CreateRelationsMap<
+      Record<Extract<TRelationKeys, string>, unknown>
+    >;
   }) => BuilderOnly<TModel>;
   update: <
     T extends Record<string, unknown>,
@@ -251,11 +249,9 @@ export interface IModel<TModel> {
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: {
-        [K in TRelationKeys]?: UpdateRelationsMap<
-          Record<Extract<TRelationKeys, string>, unknown>
-        >;
-      };
+      relations?: UpdateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
     },
   ) => BuilderOnly<TModel>;
   setMutationFunction: (cb: MutationFunction<TModel>) => void;

@@ -57,14 +57,6 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 
-export type RelationOperation =
-  | CreateRelationResult<Record<string, unknown>, string>
-  | UpdateRelationResult<Record<string, unknown>, string>
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<Record<string, unknown>>
-  | ToggleRelationDefinition<Record<string, unknown>>;
-
 // ==================== Types de relations valides ====================
 
 export type ValidCreateNestedRelation<T> =
@@ -295,11 +287,9 @@ export interface IModel<TModel> {
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: {
-      [K in TRelationKeys]?: CreateRelationsMap<
-        Record<Extract<TRelationKeys, string>, unknown>
-      >;
-    };
+    relations?: CreateRelationsMap<
+      Record<Extract<TRelationKeys, string>, unknown>
+    >;
   }) => BuilderOnly<TModel>;
 
   update: <
@@ -309,11 +299,9 @@ export interface IModel<TModel> {
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: {
-        [K in TRelationKeys]?: UpdateRelationsMap<
-          Record<Extract<TRelationKeys, string>, unknown>
-        >;
-      };
+      relations?: UpdateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
     },
   ) => BuilderOnly<TModel>;
 
