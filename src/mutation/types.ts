@@ -6,18 +6,11 @@ export type SimpleKey = string | number;
 export type CompositeKey = SimpleKey | Array<SimpleKey>;
 export type Attributes = Record<string, unknown>;
 export type PivotData = Record<string, string | number>;
-export type RelationDefinitionType =
-  | "create"
-  | "update"
-  | "attach"
-  | "detach"
-  | "sync"
-  | "toggle";
 
 // ==================== 2. DÉFINITIONS DES OPÉRATIONS DE BASE ====================
 
 export interface BaseRelationDefinition {
-  operation: RelationDefinitionType;
+  operation: string;
   __relationDefinition?: true;
 }
 
@@ -36,14 +29,14 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
 export interface CreateRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
-  relations?: Record<string, RelationDefinition>;
+  relations?: Record<string, CreateValidRelationOperation>;
 }
 
 export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
   operation: "update";
   key: SimpleKey;
   attributes: T;
-  relations?: Record<string, RelationDefinition>;
+  relations?: Record<string, UpdateValidRelationOperation>;
 }
 
 // Opérations de gestion collective
@@ -61,15 +54,6 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   attributes?: T;
   pivot?: PivotData;
 }
-
-// Type de base pour toutes les opérations de relation
-export type RelationDefinition =
-  | CreateRelationOperation<Attributes>
-  | UpdateRelationOperation<Attributes>
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<Attributes>
-  | ToggleRelationDefinition<Attributes>;
 
 // ==================== 3. OPÉRATIONS VALIDES PAR CONTEXTE ====================
 
@@ -119,9 +103,9 @@ export type ToggleParams<T> = {
   pivot?: PivotData;
 };
 
-// ==================== 5. INTERFACES CONTEXTUELLES DE RELATION ====================
+// ==================== 5. INTERFACES DE RELATION CONTEXTUELLES ====================
 
-// Interface pour le contexte de création
+// Interface pour les opérations en contexte de création
 export interface ICreationRelation {
   add: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,
@@ -130,7 +114,7 @@ export interface ICreationRelation {
   attach: (key: SimpleKey) => AttachRelationDefinition;
 }
 
-// Interface pour le contexte de mise à jour
+// Interface pour les opérations en contexte de mise à jour
 export interface IUpdateRelation {
   add: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,
@@ -149,7 +133,7 @@ export interface IUpdateRelation {
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 
-// ==================== 6. MUTATION ET BUILDERS ====================
+// ==================== 6. INTERFACES DE MUTATION ET BUILDER ====================
 
 export type ExtractModelAttributes<T> = Omit<T, "relations">;
 
@@ -179,7 +163,7 @@ export interface MutationResponse {
   updated: Array<SimpleKey>;
 }
 
-// Interfaces Builder avec contexte
+// Interfaces pour les builders contextuels
 export interface BuilderWithCreationContext<TModel> {
   build: () => MutationRequest<TModel, Record<string, unknown>>;
   mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
@@ -192,7 +176,7 @@ export interface BuilderWithUpdateContext<TModel> {
   relation: IUpdateRelation;
 }
 
-// Types pour les maps de relation
+// Types pour les maps de relations
 export type StrictCreateRelationsMap<T extends Record<string, unknown>> = {
   [K in keyof T]: CreateValidRelationOperation;
 };
@@ -272,6 +256,8 @@ export interface IModel<TModel> {
 }
 
 export interface IMutation<T> {
+  model: IModel<T>;
+
   mutate: (
     mutateRequest:
       | BuilderWithCreationContext<T>

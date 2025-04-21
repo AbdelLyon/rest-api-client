@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { RequestConfig } from "../http/types.js";
+import { HttpRequest } from "../http/Request/HttpRequest.js";
 import {
   ActionRequest,
   ActionResponse,
@@ -10,9 +13,6 @@ import {
   MutationRequest,
   MutationResponse,
 } from "./types.js";
-import { z } from "zod";
-import { RequestConfig } from "../http/types.js";
-import { HttpRequest } from "../http/Request/HttpRequest.js";
 export declare abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpRequest;
   protected pathname: string;

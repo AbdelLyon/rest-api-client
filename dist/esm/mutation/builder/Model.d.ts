@@ -10,8 +10,6 @@ import {
 export declare class Model<TModel> implements IModel<TModel> {
   private operations;
   private mutationFn;
-  private creationRelation;
-  private updateRelation;
   setMutationFunction(fn: MutationFunction<TModel>): void;
   create<
     T extends Record<string, unknown>,

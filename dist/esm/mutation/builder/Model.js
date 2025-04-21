@@ -7,9 +7,6 @@ class Model {
   constructor() {
     __publicField(this, "operations", []);
     __publicField(this, "mutationFn", null);
-    // Instances distinctes pour chaque contexte
-    __publicField(this, "creationRelation", new CreationRelation());
-    __publicField(this, "updateRelation", new UpdateRelation());
   }
   setMutationFunction(fn) {
     this.mutationFn = fn;
@@ -25,7 +22,7 @@ class Model {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.creationRelation
+      relation: new CreationRelation()
       // Contexte de création uniquement
     };
   }
@@ -41,7 +38,7 @@ class Model {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.updateRelation
+      relation: new UpdateRelation()
       // Contexte de mise à jour complet
     };
   }

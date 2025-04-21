@@ -1,5 +1,4 @@
-import { RequestConfig } from "@/http";
-import {
+import type {
   BuilderWithCreationContext,
   BuilderWithUpdateContext,
   ExtractModelAttributes,
@@ -12,6 +11,7 @@ import {
   StrictUpdateRelationsMap,
   TypedMutationOperation,
 } from "../types";
+import type { RequestConfig } from "@/http/types";
 import { CreationRelation } from "./CreationRelation";
 import { UpdateRelation } from "./UpdateRelation";
 
@@ -20,10 +20,6 @@ export class Model<TModel> implements IModel<TModel> {
     TypedMutationOperation<TModel, Record<string, unknown>>
   > = [];
   private mutationFn: MutationFunction<TModel> | null = null;
-
-  // Instances distinctes pour chaque contexte
-  private creationRelation = new CreationRelation();
-  private updateRelation = new UpdateRelation();
 
   public setMutationFunction(fn: MutationFunction<TModel>): void {
     this.mutationFn = fn;
@@ -48,10 +44,11 @@ export class Model<TModel> implements IModel<TModel> {
 
     this.operations.push(operation);
 
+    // Retourne un builder avec un contexte de création
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.creationRelation, // Contexte de création uniquement
+      relation: new CreationRelation(), // Contexte de création uniquement
     };
   }
 
@@ -78,10 +75,11 @@ export class Model<TModel> implements IModel<TModel> {
 
     this.operations.push(operation);
 
+    // Retourne un builder avec un contexte de mise à jour
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.updateRelation, // Contexte de mise à jour complet
+      relation: new UpdateRelation(), // Contexte de mise à jour complet
     };
   }
 

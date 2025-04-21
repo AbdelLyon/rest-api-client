@@ -1,10 +1,10 @@
 class CreationRelation {
   add(params) {
-    const { attributes, relations } = params;
+    const { attributes, relations = {} } = params;
     const relationDefinition = {
       operation: "create",
       attributes,
-      ...relations && { relations }
+      relations
     };
     this.defineRelationDefinition(relationDefinition);
     return relationDefinition;

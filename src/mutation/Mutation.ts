@@ -1,4 +1,8 @@
-import type {
+import type { z } from "zod";
+import type { RequestConfig } from "@/http/types";
+import type { HttpRequest } from "@/http/Request/HttpRequest";
+import { HttpClient } from "@/http/HttpClient";
+import {
   ActionRequest,
   ActionResponse,
   BuilderWithCreationContext,
@@ -10,10 +14,6 @@ import type {
   MutationRequest,
   MutationResponse,
 } from "./types";
-import type { z } from "zod";
-import type { RequestConfig } from "@/http/types";
-import type { HttpRequest } from "@/http/Request/HttpRequest";
-import { HttpClient } from "@/http/HttpClient";
 import { Builder } from "./builder/Builder";
 
 export abstract class Mutation<T> implements IMutation<T> {

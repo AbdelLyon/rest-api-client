@@ -3,15 +3,8 @@ export type SimpleKey = string | number;
 export type CompositeKey = SimpleKey | Array<SimpleKey>;
 export type Attributes = Record<string, unknown>;
 export type PivotData = Record<string, string | number>;
-export type RelationDefinitionType =
-  | "create"
-  | "update"
-  | "attach"
-  | "detach"
-  | "sync"
-  | "toggle";
 export interface BaseRelationDefinition {
-  operation: RelationDefinitionType;
+  operation: string;
   __relationDefinition?: true;
 }
 export interface AttachRelationDefinition extends BaseRelationDefinition {
@@ -25,13 +18,13 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
 export interface CreateRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
-  relations?: Record<string, RelationDefinition>;
+  relations?: Record<string, CreateValidRelationOperation>;
 }
 export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
   operation: "update";
   key: SimpleKey;
   attributes: T;
-  relations?: Record<string, RelationDefinition>;
+  relations?: Record<string, UpdateValidRelationOperation>;
 }
 export interface SyncRelationDefinition<T> extends BaseRelationDefinition {
   operation: "sync";
@@ -46,13 +39,6 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   attributes?: T;
   pivot?: PivotData;
 }
-export type RelationDefinition =
-  | CreateRelationOperation<Attributes>
-  | UpdateRelationOperation<Attributes>
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<Attributes>
-  | ToggleRelationDefinition<Attributes>;
 export type CreateValidRelationOperation =
   | CreateRelationOperation<Attributes>
   | AttachRelationDefinition;
@@ -203,6 +189,7 @@ export interface IModel<TModel> {
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }
 export interface IMutation<T> {
+  model: IModel<T>;
   mutate: (
     mutateRequest:
       | BuilderWithCreationContext<T>

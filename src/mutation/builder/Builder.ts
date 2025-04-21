@@ -1,4 +1,4 @@
-import { IModel } from "../types";
+import type { IModel } from "../types";
 import { Model } from "./Model";
 
 export class Builder {

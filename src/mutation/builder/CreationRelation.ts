@@ -1,23 +1,24 @@
 import type {
   Attributes,
   AttachRelationDefinition,
+  BaseRelationDefinition,
   CreateRelationOperation,
   CreateRelationParams,
+  CreateValidRelationOperation,
   ICreationRelation,
   SimpleKey,
-  BaseRelationDefinition,
 } from "../types";
 
 export class CreationRelation implements ICreationRelation {
   public add<T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,
   ): CreateRelationOperation<T> {
-    const { attributes, relations } = params;
+    const { attributes, relations = {} } = params;
 
     const relationDefinition: CreateRelationOperation<T> = {
       operation: "create",
       attributes,
-      ...(relations && { relations }),
+      relations: relations as Record<string, CreateValidRelationOperation>,
     };
 
     this.defineRelationDefinition(relationDefinition);
