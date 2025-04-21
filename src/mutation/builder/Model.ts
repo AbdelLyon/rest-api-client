@@ -3,7 +3,7 @@ import type {
   Attributes,
   BuilderOnly,
   CreateRelationParams,
-  CreateRelationResult,
+  CreateValidRelationOperation,
   DetachRelationDefinition,
   ExtractModelAttributes,
   IModel,
@@ -119,7 +119,7 @@ export class Model<TModel>
     TRelationKeys extends keyof T = never,
   >(
     params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys> {
+  ): CreateValidRelationOperation {
     const { attributes, relations } = params;
     return this.relation.add<T, TRelationKeys>({
       attributes,

@@ -2,7 +2,7 @@ import {
   AttachRelationDefinition,
   Attributes,
   CreateRelationParams,
-  CreateRelationResult,
+  CreateValidRelationOperation,
   DetachRelationDefinition,
   IRelation,
   SimpleKey,
@@ -16,7 +16,7 @@ import {
 export declare class Relation implements IRelation {
   add<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys>;
+  ): CreateValidRelationOperation;
   edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
   ): UpdateRelationResult<T, TRelationKeys>;

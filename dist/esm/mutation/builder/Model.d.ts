@@ -3,7 +3,7 @@ import {
   Attributes,
   BuilderOnly,
   CreateRelationParams,
-  CreateRelationResult,
+  CreateValidRelationOperation,
   DetachRelationDefinition,
   IModel,
   IRelation,
@@ -56,7 +56,7 @@ export declare class Model<TModel>
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
   add<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys>;
+  ): CreateValidRelationOperation;
   edit<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKeys>,
   ): UpdateRelationResult<T, TRelationKeys>;

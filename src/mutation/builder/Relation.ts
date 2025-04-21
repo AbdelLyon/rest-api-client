@@ -3,6 +3,7 @@ import type {
   Attributes,
   CreateRelationParams,
   CreateRelationResult,
+  CreateValidRelationOperation,
   DetachRelationDefinition,
   ExtractedAttributes,
   IRelation,
@@ -19,7 +20,7 @@ import type {
 export class Relation implements IRelation {
   public add<T extends Attributes, TRelationKeys extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateRelationResult<T, TRelationKeys> {
+  ): CreateValidRelationOperation {
     const { attributes, relations } = params;
 
     const { normalAttributes, nestedRelations: extractedRelations } =

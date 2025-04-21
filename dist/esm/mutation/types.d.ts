@@ -236,7 +236,7 @@ export interface DeleteResponse<T> {
 export interface IRelation {
   add: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,
-  ) => CreateRelationResult<T, TRelationKey>;
+  ) => CreateValidRelationOperation;
   edit: <T extends Attributes, TRelationKey extends keyof T = never>(
     params: UpdateRelationParams<T, TRelationKey>,
   ) => UpdateRelationResult<T, TRelationKey>;
