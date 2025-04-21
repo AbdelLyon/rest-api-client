@@ -4,7 +4,6 @@ import type {
   BuilderOnly,
   CreateRelationParams,
   CreateRelationResult,
-  CreateRelationsMap,
   DetachRelationDefinition,
   ExtractModelAttributes,
   IModel,
@@ -13,6 +12,8 @@ import type {
   MutationRequest,
   MutationResponse,
   SimpleKey,
+  StrictCreateRelationsMap,
+  StrictUpdateRelationsMap,
   SyncParams,
   SyncRelationDefinition,
   ToggleParams,
@@ -20,7 +21,6 @@ import type {
   TypedMutationOperation,
   UpdateRelationParams,
   UpdateRelationResult,
-  UpdateRelationsMap,
 } from "@/mutation/types";
 import type { RequestConfig } from "@/http/types";
 import { Relation } from "@/mutation/builder/Relation";
@@ -49,7 +49,7 @@ export class Model<TModel>
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: CreateRelationsMap<
+    relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
   }): BuilderOnly<TModel> {
@@ -76,7 +76,7 @@ export class Model<TModel>
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: UpdateRelationsMap<
+      relations?: StrictUpdateRelationsMap<
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },

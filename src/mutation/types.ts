@@ -57,7 +57,23 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 
-// ==================== Types de relations valides ====================
+// ==================== Types d'opérations valides par contexte ====================
+
+// Opérations valides dans un contexte de création d'entité
+export type CreateValidRelationOperation =
+  | CreateRelationResult<Record<string, unknown>, string>
+  | AttachRelationDefinition;
+
+// Opérations valides dans un contexte de mise à jour d'entité
+export type UpdateValidRelationOperation =
+  | CreateRelationResult<Record<string, unknown>, string>
+  | UpdateRelationResult<Record<string, unknown>, string>
+  | AttachRelationDefinition
+  | DetachRelationDefinition
+  | SyncRelationDefinition<Record<string, unknown>>
+  | ToggleRelationDefinition<Record<string, unknown>>;
+
+// ==================== Types de relations imbriquées ====================
 
 export type ValidCreateNestedRelation<T> =
   | (CreateRelationOperation<T> & {
@@ -84,7 +100,7 @@ export type RelationDefinition<
   ? ValidCreateNestedRelation<T>
   : ValidUpdateNestedRelation<T>;
 
-// ==================== Types pour les paramètres des méthodes ====================
+// ==================== Types pour les paramètres des méthodes de relation ====================
 
 export type CreateRelationParams<
   T extends Attributes,
@@ -116,7 +132,7 @@ export type ToggleParams<T> = {
   pivot?: PivotData;
 };
 
-// ==================== Types pour les résultats des méthodes ====================
+// ==================== Types pour les résultats des méthodes de relation ====================
 
 export type CreateRelationResult<
   T extends Attributes,
@@ -140,7 +156,7 @@ export type ExtractedAttributes = {
   nestedRelations: Attributes;
 };
 
-// ==================== Types pour les opérations de mutation ====================
+// ==================== Types pour les opérations de mutation d'entité ====================
 
 export type ExtractModelAttributes<T> = Omit<T, "relations">;
 
@@ -194,12 +210,28 @@ export type ValidUpdateRelationOnly<T> = T extends {
   ? T
   : T;
 
+// ==================== Types pour les relations dans les entités ====================
+
+// Maps pour relations dans les entités avec validation
 export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
   [K in keyof TRelations]: ValidCreateRelationOnly<TRelations[K]>;
 };
 
 export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
   [K in keyof TRelations]: ValidUpdateRelationOnly<TRelations[K]>;
+};
+
+// Maps plus strictes pour empêcher les opérations illogiques
+export type StrictCreateRelationsMap<
+  TRelations extends Record<string, unknown>,
+> = {
+  [K in keyof TRelations]: CreateValidRelationOperation;
+};
+
+export type StrictUpdateRelationsMap<
+  TRelations extends Record<string, unknown>,
+> = {
+  [K in keyof TRelations]: UpdateValidRelationOperation;
 };
 
 // ==================== Types pour le build et les opérations simples ====================
@@ -261,7 +293,7 @@ export interface DeleteResponse<T> {
   };
 }
 
-// ==================== Interfaces ====================
+// ==================== Interfaces principales ====================
 
 export interface IRelation {
   add: <T extends Attributes, TRelationKey extends keyof T = never>(
@@ -287,7 +319,7 @@ export interface IModel<TModel> {
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: CreateRelationsMap<
+    relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
   }) => BuilderOnly<TModel>;
@@ -299,7 +331,7 @@ export interface IModel<TModel> {
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: UpdateRelationsMap<
+      relations?: StrictUpdateRelationsMap<
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },

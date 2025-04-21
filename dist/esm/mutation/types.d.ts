@@ -44,7 +44,10 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   attributes?: T;
   pivot?: PivotData;
 }
-export type RelationOperation =
+export type CreateValidRelationOperation =
+  | CreateRelationResult<Record<string, unknown>, string>
+  | AttachRelationDefinition;
+export type UpdateValidRelationOperation =
   | CreateRelationResult<Record<string, unknown>, string>
   | UpdateRelationResult<Record<string, unknown>, string>
   | AttachRelationDefinition
@@ -167,6 +170,16 @@ export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
 export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
   [K in keyof TRelations]: ValidUpdateRelationOnly<TRelations[K]>;
 };
+export type StrictCreateRelationsMap<
+  TRelations extends Record<string, unknown>,
+> = {
+  [K in keyof TRelations]: CreateValidRelationOperation;
+};
+export type StrictUpdateRelationsMap<
+  TRelations extends Record<string, unknown>,
+> = {
+  [K in keyof TRelations]: UpdateValidRelationOperation;
+};
 export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
   build: () => MutationRequest<TModel, TRelations>;
   mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
@@ -238,7 +251,7 @@ export interface IModel<TModel> {
     TRelationKeys extends keyof T = never,
   >(params: {
     attributes: T;
-    relations?: CreateRelationsMap<
+    relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
   }) => BuilderOnly<TModel>;
@@ -249,7 +262,7 @@ export interface IModel<TModel> {
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: UpdateRelationsMap<
+      relations?: StrictUpdateRelationsMap<
         Record<Extract<TRelationKeys, string>, unknown>
       >;
     },
