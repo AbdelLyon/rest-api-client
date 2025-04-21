@@ -139,7 +139,7 @@ export type CreateRelationResult<
   TRelationKey extends keyof T = never,
 > = T &
   CreateRelationOperation<T> & {
-    relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
+    relations?: Record<TRelationKey, ValidCreateNestedRelation<T>>;
   };
 
 export type UpdateRelationResult<
@@ -148,7 +148,7 @@ export type UpdateRelationResult<
 > = T &
   UpdateRelationOperation<T> & {
     operation: "update";
-    relations?: Record<TRelationKey, ValidUpdateNestedRelation<unknown>>;
+    relations?: Record<TRelationKey, ValidUpdateNestedRelation<T>>;
   };
 
 export type ExtractedAttributes = {
