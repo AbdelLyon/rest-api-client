@@ -1,12 +1,16 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-class Relation {
+const _Relation = class _Relation {
   constructor() {
     __publicField(this, "context", "update");
   }
-  // Par défaut en mode mise à jour
-  // Définir le contexte
+  static getInstance() {
+    if (!_Relation.instance) {
+      _Relation.instance = new _Relation();
+    }
+    return _Relation.instance;
+  }
   setContext(context) {
     this.context = context;
   }
@@ -92,7 +96,9 @@ class Relation {
       configurable: true
     });
   }
-}
+};
+__publicField(_Relation, "instance", null);
+let Relation = _Relation;
 export {
   Relation
 };

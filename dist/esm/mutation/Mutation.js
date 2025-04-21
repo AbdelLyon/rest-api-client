@@ -3,19 +3,26 @@ var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { en
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 import { HttpClient } from "../http/HttpClient.js";
 import { Builder } from "./builder/Builder.js";
+import { Relation } from "./builder/Relation.js";
 class Mutation {
   constructor(pathname, schema, httpInstanceName) {
     __publicField(this, "http");
     __publicField(this, "pathname");
     __publicField(this, "schema");
+    __publicField(this, "_relation");
     this.http = HttpClient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
+    this._relation = Relation.getInstance();
+    this._relation.setContext("update");
   }
   get model() {
     const builder = Builder.create();
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
+  }
+  get relation() {
+    return this._relation;
   }
   validateData(data) {
     return data.map((item) => {

@@ -17,9 +17,16 @@ import type {
 } from "../types";
 
 export class Relation implements IRelation {
-  private context: "create" | "update" = "update"; // Par défaut en mode mise à jour
+  private context: "create" | "update" = "update";
+  private static instance: Relation | null = null;
 
-  // Définir le contexte
+  public static getInstance(): Relation {
+    if (!Relation.instance) {
+      Relation.instance = new Relation();
+    }
+    return Relation.instance;
+  }
+
   public setContext(context: "create" | "update"): void {
     this.context = context;
   }

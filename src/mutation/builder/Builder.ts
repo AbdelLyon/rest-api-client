@@ -3,10 +3,8 @@ import { Model } from "./Model";
 import { Relation } from "./Relation";
 
 export class Builder {
-  private static relationInstance: IRelation = new Relation();
-
   public static getRelation(): IRelation {
-    return Builder.relationInstance;
+    return Relation.getInstance();
   }
 
   public static create<T>(): IModel<T> {

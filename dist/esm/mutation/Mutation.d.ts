@@ -10,6 +10,7 @@ import {
   DeleteResponse,
   IModel,
   IMutation,
+  IRelation,
   MutationRequest,
   MutationResponse,
 } from "./types.js";
@@ -17,12 +18,14 @@ export declare abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
+  private readonly _relation;
   constructor(
     pathname: string,
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   );
   get model(): IModel<T>;
+  get relation(): IRelation;
   private validateData;
   mutate(
     mutateRequest:

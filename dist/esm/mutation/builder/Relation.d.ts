@@ -15,6 +15,8 @@ import {
 } from "../types.js";
 export declare class Relation implements IRelation {
   private context;
+  private static instance;
+  static getInstance(): Relation;
   setContext(context: "create" | "update"): void;
   add<T extends Attributes, TRelationKey extends keyof T = never>(
     params: CreateRelationParams<T, TRelationKey>,

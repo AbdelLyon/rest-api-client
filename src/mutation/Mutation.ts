@@ -11,15 +11,18 @@ import {
   DeleteResponse,
   IModel,
   IMutation,
+  IRelation,
   MutationRequest,
   MutationResponse,
 } from "./types";
 import { Builder } from "./builder/Builder";
+import { Relation } from "./builder/Relation";
 
 export abstract class Mutation<T> implements IMutation<T> {
   protected http: HttpRequest;
   protected pathname: string;
   protected schema: z.ZodType<T>;
+  private readonly _relation: IRelation;
 
   constructor(
     pathname: string,
@@ -29,12 +32,18 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.http = HttpClient.getInstance(httpInstanceName);
     this.pathname = pathname;
     this.schema = schema;
+    this._relation = Relation.getInstance();
+    this._relation.setContext("update");
   }
 
   get model(): IModel<T> {
     const builder = Builder.create<T>();
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
+  }
+
+  get relation(): IRelation {
+    return this._relation;
   }
 
   private validateData(data: Array<unknown>): Array<T> {
