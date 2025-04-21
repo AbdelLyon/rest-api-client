@@ -1,7 +1,7 @@
 import {
   AttachRelationDefinition,
   Attributes,
-  BuildOnly,
+  BuilderOnly,
   CreateEntityAttributes,
   CreateRelationParams,
   CreateRelationResult,
@@ -24,7 +24,7 @@ import { RequestConfig } from "../../http/types.js";
 import { Relation } from "./Relation.js";
 export declare class Model<TModel>
   extends Relation
-  implements IModel<TModel>, BuildOnly<TModel>
+  implements IModel<TModel>, BuilderOnly<TModel>
 {
   private operations;
   private mutationFn;
@@ -35,14 +35,14 @@ export declare class Model<TModel>
   create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
-  >(attributes: CreateEntityAttributes<T, TRelationKeys>): this;
+  >(attributes: CreateEntityAttributes<T, TRelationKeys>): BuilderOnly<TModel>;
   update<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     key: string | number,
     attributes: UpdateEntityAttributes<T, TRelationKeys>,
-  ): this;
+  ): BuilderOnly<TModel>;
   build(): MutationRequest<TModel, Record<string, unknown>>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;
   add<T extends Attributes, TRelationKeys extends keyof T = never>(

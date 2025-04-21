@@ -33,7 +33,10 @@ class Model extends Relation {
       relations
     };
     this.operations.push(operation);
-    return this;
+    return {
+      build: this.build.bind(this),
+      mutate: this.mutate.bind(this)
+    };
   }
   update(key, attributes) {
     const { normalAttributes, relations } = this.extractOperationData(attributes);
@@ -44,7 +47,10 @@ class Model extends Relation {
       relations
     };
     this.operations.push(operation);
-    return this;
+    return {
+      build: this.build.bind(this),
+      mutate: this.mutate.bind(this)
+    };
   }
   build() {
     const result = [...this.operations];

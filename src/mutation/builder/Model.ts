@@ -1,7 +1,7 @@
 import type {
   AttachRelationDefinition,
   Attributes,
-  BuildOnly,
+  BuilderOnly,
   CreateEntityAttributes,
   CreateRelationParams,
   CreateRelationResult,
@@ -27,7 +27,7 @@ import { Relation } from "@/mutation/builder/Relation";
 
 export class Model<TModel>
   extends Relation
-  implements IModel<TModel>, BuildOnly<TModel>
+  implements IModel<TModel>, BuilderOnly<TModel>
 {
   private operations: Array<
     TypedMutationOperation<TModel, Record<string, unknown>>
@@ -67,7 +67,7 @@ export class Model<TModel>
   public create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
-  >(attributes: CreateEntityAttributes<T, TRelationKeys>): this {
+  >(attributes: CreateEntityAttributes<T, TRelationKeys>): BuilderOnly<TModel> {
     const { normalAttributes, relations } =
       this.extractOperationData(attributes);
 
@@ -78,7 +78,10 @@ export class Model<TModel>
     };
 
     this.operations.push(operation);
-    return this;
+    return {
+      build: this.build.bind(this),
+      mutate: this.mutate.bind(this),
+    };
   }
 
   public update<
@@ -87,7 +90,7 @@ export class Model<TModel>
   >(
     key: string | number,
     attributes: UpdateEntityAttributes<T, TRelationKeys>,
-  ): this {
+  ): BuilderOnly<TModel> {
     const { normalAttributes, relations } =
       this.extractOperationData(attributes);
 
@@ -99,7 +102,10 @@ export class Model<TModel>
     };
 
     this.operations.push(operation);
-    return this;
+    return {
+      build: this.build.bind(this),
+      mutate: this.mutate.bind(this),
+    };
   }
 
   public build(): MutationRequest<TModel, Record<string, unknown>> {

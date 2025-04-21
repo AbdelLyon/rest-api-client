@@ -212,7 +212,7 @@ export type UpdateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
 
 // ==================== Types pour le build et les opérations simples ====================
 
-export interface BuildOnly<TModel, TRelations = Record<string, unknown>> {
+export interface BuilderOnly<TModel, TRelations = Record<string, unknown>> {
   build: () => MutationRequest<TModel, TRelations>;
   mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 }
@@ -295,7 +295,7 @@ export interface IModel<TModel> {
     TRelationKeys extends keyof T = never,
   >(
     attributes: CreateEntityAttributes<T, TRelationKeys>,
-  ) => this;
+  ) => BuilderOnly<TModel>;
 
   update: <
     T extends Record<string, unknown>,
@@ -303,18 +303,18 @@ export interface IModel<TModel> {
   >(
     key: SimpleKey,
     attributes: UpdateEntityAttributes<T, TRelationKeys>,
-  ) => this;
+  ) => BuilderOnly<TModel>;
 
   build: () => MutationRequest<TModel, Record<string, unknown>>;
 
-  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
+  // mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }
 
 export interface IMutation<T> {
   mutate: (
-    mutateRequest: BuildOnly<T>,
+    mutateRequest: BuilderOnly<T>,
     options?: Partial<RequestConfig>,
   ) => Promise<MutationResponse>;
 
