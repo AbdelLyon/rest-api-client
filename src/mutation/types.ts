@@ -61,7 +61,7 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
 
 // Opérations valides dans un contexte de création d'entité
 export type CreateValidRelationOperation =
-  | CreateRelationResult<Attributes, string>
+  | ValidCreateNestedRelation<Attributes>
   | AttachRelationDefinition;
 
 // Opérations valides dans un contexte de mise à jour d'entité
@@ -134,22 +134,22 @@ export type ToggleParams<T> = {
 
 // ==================== Types pour les résultats des méthodes de relation ====================
 
-export type CreateRelationResult<
-  T extends Attributes,
-  TRelationKey extends keyof T = never,
-> = T &
-  CreateRelationOperation<T> & {
-    relations?: Record<TRelationKey, ValidCreateNestedRelation<T>>;
-  };
+// export type CreateRelationResult<
+//   T extends Attributes,
+//   TRelationKey extends keyof T = never,
+// > = T &
+//   CreateRelationOperation<T> & {
+//     relations?: Record<TRelationKey, ValidCreateNestedRelation<T>>;
+//   };
 
-export type UpdateRelationResult<
-  T extends Attributes,
-  TRelationKey extends keyof T = never,
-> = T &
-  UpdateRelationOperation<T> & {
-    operation: "update";
-    relations?: Record<TRelationKey, ValidUpdateNestedRelation<T>>;
-  };
+// export type UpdateRelationResult<
+//   T extends Attributes,
+//   TRelationKey extends keyof T = never,
+// > = T &
+//   UpdateRelationOperation<T> & {
+//     operation: "update";
+//     relations?: Record<TRelationKey, ValidUpdateNestedRelation<T>>;
+//   };
 
 export type ExtractedAttributes = {
   normalAttributes: Attributes;
