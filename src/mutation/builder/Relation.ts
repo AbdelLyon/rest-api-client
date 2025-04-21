@@ -13,6 +13,7 @@ import type {
   ToggleRelationDefinition,
   UpdateRelationParams,
   UpdateValidRelationOperation,
+  ValidCreateNestedRelation,
 } from "../types";
 
 export class Relation implements IRelation {
@@ -24,12 +25,13 @@ export class Relation implements IRelation {
     const relationDefinition = {
       operation: "create" as const,
       attributes,
-      relations,
-    } as CreateValidRelationOperation;
+      relations: relations as Record<
+        TRelationKeys,
+        ValidCreateNestedRelation<Attributes>
+      >,
+    };
 
     this.defineRelationDefinition(relationDefinition);
-    // this.addGetters(relationDefinition, attributes);
-
     return relationDefinition;
   }
 
@@ -42,12 +44,13 @@ export class Relation implements IRelation {
       operation: "update" as const,
       key,
       attributes,
-      relations,
-    } as UpdateValidRelationOperation;
+      relations: relations as Record<
+        TRelationKeys,
+        ValidCreateNestedRelation<Attributes>
+      >,
+    };
 
     this.defineRelationDefinition(relationDefinition);
-    // this.addGetters(relationDefinition, attributes);
-
     return relationDefinition;
   }
 
@@ -88,7 +91,6 @@ export class Relation implements IRelation {
     return result;
   }
 
-  // Méthodes privées
   private createSimpleOperation<T extends "attach" | "detach">(
     operation: T,
     key: SimpleKey,
@@ -112,20 +114,4 @@ export class Relation implements IRelation {
       configurable: true,
     });
   }
-
-  // private addGetters(
-  //   relationDefinition:
-  //     | CreateValidRelationOperation
-  //     | UpdateValidRelationOperation,
-  //   normalAttributes: Attributes,
-  // ): void {
-  //   for (const key of Object.keys(normalAttributes)) {
-  //     Object.defineProperty(relationDefinition, key, {
-  //       get() {
-  //         return normalAttributes[key];
-  //       },
-  //       enumerable: true,
-  //     });
-  //   }
-  // }
 }
