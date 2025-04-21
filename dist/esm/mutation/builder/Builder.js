@@ -1,18 +1,9 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 import { Model } from "./Model.js";
-import { Relation } from "./Relation.js";
-const _Builder = class _Builder {
-  static getRelation() {
-    return _Builder.relationInstance;
+class Builder {
+  static create() {
+    return new Model();
   }
-  static create(relation) {
-    return new Model(relation || _Builder.getRelation());
-  }
-};
-__publicField(_Builder, "relationInstance", new Relation());
-let Builder = _Builder;
+}
 export {
   Builder
 };

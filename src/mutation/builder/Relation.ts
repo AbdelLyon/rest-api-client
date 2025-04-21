@@ -1,132 +1,132 @@
-// Fichier: Relation.ts
-import type {
-  AttachRelationDefinition,
-  Attributes,
-  CreateRelationParams,
-  CreateValidRelationOperation,
-  DetachRelationDefinition,
-  IRelation,
-  ICreationRelation,
-  IUpdateRelation,
-  RelationDefinition,
-  SimpleKey,
-  SyncParams,
-  SyncRelationDefinition,
-  ToggleParams,
-  ToggleRelationDefinition,
-  UpdateRelationParams,
-  UpdateValidRelationOperation,
-  ValidCreateNestedRelation,
-} from "../types";
+// // Fichier: Relation.ts
+// import type {
+//   AttachRelationDefinition,
+//   Attributes,
+//   CreateRelationParams,
+//   CreateValidRelationOperation,
+//   DetachRelationDefinition,
 
-export class Relation implements IRelation {
-  public add<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ): CreateValidRelationOperation {
-    const { attributes, relations } = params;
+//   ICreationRelation,
+//   IUpdateRelation,
+//   RelationDefinition,
+//   SimpleKey,
+//   SyncParams,
+//   SyncRelationDefinition,
+//   ToggleParams,
+//   ToggleRelationDefinition,
+//   UpdateRelationParams,
+//   UpdateValidRelationOperation,
 
-    const relationDefinition = {
-      operation: "create" as const,
-      attributes,
-      relations: relations as Record<
-        TRelationKeys,
-        ValidCreateNestedRelation<Attributes>
-      >,
-    };
+// } from "../types";
 
-    this.defineRelationDefinition(relationDefinition);
-    return relationDefinition;
-  }
+// export class Relation implements IRelation {
+//   public add<T extends Attributes, TRelationKeys extends keyof T = never>(
+//     params: CreateRelationParams<T, TRelationKeys>,
+//   ): CreateValidRelationOperation {
+//     const { attributes, relations } = params;
 
-  public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ): UpdateValidRelationOperation {
-    const { key, attributes, relations } = params;
+//     const relationDefinition = {
+//       operation: "create" as const,
+//       attributes,
+//       relations: relations as Record<
+//         TRelationKeys,
+//         ValidCreateNestedRelation<Attributes>
+//       >,
+//     };
 
-    const relationDefinition = {
-      operation: "update" as const,
-      key,
-      attributes,
-      relations: relations as Record<
-        TRelationKeys,
-        ValidCreateNestedRelation<Attributes>
-      >,
-    };
+//     this.defineRelationDefinition(relationDefinition);
+//     return relationDefinition;
+//   }
 
-    this.defineRelationDefinition(relationDefinition);
-    return relationDefinition;
-  }
+//   public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
+//     params: UpdateRelationParams<T, TRelationKeys>,
+//   ): UpdateValidRelationOperation {
+//     const { key, attributes, relations } = params;
 
-  public attach(key: SimpleKey): AttachRelationDefinition {
-    return this.createSimpleOperation("attach", key);
-  }
+//     const relationDefinition = {
+//       operation: "update" as const,
+//       key,
+//       attributes,
+//       relations: relations as Record<
+//         TRelationKeys,
+//         ValidCreateNestedRelation<Attributes>
+//       >,
+//     };
 
-  public detach(key: SimpleKey): DetachRelationDefinition {
-    return this.createSimpleOperation("detach", key);
-  }
+//     this.defineRelationDefinition(relationDefinition);
+//     return relationDefinition;
+//   }
 
-  public sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
-    const { key, attributes, pivot, withoutDetaching } = params;
+//   public attach(key: SimpleKey): AttachRelationDefinition {
+//     return this.createSimpleOperation("attach", key);
+//   }
 
-    const result = {
-      operation: "sync" as const,
-      key,
-      without_detaching: withoutDetaching,
-      ...(attributes && { attributes }),
-      ...(pivot && { pivot }),
-    };
+//   public detach(key: SimpleKey): DetachRelationDefinition {
+//     return this.createSimpleOperation("detach", key);
+//   }
 
-    this.defineRelationDefinition(result);
-    return result;
-  }
+//   public sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
+//     const { key, attributes, pivot, withoutDetaching } = params;
 
-  public toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T> {
-    const { key, attributes, pivot } = params;
+//     const result = {
+//       operation: "sync" as const,
+//       key,
+//       without_detaching: withoutDetaching,
+//       ...(attributes && { attributes }),
+//       ...(pivot && { pivot }),
+//     };
 
-    const result = {
-      operation: "toggle" as const,
-      key,
-      ...(attributes && { attributes }),
-      ...(pivot && { pivot }),
-    };
+//     this.defineRelationDefinition(result);
+//     return result;
+//   }
 
-    this.defineRelationDefinition(result);
-    return result;
-  }
+//   public toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T> {
+//     const { key, attributes, pivot } = params;
 
-  // Méthodes pour obtenir les contextes spécifiques
-  public getCreationContext(): ICreationRelation {
-    return {
-      add: this.add.bind(this),
-      attach: this.attach.bind(this),
-    };
-  }
+//     const result = {
+//       operation: "toggle" as const,
+//       key,
+//       ...(attributes && { attributes }),
+//       ...(pivot && { pivot }),
+//     };
 
-  public getUpdateContext(): IUpdateRelation {
-    return this;
-  }
+//     this.defineRelationDefinition(result);
+//     return result;
+//   }
 
-  private createSimpleOperation<T extends "attach" | "detach">(
-    operation: T,
-    key: SimpleKey,
-  ): T extends "attach" ? AttachRelationDefinition : DetachRelationDefinition {
-    const result = {
-      operation,
-      key,
-    } as T extends "attach"
-      ? AttachRelationDefinition
-      : DetachRelationDefinition;
+//   // Méthodes pour obtenir les contextes spécifiques
+//   public getCreationContext(): ICreationRelation {
+//     return {
+//       add: this.add.bind(this),
+//       attach: this.attach.bind(this),
+//     };
+//   }
 
-    this.defineRelationDefinition(result);
-    return result;
-  }
+//   public getUpdateContext(): IUpdateRelation {
+//     return this;
+//   }
 
-  private defineRelationDefinition(result: RelationDefinition): void {
-    Object.defineProperty(result, "__relationDefinition", {
-      value: true,
-      enumerable: false,
-      writable: false,
-      configurable: true,
-    });
-  }
-}
+//   private createSimpleOperation<T extends "attach" | "detach">(
+//     operation: T,
+//     key: SimpleKey,
+//   ): T extends "attach" ? AttachRelationDefinition : DetachRelationDefinition {
+//     const result = {
+//       operation,
+//       key,
+//     } as T extends "attach"
+//       ? AttachRelationDefinition
+//       : DetachRelationDefinition;
+
+//     this.defineRelationDefinition(result);
+//     return result;
+//   }
+
+//   private defineRelationDefinition(result: RelationDefinition): void {
+//     Object.defineProperty(result, "__relationDefinition", {
+//       value: true,
+//       enumerable: false,
+//       writable: false,
+//       configurable: true,
+//     });
+//   }
+// }

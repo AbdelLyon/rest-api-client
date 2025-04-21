@@ -1,10 +1,9 @@
-// Fichier: Model.ts
-import type {
+import { RequestConfig } from "@/http";
+import {
   BuilderWithCreationContext,
   BuilderWithUpdateContext,
   ExtractModelAttributes,
   IModel,
-  IRelation,
   MutationFunction,
   MutationRequest,
   MutationResponse,
@@ -12,19 +11,19 @@ import type {
   StrictCreateRelationsMap,
   StrictUpdateRelationsMap,
   TypedMutationOperation,
-} from "@/mutation/types";
-import type { RequestConfig } from "@/http/types";
+} from "../types";
+import { CreationRelation } from "./CreationRelation";
+import { UpdateRelation } from "./UpdateRelation";
 
 export class Model<TModel> implements IModel<TModel> {
   private operations: Array<
     TypedMutationOperation<TModel, Record<string, unknown>>
   > = [];
   private mutationFn: MutationFunction<TModel> | null = null;
-  private relation: IRelation;
 
-  constructor(relation: IRelation) {
-    this.relation = relation;
-  }
+  // Instances distinctes pour chaque contexte
+  private creationRelation = new CreationRelation();
+  private updateRelation = new UpdateRelation();
 
   public setMutationFunction(fn: MutationFunction<TModel>): void {
     this.mutationFn = fn;
@@ -52,7 +51,7 @@ export class Model<TModel> implements IModel<TModel> {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.relation.getCreationContext(),
+      relation: this.creationRelation, // Contexte de création uniquement
     };
   }
 
@@ -82,7 +81,7 @@ export class Model<TModel> implements IModel<TModel> {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.relation.getUpdateContext(),
+      relation: this.updateRelation, // Contexte de mise à jour complet
     };
   }
 

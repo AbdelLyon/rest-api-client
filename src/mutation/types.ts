@@ -36,12 +36,14 @@ export interface DetachRelationDefinition extends BaseRelationDefinition {
 export interface CreateRelationOperation<T> extends BaseRelationDefinition {
   operation: "create";
   attributes: T;
+  relations?: Record<string, RelationDefinition>;
 }
 
 export interface UpdateRelationOperation<T> extends BaseRelationDefinition {
   operation: "update";
   key: SimpleKey;
   attributes: T;
+  relations?: Record<string, RelationDefinition>;
 }
 
 // Opérations de gestion collective
@@ -60,94 +62,39 @@ export interface ToggleRelationDefinition<T> extends BaseRelationDefinition {
   pivot?: PivotData;
 }
 
-// ==================== 3. TYPES DE RELATIONS IMBRIQUÉES ====================
-
-// Définitions récursives pour les relations imbriquées
-export type ValidCreateNestedRelation<T> =
-  | (CreateRelationOperation<T> & {
-      relations?: Record<string, ValidCreateNestedRelation<T>>;
-    })
-  | AttachRelationDefinition;
-
-export type ValidUpdateNestedRelation<T> =
-  | (CreateRelationOperation<T> & {
-      relations?: Record<string, ValidUpdateNestedRelation<T>>;
-    })
-  | (UpdateRelationOperation<T> & {
-      relations?: Record<string, ValidUpdateNestedRelation<T>>;
-    })
-  | AttachRelationDefinition
-  | DetachRelationDefinition
-  | SyncRelationDefinition<T>
-  | ToggleRelationDefinition<T>;
-
-// ==================== 4. OPÉRATIONS VALIDES PAR CONTEXTE ====================
-
-// Opérations valides dans un contexte de création d'entité
-export type CreateValidRelationOperation =
-  | ValidCreateNestedRelation<Attributes>
-  | AttachRelationDefinition;
-
-// Opérations valides dans un contexte de mise à jour d'entité
-export type UpdateValidRelationOperation =
-  | ValidUpdateNestedRelation<Attributes>
+// Type de base pour toutes les opérations de relation
+export type RelationDefinition =
+  | CreateRelationOperation<Attributes>
+  | UpdateRelationOperation<Attributes>
   | AttachRelationDefinition
   | DetachRelationDefinition
   | SyncRelationDefinition<Attributes>
   | ToggleRelationDefinition<Attributes>;
 
-// Type générique pour relation avec contexte
-export type RelationDefinition<
-  T = unknown,
-  TInCreateContext extends boolean = false,
-> = TInCreateContext extends true
-  ? ValidCreateNestedRelation<T>
-  : ValidUpdateNestedRelation<T>;
+// ==================== 3. OPÉRATIONS VALIDES PAR CONTEXTE ====================
 
-// ==================== 5. INTERFACES CONTEXTUELLES DE RELATION ====================
+// Opérations valides en contexte de création
+export type CreateValidRelationOperation =
+  | CreateRelationOperation<Attributes>
+  | AttachRelationDefinition;
 
-// Interface pour contexte de création - opérations limitées
-export interface ICreationRelation {
-  add: <T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ) => CreateValidRelationOperation;
+// Opérations valides en contexte de mise à jour
+export type UpdateValidRelationOperation =
+  | CreateRelationOperation<Attributes>
+  | UpdateRelationOperation<Attributes>
+  | AttachRelationDefinition
+  | DetachRelationDefinition
+  | SyncRelationDefinition<Attributes>
+  | ToggleRelationDefinition<Attributes>;
 
-  attach: (key: SimpleKey) => AttachRelationDefinition;
-}
-
-// Interface pour contexte de mise à jour - toutes les opérations
-export interface IUpdateRelation {
-  add: <T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: CreateRelationParams<T, TRelationKeys>,
-  ) => CreateValidRelationOperation;
-
-  edit: <T extends Attributes, TRelationKeys extends keyof T = never>(
-    params: UpdateRelationParams<T, TRelationKeys>,
-  ) => UpdateValidRelationOperation;
-
-  attach: (key: SimpleKey) => AttachRelationDefinition;
-
-  detach: (key: SimpleKey) => DetachRelationDefinition;
-
-  sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
-
-  toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
-}
-
-// Interface complète qui hérite des deux contextuelles
-export interface IRelation extends IUpdateRelation, ICreationRelation {
-  getCreationContext(): ICreationRelation;
-  getUpdateContext(): IUpdateRelation;
-}
-
-// ==================== 6. PARAMÈTRES DES MÉTHODES DE RELATION ====================
+// ==================== 4. PARAMÈTRES DES MÉTHODES DE RELATION ====================
 
 export type CreateRelationParams<
   T extends Attributes,
   TRelationKey extends keyof T = never,
 > = {
   attributes: T;
-  relations?: Record<TRelationKey, ValidCreateNestedRelation<unknown>>;
+  relations?: Record<TRelationKey, CreateValidRelationOperation>;
 };
 
 export type UpdateRelationParams<
@@ -156,7 +103,7 @@ export type UpdateRelationParams<
 > = {
   key: SimpleKey;
   attributes: T;
-  relations?: Record<TRelationKey, ValidUpdateNestedRelation<unknown>>;
+  relations?: Record<TRelationKey, UpdateValidRelationOperation>;
 };
 
 export type SyncParams<T> = {
@@ -172,28 +119,40 @@ export type ToggleParams<T> = {
   pivot?: PivotData;
 };
 
-// ==================== 7. TYPES DE BUILDERS ET MUTATION ====================
+// ==================== 5. INTERFACES CONTEXTUELLES DE RELATION ====================
 
-// Types de builders contextuels
-export interface BuilderWithCreationContext<
-  TModel,
-  TRelations = Record<string, unknown>,
-> {
-  build: () => MutationRequest<TModel, TRelations>;
-  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
-  relation: ICreationRelation;
+// Interface pour le contexte de création
+export interface ICreationRelation {
+  add: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ) => CreateRelationOperation<T>;
+
+  attach: (key: SimpleKey) => AttachRelationDefinition;
 }
 
-export interface BuilderWithUpdateContext<
-  TModel,
-  TRelations = Record<string, unknown>,
-> {
-  build: () => MutationRequest<TModel, TRelations>;
-  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
-  relation: IUpdateRelation;
+// Interface pour le contexte de mise à jour
+export interface IUpdateRelation {
+  add: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ) => CreateRelationOperation<T>;
+
+  edit: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: UpdateRelationParams<T, TRelationKey>,
+  ) => UpdateRelationOperation<T>;
+
+  attach: (key: SimpleKey) => AttachRelationDefinition;
+
+  detach: (key: SimpleKey) => DetachRelationDefinition;
+
+  sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
+
+  toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 
-// Types de mutation
+// ==================== 6. MUTATION ET BUILDERS ====================
+
+export type ExtractModelAttributes<T> = Omit<T, "relations">;
+
 export type TypedMutationOperation<
   TModel,
   TRelations = Record<string, unknown>,
@@ -220,85 +179,29 @@ export interface MutationResponse {
   updated: Array<SimpleKey>;
 }
 
-// ==================== 8. TYPES UTILITAIRES ====================
-
-export type ExtractedAttributes = {
-  normalAttributes: Attributes;
-  nestedRelations: Attributes;
-};
-
-export type ExtractModelAttributes<T> = Omit<T, "relations">;
-
-// Vérifie si un type est une opération de relation
-export type IsRelationOperation<T> = T extends {
-  operation: RelationDefinitionType;
+// Interfaces Builder avec contexte
+export interface BuilderWithCreationContext<TModel> {
+  build: () => MutationRequest<TModel, Record<string, unknown>>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
+  relation: ICreationRelation;
 }
-  ? true
-  : false;
 
-// Vérifie si une opération est valide dans un contexte de création
-export type IsCreateOperationValid<T> = T extends {
-  operation: "update" | "detach";
+export interface BuilderWithUpdateContext<TModel> {
+  build: () => MutationRequest<TModel, Record<string, unknown>>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
+  relation: IUpdateRelation;
 }
-  ? false
-  : true;
 
-// Filtre pour ne garder que les opérations valides en création
-export type FilterValidCreateOperation<T> = T extends {
-  operation: "update" | "detach";
-}
-  ? never
-  : T;
-
-// Filtre pour ne garder que les opérations valides en mise à jour
-export type FilterValidUpdateOperation<T> = T extends {
-  operation: RelationDefinitionType;
-}
-  ? T
-  : never;
-
-// ==================== 9. MAPS DE RELATIONS ====================
-
-// Maps pour filtrage des opérations
-export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: FilterValidCreateOperation<TRelations[K]>;
+// Types pour les maps de relation
+export type StrictCreateRelationsMap<T extends Record<string, unknown>> = {
+  [K in keyof T]: CreateValidRelationOperation;
 };
 
-export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
-  [K in keyof TRelations]: FilterValidUpdateOperation<TRelations[K]>;
+export type StrictUpdateRelationsMap<T extends Record<string, unknown>> = {
+  [K in keyof T]: UpdateValidRelationOperation;
 };
 
-// Maps strictes pour les interfaces
-export type StrictCreateRelationsMap<
-  TRelations extends Record<string, unknown>,
-> = {
-  [K in keyof TRelations]: CreateValidRelationOperation;
-};
-
-export type StrictUpdateRelationsMap<
-  TRelations extends Record<string, unknown>,
-> = {
-  [K in keyof TRelations]: UpdateValidRelationOperation;
-};
-
-// ==================== 10. TYPES D'OPÉRATIONS SIMPLES ====================
-
-// Types pour les opérations atomiques
-export type CreateOperationOnly = { operation: "create" };
-export type UpdateOperationOnly = { operation: "update" };
-export type AttachOperationOnly = { operation: "attach" };
-export type DetachOperationOnly = { operation: "detach" };
-export type SyncOperationOnly = { operation: "sync" };
-export type ToggleOperationOnly = { operation: "toggle" };
-
-// Filtre pour exclure certaines opérations
-export type ExcludeUpdateOperations<T> = T extends
-  | UpdateOperationOnly
-  | DetachOperationOnly
-  ? never
-  : T;
-
-// ==================== 11. ACTIONS ET SUPPRESSIONS ====================
+// ==================== 7. ACTIONS ET SUPPRESSIONS ====================
 
 export interface ActionFieldDefinition {
   name: string;
@@ -339,11 +242,10 @@ export interface DeleteResponse<T> {
   };
 }
 
-// ==================== 12. INTERFACES PRINCIPALES ====================
+// ==================== 8. INTERFACES PRINCIPALES ====================
 
-// Interface du modèle avec contextes
 export interface IModel<TModel> {
-  create: <
+  create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(params: {
@@ -351,7 +253,7 @@ export interface IModel<TModel> {
     relations?: StrictCreateRelationsMap<
       Record<Extract<TRelationKeys, string>, unknown>
     >;
-  }) => BuilderWithCreationContext<TModel>;
+  }): BuilderWithCreationContext<TModel>;
 
   update<
     T extends Record<string, unknown>,
@@ -360,17 +262,21 @@ export interface IModel<TModel> {
     key: SimpleKey,
     params: {
       attributes?: T;
-      relations?: Record<Extract<TRelationKeys, string>, unknown>;
+      relations?: StrictUpdateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
     },
   ): BuilderWithUpdateContext<TModel>;
 
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }
 
-// Interface de mutation
 export interface IMutation<T> {
   mutate: (
-    mutateRequest: BuilderWithCreationContext<T> | BuilderWithUpdateContext<T>,
+    mutateRequest:
+      | BuilderWithCreationContext<T>
+      | BuilderWithUpdateContext<T>
+      | MutationRequest<T, Record<string, unknown>>,
     options?: Partial<RequestConfig>,
   ) => Promise<MutationResponse>;
 

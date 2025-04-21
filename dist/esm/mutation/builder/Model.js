@@ -1,12 +1,15 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+import { CreationRelation } from "./CreationRelation.js";
+import { UpdateRelation } from "./UpdateRelation.js";
 class Model {
-  constructor(relation) {
+  constructor() {
     __publicField(this, "operations", []);
     __publicField(this, "mutationFn", null);
-    __publicField(this, "relation");
-    this.relation = relation;
+    // Instances distinctes pour chaque contexte
+    __publicField(this, "creationRelation", new CreationRelation());
+    __publicField(this, "updateRelation", new UpdateRelation());
   }
   setMutationFunction(fn) {
     this.mutationFn = fn;
@@ -22,7 +25,8 @@ class Model {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.relation.getCreationContext()
+      relation: this.creationRelation
+      // Contexte de création uniquement
     };
   }
   update(key, params) {
@@ -37,7 +41,8 @@ class Model {
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: this.relation.getUpdateContext()
+      relation: this.updateRelation
+      // Contexte de mise à jour complet
     };
   }
   build() {

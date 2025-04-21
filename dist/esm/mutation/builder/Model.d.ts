@@ -2,7 +2,6 @@ import {
   BuilderWithCreationContext,
   BuilderWithUpdateContext,
   IModel,
-  IRelation,
   MutationFunction,
   SimpleKey,
   StrictCreateRelationsMap,
@@ -11,8 +10,8 @@ import {
 export declare class Model<TModel> implements IModel<TModel> {
   private operations;
   private mutationFn;
-  private relation;
-  constructor(relation: IRelation);
+  private creationRelation;
+  private updateRelation;
   setMutationFunction(fn: MutationFunction<TModel>): void;
   create<
     T extends Record<string, unknown>,

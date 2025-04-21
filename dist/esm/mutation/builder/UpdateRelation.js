@@ -1,10 +1,10 @@
-class Relation {
+class UpdateRelation {
   add(params) {
     const { attributes, relations } = params;
     const relationDefinition = {
       operation: "create",
       attributes,
-      relations
+      ...relations && { relations }
     };
     this.defineRelationDefinition(relationDefinition);
     return relationDefinition;
@@ -15,16 +15,26 @@ class Relation {
       operation: "update",
       key,
       attributes,
-      relations
+      ...relations && { relations }
     };
     this.defineRelationDefinition(relationDefinition);
     return relationDefinition;
   }
   attach(key) {
-    return this.createSimpleOperation("attach", key);
+    const result = {
+      operation: "attach",
+      key
+    };
+    this.defineRelationDefinition(result);
+    return result;
   }
   detach(key) {
-    return this.createSimpleOperation("detach", key);
+    const result = {
+      operation: "detach",
+      key
+    };
+    this.defineRelationDefinition(result);
+    return result;
   }
   sync(params) {
     const { key, attributes, pivot, withoutDetaching } = params;
@@ -49,24 +59,6 @@ class Relation {
     this.defineRelationDefinition(result);
     return result;
   }
-  // Méthodes pour obtenir les contextes spécifiques
-  getCreationContext() {
-    return {
-      add: this.add.bind(this),
-      attach: this.attach.bind(this)
-    };
-  }
-  getUpdateContext() {
-    return this;
-  }
-  createSimpleOperation(operation, key) {
-    const result = {
-      operation,
-      key
-    };
-    this.defineRelationDefinition(result);
-    return result;
-  }
   defineRelationDefinition(result) {
     Object.defineProperty(result, "__relationDefinition", {
       value: true,
@@ -77,6 +69,6 @@ class Relation {
   }
 }
 export {
-  Relation
+  UpdateRelation
 };
-//# sourceMappingURL=Relation.js.map
+//# sourceMappingURL=UpdateRelation.js.map
