@@ -35,13 +35,13 @@ export abstract class Mutation<T> implements IMutation<T> {
     this.builderRelation = Builder.getRelation();
   }
 
-  public model(): IModel<T> {
+  get model(): IModel<T> {
     const builder = Builder.create<T>(this.builderRelation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
 
-  public relation(): IRelation {
+  get relation(): IRelation {
     return this.builderRelation;
   }
 

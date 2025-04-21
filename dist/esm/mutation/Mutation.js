@@ -14,12 +14,12 @@ class Mutation {
     this.schema = schema;
     this.builderRelation = Builder.getRelation();
   }
-  model() {
+  get model() {
     const builder = Builder.create(this.builderRelation);
     builder.setMutationFunction((data, options) => this.mutate(data, options));
     return builder;
   }
-  relation() {
+  get relation() {
     return this.builderRelation;
   }
   validateData(data) {

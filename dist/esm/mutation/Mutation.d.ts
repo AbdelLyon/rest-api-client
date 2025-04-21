@@ -23,8 +23,8 @@ export declare abstract class Mutation<T> implements IMutation<T> {
     schema: z.ZodType<T>,
     httpInstanceName?: string,
   );
-  model(): IModel<T>;
-  relation(): IRelation;
+  get model(): IModel<T>;
+  get relation(): IRelation;
   private validateData;
   mutate(
     mutateRequest: BuildOnly<T> | MutationRequest<T, Record<string, unknown>>,
