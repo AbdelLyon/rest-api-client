@@ -3,7 +3,13 @@ var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { en
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 class HttpHandler {
   constructor() {
-    __publicField(this, "idempotentMethods", ["GET", "HEAD", "OPTIONS", "PUT", "DELETE"]);
+    __publicField(this, "idempotentMethods", [
+      "GET",
+      "HEAD",
+      "OPTIONS",
+      "PUT",
+      "DELETE"
+    ]);
     __publicField(this, "maxRetries", 3);
     __publicField(this, "defaultTimeout", 1e4);
     __publicField(this, "withCredentials", true);
@@ -49,7 +55,9 @@ class HttpHandler {
       return response;
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
-        throw new Error(`Request timeout after ${config.timeout || defaultTimeout}ms`);
+        throw new Error(
+          `Request timeout after ${config.timeout || defaultTimeout}ms`
+        );
       }
       if (attempt < maxRetries && this.isRetryableError(0, config.method)) {
         return this.retryWithBackoff(url, config, {
@@ -66,7 +74,10 @@ class HttpHandler {
     const { timeout = defaultTimeout, params, data, ...fetchOptions } = config;
     const fullUrl = this.appendQueryParams(url, params);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort("Request timeout"), timeout);
+    const timeoutId = setTimeout(
+      () => controller.abort("Request timeout"),
+      timeout
+    );
     const body = this.prepareRequestBody(data);
     const response = await fetch(fullUrl, {
       ...fetchOptions,

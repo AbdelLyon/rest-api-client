@@ -307,6 +307,8 @@ export interface IModel<TModel> {
 
   build: () => MutationRequest<TModel, Record<string, unknown>>;
 
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
+
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }
 

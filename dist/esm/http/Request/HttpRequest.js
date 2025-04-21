@@ -43,7 +43,10 @@ class HttpRequest {
         ...mergedConfig,
         url
       });
-      const response = await this.handler.executeRequest(url, interceptedConfig);
+      const response = await this.handler.executeRequest(
+        url,
+        interceptedConfig
+      );
       const interceptedResponse = await HttpInterceptor.applyResponseSuccessInterceptors(response);
       return await this.handler.parseResponse(interceptedResponse);
     } catch (error) {

@@ -248,6 +248,7 @@ export interface IModel<TModel> {
     attributes: UpdateEntityAttributes<T, TRelationKeys>,
   ) => this;
   build: () => MutationRequest<TModel, Record<string, unknown>>;
+  mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }
 export interface IMutation<T> {
