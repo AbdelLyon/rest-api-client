@@ -1,132 +1,138 @@
-// // Fichier: Relation.ts
-// import type {
-//   AttachRelationDefinition,
-//   Attributes,
-//   CreateRelationParams,
-//   CreateValidRelationOperation,
-//   DetachRelationDefinition,
+import type {
+  Attributes,
+  AttachRelationDefinition,
+  BaseRelationDefinition,
+  CreateRelationOperation,
+  CreateRelationParams,
+  DetachRelationDefinition,
+  IRelation,
+  SimpleKey,
+  SyncParams,
+  SyncRelationDefinition,
+  ToggleParams,
+  ToggleRelationDefinition,
+  UpdateRelationOperation,
+  UpdateRelationParams,
+  CreateValidRelationOperation,
+} from "../types";
 
-//   ICreationRelation,
-//   IUpdateRelation,
-//   RelationDefinition,
-//   SimpleKey,
-//   SyncParams,
-//   SyncRelationDefinition,
-//   ToggleParams,
-//   ToggleRelationDefinition,
-//   UpdateRelationParams,
-//   UpdateValidRelationOperation,
+export class Relation implements IRelation {
+  private context: "create" | "update" = "update"; // Par défaut en mode mise à jour
 
-// } from "../types";
+  // Définir le contexte
+  public setContext(context: "create" | "update"): void {
+    this.context = context;
+  }
 
-// export class Relation implements IRelation {
-//   public add<T extends Attributes, TRelationKeys extends keyof T = never>(
-//     params: CreateRelationParams<T, TRelationKeys>,
-//   ): CreateValidRelationOperation {
-//     const { attributes, relations } = params;
+  // Méthodes toujours disponibles
+  public add<T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ): CreateRelationOperation<T> {
+    const { attributes, relations = {} } = params;
 
-//     const relationDefinition = {
-//       operation: "create" as const,
-//       attributes,
-//       relations: relations as Record<
-//         TRelationKeys,
-//         ValidCreateNestedRelation<Attributes>
-//       >,
-//     };
+    const relationDefinition: CreateRelationOperation<T> = {
+      operation: "create",
+      attributes,
+      relations: relations as
+        | Record<string, CreateValidRelationOperation>
+        | undefined,
+    };
 
-//     this.defineRelationDefinition(relationDefinition);
-//     return relationDefinition;
-//   }
+    this.defineRelationDefinition(relationDefinition);
+    return relationDefinition;
+  }
 
-//   public edit<T extends Attributes, TRelationKeys extends keyof T = never>(
-//     params: UpdateRelationParams<T, TRelationKeys>,
-//   ): UpdateValidRelationOperation {
-//     const { key, attributes, relations } = params;
+  public attach(key: SimpleKey): AttachRelationDefinition {
+    const result: AttachRelationDefinition = {
+      operation: "attach",
+      key,
+    };
 
-//     const relationDefinition = {
-//       operation: "update" as const,
-//       key,
-//       attributes,
-//       relations: relations as Record<
-//         TRelationKeys,
-//         ValidCreateNestedRelation<Attributes>
-//       >,
-//     };
+    this.defineRelationDefinition(result);
+    return result;
+  }
 
-//     this.defineRelationDefinition(relationDefinition);
-//     return relationDefinition;
-//   }
+  // Méthodes disponibles uniquement en contexte de mise à jour
+  public edit<T extends Attributes, TRelationKey extends keyof T = never>(
+    params: UpdateRelationParams<T, TRelationKey>,
+  ): UpdateRelationOperation<T> {
+    this.checkUpdateContext("edit");
 
-//   public attach(key: SimpleKey): AttachRelationDefinition {
-//     return this.createSimpleOperation("attach", key);
-//   }
+    const { key, attributes, relations = {} } = params;
 
-//   public detach(key: SimpleKey): DetachRelationDefinition {
-//     return this.createSimpleOperation("detach", key);
-//   }
+    const relationDefinition: UpdateRelationOperation<T> = {
+      operation: "update",
+      key,
+      attributes,
+      relations: relations as
+        | Record<string, UpdateRelationOperation<T>>
+        | undefined,
+    };
 
-//   public sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
-//     const { key, attributes, pivot, withoutDetaching } = params;
+    this.defineRelationDefinition(relationDefinition);
+    return relationDefinition;
+  }
 
-//     const result = {
-//       operation: "sync" as const,
-//       key,
-//       without_detaching: withoutDetaching,
-//       ...(attributes && { attributes }),
-//       ...(pivot && { pivot }),
-//     };
+  public detach(key: SimpleKey): DetachRelationDefinition {
+    this.checkUpdateContext("detach");
 
-//     this.defineRelationDefinition(result);
-//     return result;
-//   }
+    const result: DetachRelationDefinition = {
+      operation: "detach",
+      key,
+    };
 
-//   public toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T> {
-//     const { key, attributes, pivot } = params;
+    this.defineRelationDefinition(result);
+    return result;
+  }
 
-//     const result = {
-//       operation: "toggle" as const,
-//       key,
-//       ...(attributes && { attributes }),
-//       ...(pivot && { pivot }),
-//     };
+  public sync<T>(params: SyncParams<T>): SyncRelationDefinition<T> {
+    this.checkUpdateContext("sync");
 
-//     this.defineRelationDefinition(result);
-//     return result;
-//   }
+    const { key, attributes, pivot, withoutDetaching } = params;
 
-//   // Méthodes pour obtenir les contextes spécifiques
-//   public getCreationContext(): ICreationRelation {
-//     return {
-//       add: this.add.bind(this),
-//       attach: this.attach.bind(this),
-//     };
-//   }
+    const result: SyncRelationDefinition<T> = {
+      operation: "sync",
+      key,
+      without_detaching: withoutDetaching,
+      ...(attributes && { attributes }),
+      ...(pivot && { pivot }),
+    };
 
-//   public getUpdateContext(): IUpdateRelation {
-//     return this;
-//   }
+    this.defineRelationDefinition(result);
+    return result;
+  }
 
-//   private createSimpleOperation<T extends "attach" | "detach">(
-//     operation: T,
-//     key: SimpleKey,
-//   ): T extends "attach" ? AttachRelationDefinition : DetachRelationDefinition {
-//     const result = {
-//       operation,
-//       key,
-//     } as T extends "attach"
-//       ? AttachRelationDefinition
-//       : DetachRelationDefinition;
+  public toggle<T>(params: ToggleParams<T>): ToggleRelationDefinition<T> {
+    this.checkUpdateContext("toggle");
 
-//     this.defineRelationDefinition(result);
-//     return result;
-//   }
+    const { key, attributes, pivot } = params;
 
-//   private defineRelationDefinition(result: RelationDefinition): void {
-//     Object.defineProperty(result, "__relationDefinition", {
-//       value: true,
-//       enumerable: false,
-//       writable: false,
-//       configurable: true,
-//     });
-//   }
-// }
+    const result: ToggleRelationDefinition<T> = {
+      operation: "toggle",
+      key,
+      ...(attributes && { attributes }),
+      ...(pivot && { pivot }),
+    };
+
+    this.defineRelationDefinition(result);
+    return result;
+  }
+
+  // Méthode privée pour vérifier le contexte
+  private checkUpdateContext(methodName: string): void {
+    if (this.context === "create") {
+      throw new Error(
+        `Cannot use method '${methodName}' in creation context. Only 'add' and 'attach' methods are allowed.`,
+      );
+    }
+  }
+
+  private defineRelationDefinition(result: BaseRelationDefinition): void {
+    Object.defineProperty(result, "__relationDefinition", {
+      value: true,
+      enumerable: false,
+      writable: false,
+      configurable: true,
+    });
+  }
+}

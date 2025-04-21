@@ -93,6 +93,19 @@ export interface IUpdateRelation {
   sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
+export interface IRelation {
+  add: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ) => CreateRelationOperation<T>;
+  attach: (key: SimpleKey) => AttachRelationDefinition;
+  edit: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: UpdateRelationParams<T, TRelationKey>,
+  ) => UpdateRelationOperation<T>;
+  detach: (key: SimpleKey) => DetachRelationDefinition;
+  sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
+  toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
+  setContext: (context: "create" | "update") => void;
+}
 export type ExtractModelAttributes<T> = Omit<T, "relations">;
 export type TypedMutationOperation<
   TModel,

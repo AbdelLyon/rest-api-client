@@ -1,8 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { CreationRelation } from "./CreationRelation.js";
-import { UpdateRelation } from "./UpdateRelation.js";
+import { Relation } from "./Relation.js";
 class Model {
   constructor() {
     __publicField(this, "operations", []);
@@ -19,11 +18,12 @@ class Model {
       relations
     };
     this.operations.push(operation);
+    const creationRelation = new Relation();
+    creationRelation.setContext("create");
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: new CreationRelation()
-      // Contexte de création uniquement
+      relation: creationRelation
     };
   }
   update(key, params) {
@@ -35,11 +35,12 @@ class Model {
       relations
     };
     this.operations.push(operation);
+    const updateRelation = new Relation();
+    updateRelation.setContext("update");
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: new UpdateRelation()
-      // Contexte de mise à jour complet
+      relation: updateRelation
     };
   }
   build() {

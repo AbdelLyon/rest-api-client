@@ -133,6 +133,29 @@ export interface IUpdateRelation {
   toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
 }
 
+export interface IRelation {
+  // Opérations toujours disponibles
+  add: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: CreateRelationParams<T, TRelationKey>,
+  ) => CreateRelationOperation<T>;
+
+  attach: (key: SimpleKey) => AttachRelationDefinition;
+
+  // Opérations disponibles uniquement en contexte de mise à jour
+  edit: <T extends Attributes, TRelationKey extends keyof T = never>(
+    params: UpdateRelationParams<T, TRelationKey>,
+  ) => UpdateRelationOperation<T>;
+
+  detach: (key: SimpleKey) => DetachRelationDefinition;
+
+  sync: <T>(params: SyncParams<T>) => SyncRelationDefinition<T>;
+
+  toggle: <T>(params: ToggleParams<T>) => ToggleRelationDefinition<T>;
+
+  // Méthode pour définir le contexte (interne)
+  setContext: (context: "create" | "update") => void;
+}
+
 // ==================== 6. INTERFACES DE MUTATION ET BUILDER ====================
 
 export type ExtractModelAttributes<T> = Omit<T, "relations">;

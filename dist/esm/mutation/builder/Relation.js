@@ -1,19 +1,20 @@
-class UpdateRelation {
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+class Relation {
+  constructor() {
+    __publicField(this, "context", "update");
+  }
+  // Par défaut en mode mise à jour
+  // Définir le contexte
+  setContext(context) {
+    this.context = context;
+  }
+  // Méthodes toujours disponibles
   add(params) {
     const { attributes, relations = {} } = params;
     const relationDefinition = {
       operation: "create",
-      attributes,
-      relations
-    };
-    this.defineRelationDefinition(relationDefinition);
-    return relationDefinition;
-  }
-  edit(params) {
-    const { key, attributes, relations = {} } = params;
-    const relationDefinition = {
-      operation: "update",
-      key,
       attributes,
       relations
     };
@@ -28,7 +29,21 @@ class UpdateRelation {
     this.defineRelationDefinition(result);
     return result;
   }
+  // Méthodes disponibles uniquement en contexte de mise à jour
+  edit(params) {
+    this.checkUpdateContext("edit");
+    const { key, attributes, relations = {} } = params;
+    const relationDefinition = {
+      operation: "update",
+      key,
+      attributes,
+      relations
+    };
+    this.defineRelationDefinition(relationDefinition);
+    return relationDefinition;
+  }
   detach(key) {
+    this.checkUpdateContext("detach");
     const result = {
       operation: "detach",
       key
@@ -37,6 +52,7 @@ class UpdateRelation {
     return result;
   }
   sync(params) {
+    this.checkUpdateContext("sync");
     const { key, attributes, pivot, withoutDetaching } = params;
     const result = {
       operation: "sync",
@@ -49,6 +65,7 @@ class UpdateRelation {
     return result;
   }
   toggle(params) {
+    this.checkUpdateContext("toggle");
     const { key, attributes, pivot } = params;
     const result = {
       operation: "toggle",
@@ -58,6 +75,14 @@ class UpdateRelation {
     };
     this.defineRelationDefinition(result);
     return result;
+  }
+  // Méthode privée pour vérifier le contexte
+  checkUpdateContext(methodName) {
+    if (this.context === "create") {
+      throw new Error(
+        `Cannot use method '${methodName}' in creation context. Only 'add' and 'attach' methods are allowed.`
+      );
+    }
   }
   defineRelationDefinition(result) {
     Object.defineProperty(result, "__relationDefinition", {
@@ -69,6 +94,6 @@ class UpdateRelation {
   }
 }
 export {
-  UpdateRelation
+  Relation
 };
-//# sourceMappingURL=UpdateRelation.js.map
+//# sourceMappingURL=Relation.js.map

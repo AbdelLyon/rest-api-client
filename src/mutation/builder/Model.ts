@@ -12,8 +12,7 @@ import type {
   TypedMutationOperation,
 } from "../types";
 import type { RequestConfig } from "@/http/types";
-import { CreationRelation } from "./CreationRelation";
-import { UpdateRelation } from "./UpdateRelation";
+import { Relation } from "./Relation";
 
 export class Model<TModel> implements IModel<TModel> {
   private operations: Array<
@@ -44,11 +43,14 @@ export class Model<TModel> implements IModel<TModel> {
 
     this.operations.push(operation);
 
-    // Retourne un builder avec un contexte de création
+    // Créer une nouvelle instance de relation en contexte création
+    const creationRelation = new Relation();
+    creationRelation.setContext("create");
+
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: new CreationRelation(), // Contexte de création uniquement
+      relation: creationRelation,
     };
   }
 
@@ -75,11 +77,14 @@ export class Model<TModel> implements IModel<TModel> {
 
     this.operations.push(operation);
 
-    // Retourne un builder avec un contexte de mise à jour
+    // Créer une nouvelle instance de relation en contexte mise à jour
+    const updateRelation = new Relation();
+    updateRelation.setContext("update");
+
     return {
       build: this.build.bind(this),
       mutate: this.mutate.bind(this),
-      relation: new UpdateRelation(), // Contexte de mise à jour complet
+      relation: updateRelation,
     };
   }
 
