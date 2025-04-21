@@ -194,20 +194,12 @@ export type ValidUpdateRelationOnly<T> = T extends {
   ? T
   : T;
 
-export type CreateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
-  [K in keyof T]: K extends TRelationKeys
-    ? IsRelationOperation<T[K]> extends true
-      ? ValidCreateRelationOnly<T[K]>
-      : T[K]
-    : T[K];
+export type CreateRelationsMap<TRelations extends Record<string, unknown>> = {
+  [K in keyof TRelations]: ValidCreateRelationOnly<TRelations[K]>;
 };
 
-export type UpdateEntityAttributes<T, TRelationKeys extends keyof T = never> = {
-  [K in keyof T]: K extends TRelationKeys
-    ? IsRelationOperation<T[K]> extends true
-      ? ValidUpdateRelationOnly<T[K]>
-      : T[K]
-    : T[K];
+export type UpdateRelationsMap<TRelations extends Record<string, unknown>> = {
+  [K in keyof TRelations]: ValidUpdateRelationOnly<TRelations[K]>;
 };
 
 // ==================== Types pour le build et les opérations simples ====================
@@ -293,21 +285,25 @@ export interface IModel<TModel> {
   create: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
-  >(
-    attributes: CreateEntityAttributes<T, TRelationKeys>,
-  ) => BuilderOnly<TModel>;
+  >(params: {
+    attributes: T;
+    relations?: CreateRelationsMap<
+      Record<Extract<TRelationKeys, string>, unknown>
+    >;
+  }) => BuilderOnly<TModel>;
 
   update: <
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
     key: SimpleKey,
-    attributes: UpdateEntityAttributes<T, TRelationKeys>,
+    params: {
+      attributes: T;
+      relations?: UpdateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
+    },
   ) => BuilderOnly<TModel>;
-
-  build: () => MutationRequest<TModel, Record<string, unknown>>;
-
-  // mutate: (options?: Partial<RequestConfig>) => Promise<MutationResponse>;
 
   setMutationFunction: (cb: MutationFunction<TModel>) => void;
 }

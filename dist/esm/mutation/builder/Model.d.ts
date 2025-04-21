@@ -2,9 +2,9 @@ import {
   AttachRelationDefinition,
   Attributes,
   BuilderOnly,
-  CreateEntityAttributes,
   CreateRelationParams,
   CreateRelationResult,
+  CreateRelationsMap,
   DetachRelationDefinition,
   IModel,
   IRelation,
@@ -16,9 +16,9 @@ import {
   SyncRelationDefinition,
   ToggleParams,
   ToggleRelationDefinition,
-  UpdateEntityAttributes,
   UpdateRelationParams,
   UpdateRelationResult,
+  UpdateRelationsMap,
 } from "../types.js";
 import { RequestConfig } from "../../http/types.js";
 import { Relation } from "./Relation.js";
@@ -30,18 +30,27 @@ export declare class Model<TModel>
   private mutationFn;
   private relation;
   constructor(relation: IRelation);
-  private extractOperationData;
   setMutationFunction(fn: MutationFunction<TModel>): void;
   create<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
-  >(attributes: CreateEntityAttributes<T, TRelationKeys>): BuilderOnly<TModel>;
+  >(params: {
+    attributes: T;
+    relations?: CreateRelationsMap<
+      Record<Extract<TRelationKeys, string>, unknown>
+    >;
+  }): BuilderOnly<TModel>;
   update<
     T extends Record<string, unknown>,
     TRelationKeys extends keyof T = never,
   >(
-    key: string | number,
-    attributes: UpdateEntityAttributes<T, TRelationKeys>,
+    key: SimpleKey,
+    params: {
+      attributes: T;
+      relations?: UpdateRelationsMap<
+        Record<Extract<TRelationKeys, string>, unknown>
+      >;
+    },
   ): BuilderOnly<TModel>;
   build(): MutationRequest<TModel, Record<string, unknown>>;
   mutate(options?: Partial<RequestConfig>): Promise<MutationResponse>;

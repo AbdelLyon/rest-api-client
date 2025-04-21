@@ -10,26 +10,14 @@ class Model extends Relation {
     __publicField(this, "relation");
     this.relation = relation;
   }
-  extractOperationData(attributes) {
-    const normalAttributes = {};
-    const relations = {};
-    for (const [key, value] of Object.entries(attributes)) {
-      if (value && typeof value === "object" && "operation" in value) {
-        relations[key] = value;
-      } else {
-        normalAttributes[key] = value;
-      }
-    }
-    return { normalAttributes, relations };
-  }
   setMutationFunction(fn) {
     this.mutationFn = fn;
   }
-  create(attributes) {
-    const { normalAttributes, relations } = this.extractOperationData(attributes);
+  create(params) {
+    const { attributes, relations = {} } = params;
     const operation = {
       operation: "create",
-      attributes: normalAttributes,
+      attributes,
       relations
     };
     this.operations.push(operation);
@@ -38,12 +26,12 @@ class Model extends Relation {
       mutate: this.mutate.bind(this)
     };
   }
-  update(key, attributes) {
-    const { normalAttributes, relations } = this.extractOperationData(attributes);
+  update(key, params) {
+    const { attributes, relations = {} } = params;
     const operation = {
       operation: "update",
       key,
-      attributes: normalAttributes,
+      attributes,
       relations
     };
     this.operations.push(operation);
