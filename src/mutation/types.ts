@@ -298,7 +298,7 @@ export interface IModel<TModel> {
   >(
     key: SimpleKey,
     params: {
-      attributes: T;
+      attributes?: T;
       relations?: UpdateRelationsMap<
         Record<Extract<TRelationKeys, string>, unknown>
       >;
