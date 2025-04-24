@@ -140,81 +140,82 @@ export abstract class Query<T> implements IQuery<T> {
     );
   }
 }
+
 //==============================================
 
 // Type inféré à partir du schéma
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  createdAt: string;
-  profile: { id: string; name: string };
-};
+// type User = {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: string;
+//   status: string;
+//   createdAt: string;
+//   profile: { id: string; name: string };
+// };
 
-// Classe UserQuery qui étend Query
-class UserQuery extends Query<User> {
-  constructor(httpInstanceName?: string) {
-    super("/api/users", null, httpInstanceName);
-  }
-}
+// // Classe UserQuery qui étend Query
+// class UserQuery extends Query<User> {
+//   constructor(httpInstanceName?: string) {
+//     super("/api/users", null, httpInstanceName);
+//   }
+// }
 
-export async function userExample() {
-  try {
-    const userQuery = new UserQuery();
+// export async function userExample() {
+//   try {
+//     const userQuery = new UserQuery();
 
-    // Exemple 1: Recherche avec SearchBuilder
-    console.log("Exemple 1: Recherche d'utilisateurs administrateurs actifs");
-    const searchResult = await userQuery
-      .createSearchBuilder<User>()
-      .withText("john")
-      .withFilter("role", "=", "admin")
-      .withFilter("status", "=", "active")
-      .withSort("createdAt", "desc")
-      .withPagination(1, 20)
-      .search<SearchResponse<User>>();
+//     // Exemple 1: Recherche avec SearchBuilder
+//     console.log("Exemple 1: Recherche d'utilisateurs administrateurs actifs");
+//     const searchResult = await userQuery
+//       .createSearchBuilder<User>()
+//       .withText("john")
+//       .withFilter("role", "=", "admin")
+//       .withFilter("status", "=", "active")
+//       .withSort("createdAt", "desc")
+//       .withPagination(1, 20)
+//       .search<SearchResponse<User>>();
 
-    console.log(`Trouvé ${searchResult.data.length} utilisateurs`);
+//     console.log(`Trouvé ${searchResult.data.length} utilisateurs`);
 
-    // Exemple 2: Recherche avec inclusion de relations
-    console.log("\nExemple 2: Recherche avec inclusion du profil");
-    const withProfileResult = await userQuery
-      .createSearchBuilder<User>()
-      .withFilter("email", "=", "admin@example.com")
-      .withInclude("profile", {
-        // TypeScript vérifiera que "profile" est une relation valide
-        filters: [{ field: "id", operator: "=", value: "123" }],
-      })
-      .search<SearchResponse<User>>();
+//     // Exemple 2: Recherche avec inclusion de relations
+//     console.log("\nExemple 2: Recherche avec inclusion du profil");
+//     const withProfileResult = await userQuery
+//       .createSearchBuilder<User>()
+//       .withFilter("email", "=", "admin@example.com")
+//       .withInclude("profile", {
+//         // TypeScript vérifiera que "profile" est une relation valide
+//         filters: [{ field: "id", operator: "=", value: "123" }],
+//       })
+//       .search<SearchResponse<User>>();
 
-    console.log("Profil inclus:", withProfileResult.data[0]?.profile);
+//     console.log("Profil inclus:", withProfileResult.data[0]?.profile);
 
-    // Exemple 3: Utilisation du DetailsBuilder
-    console.log("\nExemple 3: Obtenir les détails de la ressource User");
-    const userDetails = await userQuery
-      .createDetailsBuilder<User>()
-      .withHeader("Cache-Control", "no-cache")
-      .withParam("fields", "id,name,email,role,status")
-      .withParam("include", "validations")
-      .withTimeout(5000)
-      .details();
+//     // Exemple 3: Utilisation du DetailsBuilder
+//     console.log("\nExemple 3: Obtenir les détails de la ressource User");
+//     const userDetails = await userQuery
+//       .createDetailsBuilder<User>()
+//       .withHeader("Cache-Control", "no-cache")
+//       .withParam("fields", "id,name,email,role,status")
+//       .withParam("include", "validations")
+//       .withTimeout(5000)
+//       .details();
 
-    console.log(
-      "Détails de l'API User:",
-      `${userDetails.data.fields.length} champs`,
-      `${userDetails.data.actions.length} actions`,
-    );
+//     console.log(
+//       "Détails de l'API User:",
+//       `${userDetails.data.fields.length} champs`,
+//       `${userDetails.data.actions.length} actions`,
+//     );
 
-    // Exemple 4: Utilisation de raccourcis pour les recherches simples
-    console.log("\nExemple 4: Recherche simple par champ");
-    const byRoleResult = await userQuery.searchByField<
-      "role",
-      SearchResponse<User>
-    >("role", "=", "admin");
+//     // Exemple 4: Utilisation de raccourcis pour les recherches simples
+//     console.log("\nExemple 4: Recherche simple par champ");
+//     const byRoleResult = await userQuery.searchByField<
+//       "role",
+//       SearchResponse<User>
+//     >("role", "=", "admin");
 
-    console.log(`Trouvé ${byRoleResult.data.length} administrateurs`);
-  } catch (error) {
-    console.error("Erreur lors de l'exécution des exemples:", error);
-  }
-}
+//     console.log(`Trouvé ${byRoleResult.data.length} administrateurs`);
+//   } catch (error) {
+//     console.error("Erreur lors de l'exécution des exemples:", error);
+//   }
+// }
