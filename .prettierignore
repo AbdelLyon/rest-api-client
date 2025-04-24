@@ -1,0 +1,23 @@
+# Ignorer les fichiers binaires et images
+*.ico
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Ignorer les dossiers de build
+.next
+dist
+node_modules
+coverage
+
+# Ignorer les fichiers de configuration
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

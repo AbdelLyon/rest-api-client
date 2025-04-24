@@ -27,6 +27,12 @@ export interface TextSearch {
   value: string;
 }
 
+export type FilterValue =
+  | string
+  | number
+  | boolean
+  | Array<string | number | boolean>;
+
 export interface ScopeDefinition {
   name: string;
   parameters: Array<ScopeParameterValue>;
@@ -35,7 +41,7 @@ export interface ScopeDefinition {
 export interface FilterCriteria {
   field: string;
   operator: ComparisonOperator;
-  value: string | number | boolean | Array<string | number | boolean>;
+  value: FilterValue;
   type?: LogicalOperator;
 }
 

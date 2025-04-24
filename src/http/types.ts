@@ -61,6 +61,7 @@ export interface RequestConfig extends RequestInit {
   timeout?: number;
   baseURL?: string;
   headers?: Record<string, string>;
+  responseType?: "json" | "text" | "blob" | "arraybuffer";
 }
 
 export interface ApiErrorSource {
