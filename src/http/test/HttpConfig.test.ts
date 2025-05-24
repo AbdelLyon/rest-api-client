@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ConfigOptions } from "@/http/types";
-import { HttpConfig } from "../Request/HttpConfig";
+import { HttpConfig } from "../request/HttpConfig";
 
 interface ApiError extends Error {
   config?: {

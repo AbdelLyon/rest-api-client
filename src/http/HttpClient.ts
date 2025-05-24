@@ -1,4 +1,4 @@
-import { HttpRequest } from "./Request/HttpRequest";
+import { HttpRequest } from "./request/HttpRequest";
 import type { HttpConfig } from "./types";
 
 export class HttpClient {

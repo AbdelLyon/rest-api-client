@@ -28,13 +28,11 @@ class Auth {
       this.registerDataSchema.parse(userData);
     }
     try {
-      const response = await this.http.request(
-        {
-          method: "POST",
-          url: `${this.pathname}/register`,
-          data: userData
-        }
-      );
+      const response = await this.http.request({
+        method: "POST",
+        url: `${this.pathname}/register`,
+        data: userData
+      });
       const user = this.userSchema.parse(response.user);
       if (this.tokenSchema) {
         this.tokenSchema.parse(response.tokens);
@@ -50,13 +48,11 @@ class Auth {
       this.credentialsSchema.parse(credentials);
     }
     try {
-      const response = await this.http.request(
-        {
-          method: "POST",
-          url: `${this.pathname}/login`,
-          data: credentials
-        }
-      );
+      const response = await this.http.request({
+        method: "POST",
+        url: `${this.pathname}/login`,
+        data: credentials
+      });
       const user = this.userSchema.parse(response.user);
       const tokens = this.tokenSchema ? this.tokenSchema.parse(response.tokens) : response.tokens;
       return { user, tokens };
@@ -67,12 +63,10 @@ class Auth {
   }
   async logout() {
     try {
-      await this.http.request(
-        {
-          method: "POST",
-          url: `${this.pathname}/logout`
-        }
-      );
+      await this.http.request({
+        method: "POST",
+        url: `${this.pathname}/logout`
+      });
     } catch (error) {
       console.error("Logout error", error);
       throw error;
@@ -80,13 +74,11 @@ class Auth {
   }
   async refreshToken(refreshToken) {
     try {
-      const response = await this.http.request(
-        {
-          method: "POST",
-          url: `${this.pathname}/refresh-token`,
-          data: { refreshToken }
-        }
-      );
+      const response = await this.http.request({
+        method: "POST",
+        url: `${this.pathname}/refresh-token`,
+        data: { refreshToken }
+      });
       return this.tokenSchema ? this.tokenSchema.parse(response) : response;
     } catch (error) {
       console.error("Token refresh error", error);
@@ -95,12 +87,10 @@ class Auth {
   }
   async getCurrentUser() {
     try {
-      const response = await this.http.request(
-        {
-          method: "GET",
-          url: `${this.pathname}/me`
-        }
-      );
+      const response = await this.http.request({
+        method: "GET",
+        url: `${this.pathname}/me`
+      });
       return this.userSchema.parse(response);
     } catch (error) {
       console.error("Get current user error", error);

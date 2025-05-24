@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HttpRequest } from '../http/Request/HttpRequest.js';
+import { HttpRequest } from '../http/request/HttpRequest.js';
 import { ActionRequest, ActionResponse, BuilderWithCreationContext, BuilderWithUpdateContext, DeleteRequest, DeleteResponse, IModel, IMutation, IRelation, MutationRequest, MutationResponse } from './types.js';
 export declare abstract class Mutation<T> implements IMutation<T> {
     protected http: HttpRequest;

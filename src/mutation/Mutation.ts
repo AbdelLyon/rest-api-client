@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { HttpRequest } from "@/http/Request/HttpRequest";
+import type { HttpRequest } from "@/http/request/HttpRequest";
 import { HttpClient } from "@/http/HttpClient";
 import {
   ActionRequest,

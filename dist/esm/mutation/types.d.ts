@@ -1,5 +1,5 @@
 import { Permission, RequestConfig } from '../http/types.js';
-export type SimpleKey = string | number;
+export type SimpleKey = string | number | string[] | number[];
 export type CompositeKey = SimpleKey | Array<SimpleKey>;
 export type Attributes = Record<string, unknown>;
 export type PivotData = Record<string, string | number>;

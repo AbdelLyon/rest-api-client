@@ -38,58 +38,48 @@ class Mutation {
   }
   async mutate(mutateRequest) {
     const data = "build" in mutateRequest ? mutateRequest.build() : mutateRequest;
-    const response = await this.http.request(
-      {
-        method: "POST",
-        url: `${this.pathname}/mutate`,
-        data
-      }
-    );
+    const response = await this.http.request({
+      method: "POST",
+      url: `${this.pathname}/mutate`,
+      data
+    });
     return response;
   }
   action(actionRequest) {
-    return this.http.request(
-      {
-        method: "POST",
-        url: `${this.pathname}/actions/${actionRequest.action}`,
-        data: actionRequest.payload
-      }
-    );
+    return this.http.request({
+      method: "POST",
+      url: `${this.pathname}/actions/${actionRequest.action}`,
+      data: actionRequest.payload
+    });
   }
   async delete(request) {
-    const response = await this.http.request(
-      {
-        method: "DELETE",
-        url: this.pathname,
-        data: request
-      }
-    );
+    const response = await this.http.request({
+      method: "DELETE",
+      url: this.pathname,
+      data: request
+    });
     return {
       ...response,
       data: this.validateData(response.data)
     };
   }
   async forceDelete(request) {
-    const response = await this.http.request(
-      {
-        method: "DELETE",
-        url: `${this.pathname}/force`,
-        data: request
-      }
-    );
+    const response = await this.http.request({
+      method: "DELETE",
+      url: `${this.pathname}/force`,
+      data: request
+    });
     return {
       ...response,
       data: this.validateData(response.data)
     };
   }
   async restore(request) {
-    const response = await this.http.request(
-      {
-        method: "POST",
-        url: `${this.pathname}/restore`,
-        data: request
-      }
-    );
+    const response = await this.http.request({
+      method: "POST",
+      url: `${this.pathname}/restore`,
+      data: request
+    });
     return {
       ...response,
       data: this.validateData(response.data)

@@ -1,4 +1,4 @@
-import { HttpRequest } from '../http/Request/HttpRequest.js';
+import { HttpRequest } from '../http/request/HttpRequest.js';
 import { DetailsResponse, IQuery, PaginatedSearchRequest, SearchRequest, ComparisonOperator } from './types.js';
 import { z } from 'zod';
 import { SearchBuilder } from './SearchBuilder.js';

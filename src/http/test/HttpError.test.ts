@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import type { ApiErrorSource, RequestConfig } from "@/http/types";
-import { HttpError } from "../Request/HttpError";
+import { HttpError } from "../request/HttpError";
 
 interface MockRequestConfig extends RequestConfig {
   url: string;

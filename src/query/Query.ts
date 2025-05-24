@@ -1,4 +1,4 @@
-import type { HttpRequest } from "../http/Request/HttpRequest";
+import type { HttpRequest } from "../http/request/HttpRequest";
 import type {
   DetailsResponse,
   IQuery,

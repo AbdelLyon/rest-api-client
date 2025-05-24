@@ -1,4 +1,4 @@
-import { HttpRequest } from '../http/Request/HttpRequest.js';
+import { HttpRequest } from '../http/request/HttpRequest.js';
 import { IAuth } from './types.js';
 import { z } from 'zod';
 export declare abstract class Auth<TUser, TCredentials, TRegisterData, TTokens> implements IAuth<TUser, TCredentials, TRegisterData, TTokens> {

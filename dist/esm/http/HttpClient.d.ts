@@ -1,4 +1,4 @@
-import { HttpRequest } from './Request/HttpRequest.js';
+import { HttpRequest } from './request/HttpRequest.js';
 import { HttpConfig } from './types.js';
 export declare class HttpClient {
     private static instances;

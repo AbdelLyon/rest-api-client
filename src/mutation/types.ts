@@ -2,7 +2,7 @@ import type { Permission, RequestConfig } from "@/http/types";
 
 // ==================== 1. TYPES FONDAMENTAUX ====================
 
-export type SimpleKey = string | number;
+export type SimpleKey = string | number | string[] | number[];
 export type CompositeKey = SimpleKey | Array<SimpleKey>;
 export type Attributes = Record<string, unknown>;
 export type PivotData = Record<string, string | number>;

@@ -6,7 +6,7 @@ import type {
   ResponseSuccessInterceptor,
   ResponseErrorInterceptor,
 } from "@/http/types";
-import { HttpInterceptor } from "../Request/HttpInterceptor";
+import { HttpInterceptor } from "../request/HttpInterceptor";
 
 describe("HttpInterceptor", () => {
   const clearAllInterceptors = () => {

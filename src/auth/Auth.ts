@@ -1,4 +1,4 @@
-import type { HttpRequest } from "../http/Request/HttpRequest";
+import type { HttpRequest } from "../http/request/HttpRequest";
 import type { IAuth } from "./types";
 import type { z } from "zod";
 import { HttpClient } from "@/http/HttpClient";
