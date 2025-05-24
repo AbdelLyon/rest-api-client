@@ -23,7 +23,7 @@ class Auth {
   initHttpClient() {
     this.http = HttpClient.getInstance(this.httpInstanceName);
   }
-  async register(userData, options = {}) {
+  async register(userData) {
     if (this.registerDataSchema) {
       this.registerDataSchema.parse(userData);
     }
@@ -33,8 +33,7 @@ class Auth {
           method: "POST",
           url: `${this.pathname}/register`,
           data: userData
-        },
-        options
+        }
       );
       const user = this.userSchema.parse(response.user);
       if (this.tokenSchema) {
@@ -46,7 +45,7 @@ class Auth {
       throw error;
     }
   }
-  async login(credentials, options = {}) {
+  async login(credentials) {
     if (this.credentialsSchema) {
       this.credentialsSchema.parse(credentials);
     }
@@ -56,8 +55,7 @@ class Auth {
           method: "POST",
           url: `${this.pathname}/login`,
           data: credentials
-        },
-        options
+        }
       );
       const user = this.userSchema.parse(response.user);
       const tokens = this.tokenSchema ? this.tokenSchema.parse(response.tokens) : response.tokens;
@@ -67,29 +65,27 @@ class Auth {
       throw error;
     }
   }
-  async logout(options = {}) {
+  async logout() {
     try {
       await this.http.request(
         {
           method: "POST",
           url: `${this.pathname}/logout`
-        },
-        options
+        }
       );
     } catch (error) {
       console.error("Logout error", error);
       throw error;
     }
   }
-  async refreshToken(refreshToken, options = {}) {
+  async refreshToken(refreshToken) {
     try {
       const response = await this.http.request(
         {
           method: "POST",
           url: `${this.pathname}/refresh-token`,
           data: { refreshToken }
-        },
-        options
+        }
       );
       return this.tokenSchema ? this.tokenSchema.parse(response) : response;
     } catch (error) {
@@ -97,14 +93,13 @@ class Auth {
       throw error;
     }
   }
-  async getCurrentUser(options = {}) {
+  async getCurrentUser() {
     try {
       const response = await this.http.request(
         {
           method: "GET",
           url: `${this.pathname}/me`
-        },
-        options
+        }
       );
       return this.userSchema.parse(response);
     } catch (error) {

@@ -1,6 +1,5 @@
 import type { HttpRequest } from "../http/Request/HttpRequest";
 import type { IAuth } from "./types";
-import type { RequestConfig } from "@/http/types";
 import type { z } from "zod";
 import { HttpClient } from "@/http/HttpClient";
 
@@ -41,10 +40,7 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
     this.http = HttpClient.getInstance(this.httpInstanceName);
   }
 
-  public async register(
-    userData: TRegisterData,
-    options: Partial<RequestConfig> = {},
-  ): Promise<TUser> {
+  public async register(userData: TRegisterData): Promise<TUser> {
     if (this.registerDataSchema) {
       this.registerDataSchema.parse(userData);
     }
@@ -53,14 +49,11 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
       const response = await this.http.request<{
         user: TUser;
         tokens: TTokens;
-      }>(
-        {
-          method: "POST",
-          url: `${this.pathname}/register`,
-          data: userData,
-        },
-        options,
-      );
+      }>({
+        method: "POST",
+        url: `${this.pathname}/register`,
+        data: userData,
+      });
 
       const user = this.userSchema.parse(response.user);
       if (this.tokenSchema) {
@@ -74,10 +67,7 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
     }
   }
 
-  public async login(
-    credentials: TCredentials,
-    options: Partial<RequestConfig> = {},
-  ): Promise<{
+  public async login(credentials: TCredentials): Promise<{
     user: TUser;
     tokens: TTokens;
   }> {
@@ -89,14 +79,11 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
       const response = await this.http.request<{
         user: TUser;
         tokens: TTokens;
-      }>(
-        {
-          method: "POST",
-          url: `${this.pathname}/login`,
-          data: credentials,
-        },
-        options,
-      );
+      }>({
+        method: "POST",
+        url: `${this.pathname}/login`,
+        data: credentials,
+      });
 
       const user = this.userSchema.parse(response.user);
       const tokens = this.tokenSchema
@@ -110,34 +97,25 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
     }
   }
 
-  public async logout(options: Partial<RequestConfig> = {}): Promise<void> {
+  public async logout(): Promise<void> {
     try {
-      await this.http.request(
-        {
-          method: "POST",
-          url: `${this.pathname}/logout`,
-        },
-        options,
-      );
+      await this.http.request({
+        method: "POST",
+        url: `${this.pathname}/logout`,
+      });
     } catch (error) {
       console.error("Logout error", error);
       throw error;
     }
   }
 
-  public async refreshToken(
-    refreshToken: string,
-    options: Partial<RequestConfig> = {},
-  ): Promise<TTokens> {
+  public async refreshToken(refreshToken: string): Promise<TTokens> {
     try {
-      const response = await this.http.request<TTokens>(
-        {
-          method: "POST",
-          url: `${this.pathname}/refresh-token`,
-          data: { refreshToken },
-        },
-        options,
-      );
+      const response = await this.http.request<TTokens>({
+        method: "POST",
+        url: `${this.pathname}/refresh-token`,
+        data: { refreshToken },
+      });
 
       return this.tokenSchema ? this.tokenSchema.parse(response) : response;
     } catch (error) {
@@ -146,17 +124,12 @@ export abstract class Auth<TUser, TCredentials, TRegisterData, TTokens>
     }
   }
 
-  public async getCurrentUser(
-    options: Partial<RequestConfig> = {},
-  ): Promise<TUser> {
+  public async getCurrentUser(): Promise<TUser> {
     try {
-      const response = await this.http.request<TUser>(
-        {
-          method: "GET",
-          url: `${this.pathname}/me`,
-        },
-        options,
-      );
+      const response = await this.http.request<TUser>({
+        method: "GET",
+        url: `${this.pathname}/me`,
+      });
 
       return this.userSchema.parse(response);
     } catch (error) {

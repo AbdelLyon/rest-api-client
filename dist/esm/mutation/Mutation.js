@@ -18,7 +18,7 @@ class Mutation {
   }
   get model() {
     const builder = Builder.create();
-    builder.setMutationFunction((data, options) => this.mutate(data, options));
+    builder.setMutationFunction((data) => this.mutate(data));
     return builder;
   }
   get relation() {
@@ -36,64 +36,59 @@ class Mutation {
       return result.data;
     });
   }
-  async mutate(mutateRequest, options) {
+  async mutate(mutateRequest) {
     const data = "build" in mutateRequest ? mutateRequest.build() : mutateRequest;
     const response = await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/mutate`,
         data
-      },
-      options
+      }
     );
     return response;
   }
-  action(actionRequest, options = {}) {
+  action(actionRequest) {
     return this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/actions/${actionRequest.action}`,
         data: actionRequest.payload
-      },
-      options
+      }
     );
   }
-  async delete(request, options = {}) {
+  async delete(request) {
     const response = await this.http.request(
       {
         method: "DELETE",
         url: this.pathname,
         data: request
-      },
-      options
+      }
     );
     return {
       ...response,
       data: this.validateData(response.data)
     };
   }
-  async forceDelete(request, options = {}) {
+  async forceDelete(request) {
     const response = await this.http.request(
       {
         method: "DELETE",
         url: `${this.pathname}/force`,
         data: request
-      },
-      options
+      }
     );
     return {
       ...response,
       data: this.validateData(response.data)
     };
   }
-  async restore(request, options = {}) {
+  async restore(request) {
     const response = await this.http.request(
       {
         method: "POST",
         url: `${this.pathname}/restore`,
         data: request
-      },
-      options
+      }
     );
     return {
       ...response,

@@ -1,5 +1,4 @@
 import type { z } from "zod";
-import type { RequestConfig } from "@/http/types";
 import type { HttpRequest } from "@/http/Request/HttpRequest";
 import { HttpClient } from "@/http/HttpClient";
 import {
@@ -38,7 +37,7 @@ export abstract class Mutation<T> implements IMutation<T> {
 
   get model(): IModel<T> {
     const builder = Builder.create<T>();
-    builder.setMutationFunction((data, options) => this.mutate(data, options));
+    builder.setMutationFunction((data) => this.mutate(data));
     return builder;
   }
 
@@ -64,49 +63,33 @@ export abstract class Mutation<T> implements IMutation<T> {
       | BuilderWithCreationContext<T>
       | BuilderWithUpdateContext<T>
       | MutationRequest<T, Record<string, unknown>>,
-    options?: Partial<RequestConfig>,
   ): Promise<MutationResponse> {
     const data =
       "build" in mutateRequest ? mutateRequest.build() : mutateRequest;
 
-    const response = await this.http.request<MutationResponse>(
-      {
-        method: "POST",
-        url: `${this.pathname}/mutate`,
-        data,
-      },
-      options,
-    );
+    const response = await this.http.request<MutationResponse>({
+      method: "POST",
+      url: `${this.pathname}/mutate`,
+      data,
+    });
 
     return response;
   }
 
-  public action(
-    actionRequest: ActionRequest,
-    options: Partial<RequestConfig> = {},
-  ): Promise<ActionResponse> {
-    return this.http.request<ActionResponse>(
-      {
-        method: "POST",
-        url: `${this.pathname}/actions/${actionRequest.action}`,
-        data: actionRequest.payload,
-      },
-      options,
-    );
+  public action(actionRequest: ActionRequest): Promise<ActionResponse> {
+    return this.http.request<ActionResponse>({
+      method: "POST",
+      url: `${this.pathname}/actions/${actionRequest.action}`,
+      data: actionRequest.payload,
+    });
   }
 
-  public async delete(
-    request: DeleteRequest,
-    options: Partial<RequestConfig> = {},
-  ): Promise<DeleteResponse<T>> {
-    const response = await this.http.request<DeleteResponse<T>>(
-      {
-        method: "DELETE",
-        url: this.pathname,
-        data: request,
-      },
-      options,
-    );
+  public async delete(request: DeleteRequest): Promise<DeleteResponse<T>> {
+    const response = await this.http.request<DeleteResponse<T>>({
+      method: "DELETE",
+      url: this.pathname,
+      data: request,
+    });
 
     return {
       ...response,
@@ -114,18 +97,12 @@ export abstract class Mutation<T> implements IMutation<T> {
     };
   }
 
-  public async forceDelete(
-    request: DeleteRequest,
-    options: Partial<RequestConfig> = {},
-  ): Promise<DeleteResponse<T>> {
-    const response = await this.http.request<DeleteResponse<T>>(
-      {
-        method: "DELETE",
-        url: `${this.pathname}/force`,
-        data: request,
-      },
-      options,
-    );
+  public async forceDelete(request: DeleteRequest): Promise<DeleteResponse<T>> {
+    const response = await this.http.request<DeleteResponse<T>>({
+      method: "DELETE",
+      url: `${this.pathname}/force`,
+      data: request,
+    });
 
     return {
       ...response,
@@ -133,18 +110,12 @@ export abstract class Mutation<T> implements IMutation<T> {
     };
   }
 
-  public async restore(
-    request: DeleteRequest,
-    options: Partial<RequestConfig> = {},
-  ): Promise<DeleteResponse<T>> {
-    const response = await this.http.request<DeleteResponse<T>>(
-      {
-        method: "POST",
-        url: `${this.pathname}/restore`,
-        data: request,
-      },
-      options,
-    );
+  public async restore(request: DeleteRequest): Promise<DeleteResponse<T>> {
+    const response = await this.http.request<DeleteResponse<T>>({
+      method: "POST",
+      url: `${this.pathname}/restore`,
+      data: request,
+    });
 
     return {
       ...response,

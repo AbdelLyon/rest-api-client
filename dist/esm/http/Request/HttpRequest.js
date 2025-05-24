@@ -35,9 +35,9 @@ class HttpRequest {
     HttpInterceptor.setupDefaultErrorInterceptor(HttpConfig.logError);
     HttpInterceptor.addInterceptors(options);
   }
-  async request(config, options = {}) {
+  async request(options) {
     try {
-      const mergedConfig = this.createMergedConfig(config, options);
+      const mergedConfig = this.createMergedConfig(options);
       const url = this.buildRequestUrl(mergedConfig.url);
       const interceptedConfig = await HttpInterceptor.applyRequestInterceptors({
         ...mergedConfig,
@@ -50,18 +50,16 @@ class HttpRequest {
       const interceptedResponse = await HttpInterceptor.applyResponseSuccessInterceptors(response);
       return await this.handler.parseResponse(interceptedResponse);
     } catch (error) {
-      return this.handleReqError(error, config, options);
+      return this.handleReqError(error, options);
     }
   }
-  createMergedConfig(config, options) {
+  createMergedConfig(options) {
     return {
       method: "GET",
       timeout: this.defaultTimeout,
-      ...config,
       ...options,
       headers: {
         ...this.defaultHeaders,
-        ...config.headers || {},
         ...options.headers || {}
       }
     };
@@ -73,12 +71,8 @@ class HttpRequest {
     const prefix = requestUrl.startsWith("/") ? "" : "/";
     return new URL(`${this.baseURL}${prefix}${requestUrl}`).toString();
   }
-  async handleReqError(error, config, options) {
-    const apiError = error instanceof HttpError ? error : new HttpError(error, {
-      ...config,
-      ...options,
-      url: config.url
-    });
+  async handleReqError(error, options) {
+    const apiError = error instanceof HttpError ? error : new HttpError(error, options);
     throw await HttpInterceptor.applyResponseErrorInterceptors(apiError);
   }
 }

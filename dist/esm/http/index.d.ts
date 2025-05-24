@@ -1,2 +1,2 @@
-export { HttpClient } from "./HttpClient.js";
-export type * from "./types.js";
+export { HttpClient } from './HttpClient.js';
+export type * from './types.js';
