@@ -170,4 +170,7 @@ export class SearchBuilder<T> {
   public build(): SearchRequest | PaginatedSearchRequest {
     return this.searchRequest;
   }
+  public setQueryInstance(instance: IQuery<T>) {
+    return (this.queryInstance = instance);
+  }
 }

@@ -1,8 +1,8 @@
 import { HttpHandler } from "./HttpHandler";
 import { HttpError } from "./HttpError";
 import type { ConfigOptions, IHttpRequest, RequestConfig } from "@/http/types";
-import { HttpConfig } from "@/http/Request/HttpConfig";
-import { HttpInterceptor } from "@/http/Request/HttpInterceptor";
+import { HttpConfig } from "./HttpConfig";
+import { HttpInterceptor } from "./HttpInterceptor";
 
 export class HttpRequest implements IHttpRequest {
   private baseURL = "";
@@ -40,12 +40,9 @@ export class HttpRequest implements IHttpRequest {
     HttpInterceptor.addInterceptors(options);
   }
 
-  public async request<TResponse>(
-    config: Partial<RequestConfig> & { url: string },
-    options: Partial<RequestConfig> = {},
-  ): Promise<TResponse> {
+  public async request<TResponse>(options: RequestConfig): Promise<TResponse> {
     try {
-      const mergedConfig = this.createMergedConfig(config, options);
+      const mergedConfig = this.createMergedConfig(options);
       const url = this.buildRequestUrl(mergedConfig.url);
       const interceptedConfig = await HttpInterceptor.applyRequestInterceptors({
         ...mergedConfig,
@@ -61,22 +58,17 @@ export class HttpRequest implements IHttpRequest {
 
       return await this.handler.parseResponse<TResponse>(interceptedResponse);
     } catch (error) {
-      return this.handleReqError(error, config, options);
+      return this.handleReqError(error, options);
     }
   }
 
-  private createMergedConfig(
-    config: Partial<RequestConfig> & { url: string },
-    options: Partial<RequestConfig>,
-  ): RequestConfig {
+  private createMergedConfig(options: RequestConfig): RequestConfig {
     return {
       method: "GET",
       timeout: this.defaultTimeout,
-      ...config,
       ...options,
       headers: {
         ...this.defaultHeaders,
-        ...(config.headers || {}),
         ...(options.headers || {}),
       },
     };
@@ -93,17 +85,10 @@ export class HttpRequest implements IHttpRequest {
 
   private async handleReqError<T>(
     error: unknown,
-    config: Partial<RequestConfig> & { url: string },
-    options: Partial<RequestConfig>,
+    options: RequestConfig,
   ): Promise<T> {
     const apiError =
-      error instanceof HttpError
-        ? error
-        : new HttpError(error, {
-            ...config,
-            ...options,
-            url: config.url,
-          });
+      error instanceof HttpError ? error : new HttpError(error, options);
 
     throw await HttpInterceptor.applyResponseErrorInterceptors(apiError);
   }
